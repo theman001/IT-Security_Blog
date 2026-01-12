@@ -100,7 +100,9 @@ function renderTree(nodes) {
                     <a href="/categories/${node.slug}" data-link class="tree-label">
                         ${node.name}
                     </a>
-                    ${node.post_count ? `<span class="tree-badge">${node.post_count}</span>` : ''}
+                    <span class="tree-badge">
+                        ${hasChildren ? node.children.length : (node.post_count || 0)}
+                    </span>
                 </div>
                 ${hasChildren ? renderTree(node.children) : ''}
             </li>

@@ -82,10 +82,17 @@ export default async function render(container, params) {
             `;
         });
         html += `</div>`;
-    } else if (mode === 'latest') {
-        html += `<p>No posts found.</p>`;
-    } else if (mode === 'category' && subCategories.length === 0) {
-        html += `<p>This folder is empty.</p>`;
+    } else {
+        // No posts found (handled for both Home and Empty Category)
+        if (mode === 'category' && subCategories.length === 0) {
+            html += `<div style="text-align: center; color: var(--muted); padding: 2rem;">
+                        <p>This folder is currently empty.</p>
+                      </div>`;
+        } else if (subCategories.length === 0) { // Only show Not Found if no subcategories either
+            html += `<div style="text-align: center; color: var(--muted); padding: 2rem;">
+                        <h3>Post not found.</h3>
+                      </div>`;
+        }
     }
 
     container.innerHTML = html;

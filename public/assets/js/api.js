@@ -117,7 +117,7 @@ export async function fetchPostsByCategory(slugInput) {
         FROM reports r
         JOIN categories c ON r.category_id = c.id
         WHERE c.id = ${category.id} -- Safe enough for internal integer ID
-        ORDER BY r.created_at DESC
+        ORDER BY r.created_at ASC, r.id ASC
     `;
 
     const rawPosts = await query(postsSql);
@@ -155,9 +155,14 @@ export async function fetchPosts() {
 
 // Added Missing Function
 export async function fetchPostBySlug(slug) {
+    console.log('[DEBUG] fetchPostBySlug Input:', slug); // Debug Log
     const sql = `
-        SELECT r.id, r.title, r.slug, r.created_at, r.content_md
+        SELECT 
+            r.id, r.title, r.slug, r.created_at, r.content_md, 
+            r.category_id, r.author_type, r.tags,
+            c.name as category_name
         FROM reports r
+        LEFT JOIN categories c ON r.category_id = c.id
         WHERE r.slug = $1
     `;
 
@@ -178,6 +183,19 @@ function mapReport(r) {
         }
     } catch (e) { console.warn('Date parse error', e); }
 
+    // Parse Tags (Handle JSON array string or array)
+    let tags = [];
+    if (Array.isArray(r.tags)) {
+        tags = r.tags;
+    } else if (typeof r.tags === 'string') {
+        try {
+            // Check if it looks like a JSON array
+            if (r.tags.trim().startsWith('[')) {
+                tags = JSON.parse(r.tags);
+            }
+        } catch (e) { console.warn('Tag parse error', e); }
+    }
+
     return {
         id: r.id,
         title: r.title,
@@ -185,6 +203,23 @@ function mapReport(r) {
         rawDate: r.created_at,
         date: dateStr,
         content: r.content_md, // Correct Column
-        categoryName: r.category_name || 'Uncategorized' // Fallback
+        categoryName: r.category_name || 'Uncategorized', // Fallback
+        authorType: r.author_type || 'Unknown',
+        tags: tags
     };
+}
+
+export function resetCache() {
+    console.log('Clearing DB Cache...');
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('sql_')) {
+            keysToRemove.push(key);
+        }
+    }
+
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    alert('Cache Cleared! Page will reload.');
+    window.location.reload();
 }
