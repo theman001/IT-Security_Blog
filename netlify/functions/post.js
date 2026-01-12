@@ -1,6 +1,12 @@
 import { Client } from "pg";
 
 export async function handler(event) {
+  const slug = event.queryStringParameters?.slug;
+
+  if (!slug) {
+    return { statusCode: 400, body: "slug required" };
+  }
+
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -8,29 +14,25 @@ export async function handler(event) {
 
   await client.connect();
 
-  const category = event.queryStringParameters?.category;
-
-  let query = `
-    SELECT r.slug, r.title, r.created_at, c.slug AS category
+  const res = await client.query(
+    `
+    SELECT r.slug, r.title, r.content_md, r.created_at,
+           c.slug AS category
     FROM reports r
     JOIN categories c ON r.category_id = c.id
-  `;
-
-  const params = [];
-
-  if (category) {
-    query += ` WHERE c.slug = $1`;
-    params.push(category);
-  }
-
-  query += ` ORDER BY r.created_at DESC`;
-
-  const res = await client.query(query, params);
+    WHERE r.slug = $1
+    `,
+    [slug]
+  );
 
   await client.end();
 
+  if (res.rows.length === 0) {
+    return { statusCode: 404, body: "Not found" };
+  }
+
   return {
     statusCode: 200,
-    body: JSON.stringify(res.rows)
+    body: JSON.stringify(res.rows[0])
   };
 }
