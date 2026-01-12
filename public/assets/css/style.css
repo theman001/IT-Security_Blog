@@ -52,30 +52,44 @@ pre,
 }
 
 header {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
+    background: var(--header-bg);
+    /* backdrop-filter: blur(10px); Removed for solid bg */
     border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
+    /* position: sticky; Removed */
+    /* top: 0; Removed */
     z-index: 100;
 }
 
 nav {
-    max-width: 800px;
+    max-width: 1400px;
+    /* Expand Navbar Width */
+    width: 100%;
+    /* Ensure full width usage */
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1rem 2rem;
+    /* Add side padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
+    /* Include padding in width */
 }
 
 .logo {
-    font-size: 1.5rem;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    line-height: 1.1;
+    /* Tight line height for 2 lines */
+    font-size: 1.1rem;
+    /* Slightly smaller font */
     font-weight: 800;
     background: linear-gradient(90deg, var(--primary-color), #8b5cf6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-decoration: none;
+    letter-spacing: -0.02em;
 }
 
 .nav-links {
@@ -95,13 +109,58 @@ nav {
     color: var(--primary-color);
 }
 
+/* --- Responsive Layout & Main Frame --- */
 main {
     flex: 1;
-    max-width: 800px;
+    max-width: 1200px;
+    /* Expanded Width */
     width: 100%;
     margin: 0 auto;
-    padding: 3rem 1rem;
+    padding: 3rem 2rem;
+    /* Better Padding */
     box-sizing: border-box;
+}
+
+/* ... (omitted) ... */
+
+/* Consolidated Metadata Styles */
+.post-meta-top {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.post-category-label,
+.post-author-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    /* Precise Fixed Height */
+    line-height: normal;
+    font-size: 0.75rem;
+    font-family: var(--font-code), monospace;
+    /* Unified Font */
+    padding: 0 10px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-sizing: border-box;
+}
+
+.post-category-label {
+    color: var(--primary-color);
+    background: rgba(187, 134, 252, 0.1);
+    border: 1px solid rgba(187, 134, 252, 0.1);
+}
+
+.post-author-label {
+    color: var(--secondary-color);
+    background: var(--code-bg);
+    border: 1px solid var(--code-bg);
 }
 
 footer {
@@ -377,14 +436,7 @@ footer {
     /* No background to blend in */
 }
 
-.post-category-label {
-    font-size: 0.9rem;
-    color: var(--primary-color);
-    font-weight: 600;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.05em;
-}
+/* Old .post-category-label removed */
 
 .post-title {
     margin: 0 0 0.5rem 0;
@@ -421,6 +473,81 @@ footer {
     background-color: var(--border-color);
     transform: translateY(-1px);
     box-shadow: var(--card-shadow);
+}
+
+/* --- Header & Navigation --- */
+header {
+    background-color: var(--header-bg);
+    /* Opacity fix */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    /* Remove sticky */
+    z-index: 100;
+}
+
+/* ... (omitted) ... */
+
+/* Removed Duplicate Metadata Styles (Consolidated above) */
+
+/* Responsive Mobile Layout */
+@media (max-width: 768px) {
+    main {
+        padding: 1rem;
+        /* Compact padding */
+    }
+
+    nav {
+        padding: 1rem;
+        /* Compact nav padding on mobile */
+    }
+
+    .markdown-body h1 {
+        font-size: 1.8rem;
+    }
+
+    .post-title {
+        font-size: 1.6rem;
+    }
+
+    .post-header {
+        margin-bottom: 1.5rem;
+    }
+}
+
+.post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.tag-badge {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.1);
+    /* Light Blue Tint */
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* Cache Reset Button in Footer */
+.reset-cache-btn {
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+    opacity: 0.6;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    transition: opacity 0.2s;
+}
+
+.reset-cache-btn:hover {
+    opacity: 1;
+    color: var(--text-color);
 }
 
 /* Utility */

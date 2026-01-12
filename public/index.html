@@ -31,7 +31,9 @@
     <div id="app">
         <header>
             <nav>
-                <a href="/" class="logo" data-link>IT-Security_Blog</a>
+                <a href="/" class="logo" data-link>
+                    IT&amp;Security<br>Blog
+                </a>
                 <div class="nav-links">
                     <a href="/categories" data-link>Categories</a>
                     <a href="/about" data-link>About</a>
@@ -66,12 +68,23 @@
 
         <footer>
             <p>&copy; 2026 IT Security Blog. All rights reserved.</p>
+            <button id="reset-cache-btn" class="reset-cache-btn" style="float: right;">↻ Reset DB Cache</button>
         </footer>
     </div>
 
     <!-- Scripts -->
     <script type="module" src="/assets/js/router.js"></script>
     <script type="module" src="/assets/js/app.js"></script>
+    <script type="module">
+        import { resetCache } from '/assets/js/api.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('reset-cache-btn');
+            if (btn) {
+                btn.addEventListener('click', resetCache);
+            }
+        });
+    </script>
 </body>
 
 </html>
