@@ -1,203 +1,45 @@
-# IT-Security_Blog
+# IT-Security Blog
 
-# Blog Content API (v1)
+IT 보안과 개발 지식을 공유하기 위해 구축된 **싱글 페이지 애플리케이션(SPA) 블로그**입니다.
+가벼운 Vanilla JavaScript와 Neon DB를 활용하여 빠른 성능과 직관적인 사용자 경험을 제공합니다.
 
-정적 블로그 프론트엔드를 위한 **Headless Content API**입니다.  
-API는 **Netlify Functions**로 제공되며,  
-콘텐츠 데이터는 **Neon(PostgreSQL)** 에서 조회합니다.
+## 🛠 Tech Stack
 
-- 콘텐츠 생성/수정/삭제: **GitHub Repository 기반**
-- API 역할: **읽기 전용(Read-only)**
+- **Frontend**: HTML5, CSS3 (Variables), Vanilla JavaScript (ES6+)
+- **Database**: [Neon](https://neon.tech) (Serverless PostgreSQL)
+- **Library**: 
+  - `marked.js` (Markdown Rendering)
+  - `DOMPurify` (XSS Protection)
+  - `Prism.js` (Syntax Highlighting)
 
----
+## ✨ Key Features
 
-## 📐 API Versioning
+### 1. Dynamic Content Rendering
+- 작성된 글은 **Markdown** 형식으로 DB에 저장되며, 클라이언트에서 즉시 렌더링됩니다.
+- 코드 블록 하이라이팅 및 보안을 위한 HTML Sanitizing이 적용되어 있습니다.
 
-모든 API는 **버전 prefix**를 사용합니다.
+### 2. Category Explorer (Tree View)
+- 복잡한 지식 체계를 효과적으로 탐색할 수 있는 **계층형 트리(Tree) UI**를 제공합니다.
+- 폴더 접기/펼치기 기능과 직관적인 아이콘(Chevron/Folder)을 지원합니다.
 
-```
-/v1/...
-```
+### 3. Dark Mode Support
+- 사용자 시스템 설정에 따른 자동 테마 감지 및 수동 토글 기능을 지원합니다.
+- CSS 변수(Variables)를 활용하여 부드러운 전환과 일관된 색상 테마를 제공합니다.
 
-향후 변경 사항은 `/v2` 로 분리합니다.
+### 4. SPA Routing
+- 별도의 프레임워크 없이 자체 구현된 **Hash-based Router**를 통해 페이지 새로고침 없는 빠른 탐색이 가능합니다.
 
----
+## � Project Structure
 
-## 🧭 Base URL
-
-```
-/.netlify/functions
-```
-
-예시:
-```
-/.netlify/functions/v1/posts
-```
-
----
-
-## 🔐 Authentication
-
-- ❌ 인증 없음
-- ❌ 토큰 없음
-- ❌ 사용자 권한 관리 없음
-
-> 이 API는 공개 읽기 전용 API입니다.
-
----
-
-## 📖 OpenAPI Style Specification (v1)
-
-### 🔹 Category Object
-
-```yaml
-Category:
-  type: object
-  properties:
-    id:
-      type: integer
-    slug:
-      type: string
-      example: "SECURITY/cloud"
-    name:
-      type: string
-      example: "cloud"
-    parent_id:
-      type: integer
-      nullable: true
-    depth:
-      type: integer
-```
-
----
-
-### 🔹 Post Summary Object
-
-```yaml
-PostSummary:
-  type: object
-  properties:
-    slug:
-      type: string
-      example: "contents/TEST/test"
-    title:
-      type: string
-    created_at:
-      type: string
-      format: date-time
-    category:
-      type: string
-```
-
----
-
-### 🔹 Post Detail Object
-
-```yaml
-PostDetail:
-  type: object
-  properties:
-    slug:
-      type: string
-    title:
-      type: string
-    content_md:
-      type: string
-    created_at:
-      type: string
-      format: date-time
-    category:
-      type: string
-```
-
----
-
-## 📂 API Endpoints
-
-### 1️⃣ 카테고리 목록 조회
-
-**Endpoint**
-```
-GET /v1/categories
-```
-
-**Response 200**
-```json
-[
-  {
-    "id": 1,
-    "slug": "TEST",
-    "name": "TEST",
-    "parent_id": null,
-    "depth": 1
-  }
-]
-```
-
-**curl**
 ```bash
-curl -X GET https://<site>/.netlify/functions/v1/categories
+public/
+├── assets/
+│   ├── css/       # Global styles & Theme variables
+│   └── js/        # Core logic (Router, API, Renderer)
+├── pages/         # Page components (Home, Post, Categories)
+├── static/        # Static markdown files (About, Architecture)
+└── themes/        # Dark/Light theme definitions
 ```
 
 ---
-
-### 2️⃣ 게시글 목록 조회
-
-**Endpoint**
-```
-GET /v1/posts
-```
-
-**Query Parameters**
-| name | required | description |
-|---|---|---|
-| category | ❌ | category slug |
-
-**curl**
-```bash
-curl -X GET "https://<site>/.netlify/functions/v1/posts?category=TEST"
-```
-
----
-
-### 3️⃣ 게시글 상세 조회
-
-**Endpoint**
-```
-GET /v1/post
-```
-
-**Query Parameters**
-| name | required | description |
-|---|---|---|
-| slug | ✅ | post slug |
-
-**curl**
-```bash
-curl -X GET "https://<site>/.netlify/functions/v1/post?slug=contents/TEST/test"
-```
-
----
-
-## ❌ Error Handling
-
-| Status | Meaning |
-|---|---|
-| 400 | Bad Request |
-| 404 | Not Found |
-| 500 | Internal Server Error |
-
----
-
-## 🧠 Design Principles
-
-- GitHub Repository = CMS
-- Neon PostgreSQL = Source of Truth
-- API = Read-only
-- Folder structure = Category structure
-
----
-
-## ✅ Summary
-
-> Production-ready Headless Content API for static sites.
+*Developed for IT Security & Development Knowledge Archive.*

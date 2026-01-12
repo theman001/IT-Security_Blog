@@ -1,0 +1,83 @@
+:root {
+    /* Base Colors */
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --primary-color: #bb86fc;
+    --secondary-color: #03dac6;
+    --accent-color: #cf6679;
+
+    /* UI Elements */
+    --card-bg: #1e1e1e;
+    --header-bg: #1f1f1f;
+    --border-color: #333333;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+
+    /* Text Muted */
+    --muted: #a0a0a0;
+
+    /* Code Blocks */
+    --code-bg: #2d2d2d;
+    --code-text: #f8f8f2;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    background-image: none !important;
+    /* Override light mode gradient */
+}
+
+header {
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.post-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.post-title a {
+    color: var(--text-color);
+}
+
+.post-excerpt {
+    color: var(--muted) !important;
+}
+
+/* Category Explorer Specifics */
+.category-item {
+    color: var(--text-color);
+}
+
+.category-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+footer {
+    background: var(--header-bg);
+    color: var(--muted);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Markdown Body Overrides for Dark Mode */
+.markdown-body {
+    color: var(--text-color);
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+    border-bottom-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.markdown-body pre {
+    background-color: var(--code-bg);
+}
+
+.markdown-body code {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--code-text);
+}
