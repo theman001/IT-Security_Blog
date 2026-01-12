@@ -1,1 +1,130 @@
+openapi: 3.0.3
+info:
+  title: Blog Content API
+  description: |
+    Headless Content API for a static blog.
+    - Backend: Netlify Functions
+    - Database: Neon (PostgreSQL)
+    - CMS: GitHub Repository (Markdown)
+  version: "1.0.0"
 
+servers:
+  - url: /.netlify/functions
+    description: Netlify Functions Base
+
+paths:
+  /v1/categories:
+    get:
+      summary: Get all categories
+      description: Returns all categories ordered by depth.
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /v1/posts:
+    get:
+      summary: Get post list
+      description: Returns list of posts. Can be filtered by category.
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+          required: false
+          description: Category slug
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PostSummary"
+
+  /v1/post:
+    get:
+      summary: Get post detail
+      description: Returns a single post by slug.
+      parameters:
+        - in: query
+          name: slug
+          schema:
+            type: string
+          required: true
+          description: Post slug
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostDetail"
+        "400":
+          description: Missing slug parameter
+        "404":
+          description: Post not found
+
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        slug:
+          type: string
+          example: "TEST/cloud"
+        name:
+          type: string
+          example: "cloud"
+        parent_id:
+          type: integer
+          nullable: true
+          example: 1
+        depth:
+          type: integer
+          example: 2
+
+    PostSummary:
+      type: object
+      properties:
+        slug:
+          type: string
+          example: "contents/TEST/test"
+        title:
+          type: string
+          example: "정적 웹 호스팅 테스트용 글"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-01-12T03:57:09.987Z"
+        category:
+          type: string
+          example: "TEST"
+
+    PostDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          example: "contents/TEST/test"
+        title:
+          type: string
+          example: "정적 웹 호스팅 테스트용 글"
+        content_md:
+          type: string
+          example: "## 개요\\n이 문서는..."
+        created_at:
+          type: string
+          format: date-time
+        category:
+          type: string
+          example: "TEST"
