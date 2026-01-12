@@ -19,14 +19,14 @@ export default async function render(container, params) {
 
     container.innerHTML = `
         <article class="post-content">
-            <header class="post-header" style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
-                <div style="font-size: 0.9rem; color: var(--link); margin-bottom: 0.5rem; font-weight: 500;">
-                    ${post.category}
+            <header class="post-header">
+                <div class="post-category-label">
+                    ${post.categoryName || 'Uncategorized'}
                 </div>
-                <h1 style="margin: 0 0 0.5rem 0; font-size: 2.2rem; line-height: 1.2;">
+                <h1 class="post-title">
                     ${post.title}
                 </h1>
-                <div class="post-meta" style="color: var(--muted); font-size: 0.9rem;">
+                <div class="post-meta-info">
                     <span>${post.date}</span>
                 </div>
             </header>
@@ -35,8 +35,8 @@ export default async function render(container, params) {
                 ${htmlContent}
             </div>
             
-            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
-                <a href="/" data-link>← Back to Home</a>
+            <div class="back-link-container">
+                <a href="/" data-link class="back-link">← Back to Home</a>
             </div>
         </article>
     `;
