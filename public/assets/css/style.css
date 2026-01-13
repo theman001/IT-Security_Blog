@@ -555,3 +555,185 @@ header {
     color: #ef4444;
     font-weight: bold;
 }
+
+
+/* =========================================================
+   IDE-STYLE MARKDOWN CODE BLOCK (Security Blog Optimized)
+   - macOS Window Frame
+   - Copy Button
+   - Line Numbers
+   - Prism Syntax Highlighting
+   - Bash / Security Terminal Style
+========================================================= */
+
+/* --- Base Code Block Container --- */
+.markdown-body pre[class*="language-"] {
+    position: relative;
+    background: #0d1117; /* GitHub / IDE Dark */
+    color: #e5e7eb;
+    padding: 2.8rem 1.2rem 1.4rem 3.5rem; /* left space for line numbers */
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 2.8rem 0;
+    font-family: var(--font-code);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* --- macOS Window Dots --- */
+.markdown-body pre[class*="language-"]::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    width: 12px;
+    height: 12px;
+    background: #ff5f56;
+    border-radius: 50%;
+    box-shadow:
+        20px 0 0 #ffbd2e,
+        40px 0 0 #27c93f;
+}
+
+/* --- Code Element --- */
+.markdown-body pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font-family: inherit;
+    white-space: pre;
+    display: block;
+}
+
+/* =========================================================
+   Copy Button
+========================================================= */
+.markdown-body pre::after {
+    content: "Copy";
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    font-size: 0.65rem;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #9ca3af;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.markdown-body pre:hover::after {
+    background: rgba(255, 255, 255, 0.12);
+    color: #e5e7eb;
+}
+
+/* =========================================================
+   Line Numbers (CSS-only, Prism compatible)
+========================================================= */
+.markdown-body pre {
+    counter-reset: line;
+}
+
+.markdown-body pre code > span {
+    display: block;
+    counter-increment: line;
+}
+
+.markdown-body pre code > span::before {
+    content: counter(line);
+    position: absolute;
+    left: 0;
+    width: 3rem;
+    padding-right: 0.8rem;
+    text-align: right;
+    color: #6b7280;
+    opacity: 0.6;
+    user-select: none;
+}
+
+/* =========================================================
+   Prism Syntax Highlighting (IDE Theme)
+========================================================= */
+.token.comment {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.token.keyword {
+    color: #f472b6;
+}
+
+.token.class-name,
+.token.function {
+    color: #38bdf8;
+}
+
+.token.string {
+    color: #a7f3d0;
+}
+
+.token.number {
+    color: #facc15;
+}
+
+.token.operator {
+    color: #e5e7eb;
+}
+
+.token.punctuation {
+    color: #9ca3af;
+}
+
+/* =========================================================
+   Bash / Security Terminal Style
+========================================================= */
+pre.language-bash {
+    background: #020617; /* Darker terminal */
+    color: #d1d5db;
+}
+
+pre.language-bash .token.comment {
+    color: #64748b;
+    font-style: italic;
+}
+
+pre.language-bash .token.function {
+    color: #22d3ee;
+}
+
+pre.language-bash .token.string {
+    color: #86efac;
+}
+
+pre.language-bash .token.operator {
+    color: #f97316;
+}
+
+pre.language-bash .token.keyword {
+    color: #f87171;
+}
+
+/* Prompt-like 느낌 */
+pre.language-bash code {
+    font-size: 0.85rem;
+}
+
+/* =========================================================
+   Inline Code (Non-block)
+========================================================= */
+.markdown-body code:not(pre code) {
+    background-color: var(--code-bg);
+    color: #e01e5a;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-family: var(--font-code);
+    font-size: 0.9em;
+}
+
+/* Dark mode inline code */
+[data-theme="dark"] .markdown-body code:not(pre code) {
+    background-color: #1e293b;
+    color: #ff79c6;
+}
