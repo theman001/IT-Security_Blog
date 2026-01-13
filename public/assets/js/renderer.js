@@ -12,9 +12,10 @@ export function renderMarkdown(markdown) {
 
     marked.setOptions({
         gfm: true,
-        breaks: true,
+        breaks: false,      // ✅ 반드시 false
         headerIds: false,
-        mangle: false
+        mangle: false,
+        smartypants: false // 따옴표/기호 자동 변환 방지 (보안 블로그 필수)
     });
 
     const rawHtml = marked.parse(markdown);
@@ -29,6 +30,7 @@ export function renderMarkdown(markdown) {
 
     return rawHtml;
 }
+
 
 
 /**
