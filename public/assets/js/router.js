@@ -67,6 +67,11 @@ export const router = async () => {
 
         await module.default(container, params);
 
+        // Prism syntax highlight (manual)
+        if (window.Prism) {
+            Prism.highlightAll();
+        }
+
     } catch (e) {
         console.error('Render Error:', e);
         container.innerHTML = '<h2>Error loading page</h2>';
