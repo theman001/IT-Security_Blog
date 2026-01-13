@@ -1,96 +1,111 @@
 /**
- * Markdown Renderer (Marked v8+ compatible)
+ * Markdown Renderer
+ * - Safe for Cloudflare Pages
+ * - Code blocks are rendered as pure text
+ * - No markdown parsing inside ``` blocks
+ * - Rendering failure will NEVER break the page
  */
 
 export function renderMarkdown(markdown) {
     if (!markdown) return '';
 
-    if (typeof marked === 'undefined') {
-        console.warn('Marked.js not loaded');
-        return markdown;
+    /* ---------- Guard: marked existence ---------- */
+    if (typeof window.marked === 'undefined') {
+        console.error('[Markdown] marked is not loaded');
+        return `<pre><code>${escapeHtml(markdown)}</code></pre>`;
     }
 
-    marked.setOptions({
-        gfm: true,
-        breaks: false,          // 🔒 절대 true 금지
-        headerIds: false,
-        mangle: false
-    });
-
-    const renderer = new marked.Renderer();
-
-    /**
-     * Fenced code block
-     * @param {string} code
-     * @param {string} infostring
-     */
-    renderer.code = (code, infostring = '') => {
-        const language = infostring.trim().split(/\s+/)[0] || 'text';
-
-        return `
-<pre class="code-block">
-  <div class="code-toolbar">
-    <span class="code-lang">${language}</span>
-    <button class="copy-btn" data-copy>Copy</button>
-  </div>
-  <code class="language-${language}">${escapeHtml(code)}</code>
-</pre>`;
-    };
-
-    // Inline code
-    renderer.codespan = (code) => {
-        return `<code class="inline-code">${escapeHtml(code)}</code>`;
-    };
-
-    let html;
     try {
-        html = marked.parse(markdown, { renderer });
-    } catch (err) {
-        console.error('Marked parse error:', err);
-        return '<p class="error">Markdown rendering failed.</p>';
-    }
-
-    if (typeof DOMPurify !== 'undefined') {
-        return DOMPurify.sanitize(html, {
-            USE_PROFILES: { html: true },
-            ADD_TAGS: ['pre', 'code', 'button', 'div', 'span'],
-            ADD_ATTR: ['class', 'data-copy']
+        /* ---------- Marked global options ---------- */
+        window.marked.setOptions({
+            gfm: true,
+            breaks: false,          // IMPORTANT: 줄바꿈 강제 X
+            headerIds: false,
+            mangle: false
         });
-    }
 
-    return html;
+        /* ---------- Custom Renderer ---------- */
+        const renderer = new window.marked.Renderer();
+
+        /**
+         * Code block (```lang)
+         * - Treat content as pure text
+         * - No markdown parsing inside
+         */
+        renderer.code = (code, language) => {
+            const langClass = language ? `language-${language}` : '';
+            return `
+                <pre class="code-block ${langClass}">
+                    <code>${escapeHtml(code)}</code>
+                </pre>
+            `;
+        };
+
+        /**
+         * Inline code (`code`)
+         */
+        renderer.codespan = (text) => {
+            return `<code class="inline-code">${escapeHtml(text)}</code>`;
+        };
+
+        /* ---------- Parse ---------- */
+        let html = window.marked.parse(markdown, { renderer });
+
+        /* ---------- Sanitize ---------- */
+        if (typeof window.DOMPurify !== 'undefined') {
+            html = window.DOMPurify.sanitize(html, {
+                USE_PROFILES: { html: true },
+                ADD_TAGS: ['pre', 'code'],
+                ADD_ATTR: ['class']
+            });
+        }
+
+        return html;
+
+    } catch (err) {
+        console.error('[Markdown] rendering failed:', err);
+
+        /* ---------- Absolute fallback ---------- */
+        return `
+            <pre class="code-block">
+                <code>${escapeHtml(markdown)}</code>
+            </pre>
+        `;
+    }
 }
 
 /**
- * Markdown → Plain text (preview)
+ * Plain-text preview generator
  */
 export function stripMarkdown(markdown, maxLength = 150) {
     if (!markdown) return '';
 
     try {
-        const html = marked.parse(markdown);
-        const div = document.createElement('div');
-        div.innerHTML = html;
+        if (typeof window.marked === 'undefined') {
+            return markdown.substring(0, maxLength);
+        }
 
-        let text = div.textContent || '';
-        text = text.replace(/\s+/g, ' ').trim();
+        const html = window.marked.parse(markdown);
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+
+        let text = (tmp.textContent || '').replace(/\s+/g, ' ').trim();
 
         return text.length > maxLength
-            ? text.slice(0, maxLength) + '...'
+            ? text.substring(0, maxLength) + '...'
             : text;
+
     } catch {
-        return markdown.slice(0, maxLength);
+        return markdown.substring(0, maxLength);
     }
 }
 
-/**
- * Escape HTML inside code blocks
- */
+/* ---------- Utils ---------- */
 function escapeHtml(str) {
     return str
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(/'/g, '&#39;');
 }
