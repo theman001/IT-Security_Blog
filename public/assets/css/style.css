@@ -164,11 +164,12 @@ main {
 }
 
 footer {
-    justify-content: center;   /* 가로 가운데 */
-    align-items: flex-end;     /* 세로 아래 */
-    
     text-align: center;
-    padding: 0.15rem 0.3rem;   /* 상단 여백 줄이기 */
+
+    padding-top: 0.05rem;   /* 상단 여백 줄이기 */
+    padding-bottom: 0.25rem;
+
+    line-height: 1.2;       /* 글자를 아래쪽으로 당기는 느낌 */
     
     color: var(--secondary-color);
     border-top: 1px solid var(--border-color);
@@ -176,6 +177,7 @@ footer {
 
     margin-top: auto;
 }
+
 
 
 /* Components */
