@@ -1,8 +1,5 @@
 /**
- * Markdown Renderer
- * - Uses Marked.js for parsing
- * - Uses DOMPurify for sanitization
- * - Ensures code blocks are treated as pure text
+ * Markdown Renderer (Marked v8+ compatible)
  */
 
 export function renderMarkdown(markdown) {
@@ -13,97 +10,81 @@ export function renderMarkdown(markdown) {
         return markdown;
     }
 
-    // 🔒 핵심 설정
     marked.setOptions({
         gfm: true,
-        breaks: false,          // ❗ 매우 중요: 개행 깨짐 방지
+        breaks: false,          // 🔒 절대 true 금지
         headerIds: false,
-        mangle: false,
-        smartLists: true,
-        smartypants: false
+        mangle: false
     });
 
-    /**
-     * Renderer override
-     * - 코드블럭은 마크다운 문법 무시
-     * - plain text 그대로 출력
-     */
     const renderer = new marked.Renderer();
 
-    // ``` 코드블럭
-    renderer.code = (code, language) => {
-        const langClass = language ? `language-${language}` : 'language-plain';
+    /**
+     * Fenced code block
+     * @param {string} code
+     * @param {string} infostring
+     */
+    renderer.code = (code, infostring = '') => {
+        const language = infostring.trim().split(/\s+/)[0] || 'text';
 
         return `
 <pre class="code-block">
-    <div class="code-toolbar">
-        <span class="code-lang">${language || 'text'}</span>
-        <button class="copy-btn" data-copy>Copy</button>
-    </div>
-    <code class="${langClass}">${escapeHtml(code)}</code>
+  <div class="code-toolbar">
+    <span class="code-lang">${language}</span>
+    <button class="copy-btn" data-copy>Copy</button>
+  </div>
+  <code class="language-${language}">${escapeHtml(code)}</code>
 </pre>`;
     };
 
-    // 인라인 코드
+    // Inline code
     renderer.codespan = (code) => {
         return `<code class="inline-code">${escapeHtml(code)}</code>`;
     };
 
-    let rawHtml;
+    let html;
     try {
-        rawHtml = marked.parse(markdown, { renderer });
-    } catch (e) {
-        console.error('Markdown parse error:', e);
+        html = marked.parse(markdown, { renderer });
+    } catch (err) {
+        console.error('Marked parse error:', err);
         return '<p class="error">Markdown rendering failed.</p>';
     }
 
-    // 🔐 Sanitize
     if (typeof DOMPurify !== 'undefined') {
-        return DOMPurify.sanitize(rawHtml, {
+        return DOMPurify.sanitize(html, {
             USE_PROFILES: { html: true },
             ADD_TAGS: ['pre', 'code', 'button', 'div', 'span'],
             ADD_ATTR: ['class', 'data-copy']
         });
     }
 
-    return rawHtml;
+    return html;
 }
 
 /**
- * Markdown → Plain text (preview용)
+ * Markdown → Plain text (preview)
  */
 export function stripMarkdown(markdown, maxLength = 150) {
     if (!markdown) return '';
 
     try {
-        if (typeof marked !== 'undefined') {
-            marked.setOptions({
-                gfm: true,
-                breaks: false,
-                headerIds: false,
-                mangle: false
-            });
+        const html = marked.parse(markdown);
+        const div = document.createElement('div');
+        div.innerHTML = html;
 
-            const html = marked.parse(markdown);
-            const tmp = document.createElement('div');
-            tmp.innerHTML = html;
+        let text = div.textContent || '';
+        text = text.replace(/\s+/g, ' ').trim();
 
-            let plain = tmp.textContent || tmp.innerText || '';
-            plain = plain.replace(/\s+/g, ' ').trim();
-
-            return plain.length > maxLength
-                ? plain.slice(0, maxLength) + '...'
-                : plain;
-        }
-
-        return markdown.slice(0, maxLength);
+        return text.length > maxLength
+            ? text.slice(0, maxLength) + '...'
+            : text;
     } catch {
         return markdown.slice(0, maxLength);
     }
 }
 
 /**
- * HTML escape (코드블럭 보호용)
+ * Escape HTML inside code blocks
  */
 function escapeHtml(str) {
     return str
