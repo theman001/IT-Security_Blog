@@ -10,12 +10,30 @@ export function renderMarkdown(markdown) {
         return markdown;
     }
 
+    // ✅ 커스텀 렌더링 규칙
+    const renderer = new marked.Renderer();
+
+    // 🔒 코드블럭은 "순수 텍스트"로만 처리
+    renderer.code = (code, language) => {
+        const escaped = code
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        const langClass = language ? `language-${language}` : 'language-plain';
+
+        return `
+<pre class="code-block ${langClass}">
+<code>${escaped}</code>
+</pre>`;
+    };
+
     marked.setOptions({
         gfm: true,
-        breaks: false,      // ✅ 반드시 false
+        breaks: false,      // 🔥 반드시 false
         headerIds: false,
         mangle: false,
-        smartypants: false // 따옴표/기호 자동 변환 방지 (보안 블로그 필수)
+        renderer
     });
 
     const rawHtml = marked.parse(markdown);
@@ -30,7 +48,6 @@ export function renderMarkdown(markdown) {
 
     return rawHtml;
 }
-
 
 
 /**
