@@ -536,11 +536,11 @@ header {
     background: none;
     border: none;
     color: var(--secondary-color);
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     cursor: pointer;
     text-decoration: underline;
     opacity: 0.4;
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
     padding: 0.5rem;
     transition: opacity 0.2s;
 }
