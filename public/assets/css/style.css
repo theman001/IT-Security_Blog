@@ -739,27 +739,33 @@ pre.language-bash code {
 }
 
 /* =========================================================
-   Basic Code Block (``` without language)
+   Basic Code Block (``` without language) — Refined
    ========================================================= */
 
 .markdown-body pre:not([class*="language-"]) {
-    background-color: #2b3445; /* soft dark slate */
+    background-color: #2f3a4d; /* 내부/외부 통일 */
     color: #e5e7eb;
-    padding: 1.25rem 1.5rem;
-    border-radius: 14px; /* 🔑 둥글게 */
+
+    padding: 0.9rem 1.2rem;   /* 🔽 내부 여백 축소 */
+    margin: 1.4rem 0;        /* 🔽 바깥 여백 축소 */
+
+    border-radius: 10px;     /* 살짝만 둥글게 */
     font-family: var(--font-code);
     font-size: 0.95rem;
-    line-height: 1.7;
+    line-height: 1.65;
+
     overflow-x: auto;
-    margin: 2rem 0;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+
+    /* 그림자 약화 (레이어 느낌 제거) */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
-/* 내부 code 태그는 배경 제거 (중첩 방지) */
+/* 내부 code 태그 — 완전 플랫 */
 .markdown-body pre:not([class*="language-"]) > code {
     background: transparent;
     padding: 0;
+    margin: 0;
     color: inherit;
     font-size: inherit;
     line-height: inherit;
@@ -767,20 +773,7 @@ pre.language-bash code {
     display: block;
 }
 
-/* 스크롤바 정리 (선택) */
-.markdown-body pre:not([class*="language-"])::-webkit-scrollbar {
-    height: 8px;
-}
-
-.markdown-body pre:not([class*="language-"])::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-}
-
-.markdown-body pre:not([class*="language-"])::-webkit-scrollbar-track {
-    background: transparent;
-}
-
 [data-theme="light"] .markdown-body pre:not([class*="language-"]) {
-    background-color: #1f2937;
+    background-color: #2b3445;
 }
+
