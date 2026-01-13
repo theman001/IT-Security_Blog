@@ -164,13 +164,20 @@ main {
 }
 
 footer {
+    display: flex;
+    justify-content: center;   /* 가로 가운데 */
+    align-items: flex-end;     /* 세로 아래 */
+    
     text-align: center;
-    padding: 0.3rem;
+    padding: 0.15rem 0.3rem;   /* 상단 여백 줄이기 */
+    
     color: var(--secondary-color);
     border-top: 1px solid var(--border-color);
     background: var(--bg-color);
+
     margin-top: auto;
 }
+
 
 /* Components */
 /* --- Modern Tree Explorer Styles --- */
