@@ -1,14 +1,66 @@
-# About IT-Security_Blog
+# About IT-Security Blog
 
-Welcome to **IT-Security_Blog**, a dedicated space for sharing knowledge about cybersecurity, secure coding, and modern web development.
+IT-Security Blog는 **개인적인 보안 연구와 IT 공부 기록을 남기기 위해 만든 기술 블로그**입니다.  
+거창한 목표보다는,  
+**제가 실제로 흥미를 느끼고 직접 해본 것들**을 하나씩 정리해두는 공간에 가깝습니다.
 
-## Mission
-Our mission is to simplify complex security concepts and provide actionable advice for developers and security enthusiasts.
+보안, IT, 그리고 요즘은 AI까지—  
+업무를 하면서 필요했던 내용이나,  
+개인적으로 궁금해서 파고들어 본 주제들을  
+**프로젝트 단위로 직접 만들어보고, 실험하고, 정리하는 과정**을 중심으로 기록합니다.
 
-## Who We Are
-We are a group of passionate security researchers and developers.
+---
 
-> "Security is not a product, but a process." - Bruce Schneier
+## What I Write About
+
+이 블로그에는 주로 이런 내용들이 올라옵니다.
+
+- 보안 관련 개인 연구 및 공부 기록  
+- IT 업무를 하면서 실제로 필요했던 설정, 구조, 문제 해결 과정  
+- 웹·인프라·클라우드 환경에서의 보안 고민과 실험  
+- AI를 활용한 자동화, 분석, 실험 프로젝트  
+- “이게 왜 이렇게 동작하지?”라는 궁금증에서 시작한 삽질 기록
+
+완성된 결과만 정리하기보다는,  
+**시도 → 실패 → 정리 → 이해**의 흐름 자체를 남기는 걸 중요하게 생각합니다.
+
+---
+
+## Why This Blog Exists
+
+공부를 하다 보면,  
+그때는 이해했다고 생각했던 내용도 시간이 지나면 다시 헷갈리는 경우가 많습니다.
+
+이 블로그는 그런 내용을 다시 꺼내볼 수 있도록 만든  
+**개인 노트이자, 장기 기록 공간**입니다.
+
+- 나중의 내가 다시 봐도 이해할 수 있도록  
+- 같은 고민을 하는 누군가에게는 작은 힌트가 될 수 있도록  
+
+그 정도면 충분하다고 생각합니다.
+
+---
+
+## About the Content
+
+이 블로그에 올라오는 모든 내용은:
+
+- 개인적인 학습·연구·업무 경험을 기반으로 작성되며
+- 합법적이고 통제된 환경에서의 실험만을 다룹니다
+- 실제 운영 환경에 그대로 적용하기엔 위험할 수 있는 부분은 명확히 언급합니다
+
+> ⚠️ 이 블로그의 내용은 **공부와 기록 목적**으로 작성되었습니다.  
+> 실제 환경에 적용할 경우, 반드시 스스로 검증하고 판단하시길 권장합니다.
+
+---
 
 ## Contact
-Feel free to reach out via [Email](mailto:contact@example.com).
+
+의견이나 피드백이 있다면 언제든지 환영입니다.
+
+- 📧 [Email](mailto:notion.personal@gmail.com)
+- 🧑‍💻 [GitHub](https://github.com/theman001) 
+(정리되지 않은 실험 코드나 개인 테스트용 저장소도 포함되어 있습니다.)
+
+같은 주제에 관심이 있다면,  
+가볍게 참고하거나 편하게 읽어주셔도 괜찮습니다 🙂
