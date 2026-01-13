@@ -6,33 +6,30 @@
 export function renderMarkdown(markdown) {
     if (!markdown) return '';
 
-    // Check if marked is available
     if (typeof marked === 'undefined') {
-        console.error('Marked library is not loaded.');
-        return markdown; // Fallback to raw text
+        return markdown;
     }
 
-    try {
-        marked.use({
-            gfm: true,
-            breaks: true
+    marked.setOptions({
+        gfm: true,
+        breaks: true,
+        headerIds: false,
+        mangle: false
+    });
+
+    const rawHtml = marked.parse(markdown);
+
+    if (typeof DOMPurify !== 'undefined') {
+        return DOMPurify.sanitize(rawHtml, {
+            USE_PROFILES: { html: true },
+            ADD_TAGS: ['pre', 'code'],
+            ADD_ATTR: ['class']
         });
-
-        const rawHtml = marked.parse(markdown);
-
-        if (typeof DOMPurify !== 'undefined') {
-            return DOMPurify.sanitize(rawHtml, {
-                ADD_TAGS: ['iframe'],
-                ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling']
-            });
-        }
-
-        return rawHtml;
-    } catch (e) {
-        console.error('Markdown rendering error:', e);
-        return '<p class="error">Error rendering content.</p>';
     }
+
+    return rawHtml;
 }
+
 
 /**
  * Strips markdown syntax to return plain text for previews.
