@@ -58,8 +58,8 @@ IT-Security Blog는 **개인적인 보안 연구와 IT 공부 기록을 남기�
 
 의견이나 피드백이 있다면 언제든지 환영입니다.
 
-- 📧 [Email](mailto:notion.personal@gmail.com)
-- 🧑‍💻 [GitHub](https://github.com/theman001) 
+- 📧 (mailto:notion.personal@gmail.com)
+- 🧑‍💻 (https://github.com/theman001) 
 (정리되지 않은 실험 코드나 개인 테스트용 저장소도 포함되어 있습니다.)
 
 같은 주제에 관심이 있다면,  
