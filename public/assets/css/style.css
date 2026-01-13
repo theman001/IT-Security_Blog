@@ -539,7 +539,7 @@ header {
     font-size: 0.8rem;
     cursor: pointer;
     text-decoration: underline;
-    opacity: 0.6;
+    opacity: 0.4;
     margin-top: 0.5rem;
     padding: 0.5rem;
     transition: opacity 0.2s;
@@ -604,29 +604,6 @@ header {
     font-family: inherit;
     white-space: pre;
     display: block;
-}
-
-/* =========================================================
-   Copy Button
-========================================================= */
-.markdown-body pre::after {
-    content: "Copy";
-    position: absolute;
-    top: 8px;
-    right: 14px;
-    font-size: 0.65rem;
-    padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.06);
-    color: #9ca3af;
-    border-radius: 6px;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.2s ease;
-}
-
-.markdown-body pre:hover::after {
-    background: rgba(255, 255, 255, 0.12);
-    color: #e5e7eb;
 }
 
 /* =========================================================
