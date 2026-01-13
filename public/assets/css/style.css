@@ -737,3 +737,50 @@ pre.language-bash code {
     background-color: #1e293b;
     color: #ff79c6;
 }
+
+/* =========================================================
+   Basic Code Block (``` without language)
+   ========================================================= */
+
+.markdown-body pre:not([class*="language-"]) {
+    background-color: #2b3445; /* soft dark slate */
+    color: #e5e7eb;
+    padding: 1.25rem 1.5rem;
+    border-radius: 14px; /* 🔑 둥글게 */
+    font-family: var(--font-code);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 2rem 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 내부 code 태그는 배경 제거 (중첩 방지) */
+.markdown-body pre:not([class*="language-"]) > code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre;
+    display: block;
+}
+
+/* 스크롤바 정리 (선택) */
+.markdown-body pre:not([class*="language-"])::-webkit-scrollbar {
+    height: 8px;
+}
+
+.markdown-body pre:not([class*="language-"])::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.markdown-body pre:not([class*="language-"])::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+[data-theme="light"] .markdown-body pre:not([class*="language-"]) {
+    background-color: #1f2937;
+}
