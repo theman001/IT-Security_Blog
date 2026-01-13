@@ -10,7 +10,7 @@
 
 블로그는 정적 웹을 기반으로 다음과 같은 흐름으로 구성되어 있습니다.
 
-```
+```bash
 [Git Repository]
    └─ Markdown Contents
         ↓
@@ -38,7 +38,7 @@ Markdown 파일이 콘텐츠의 기준이 되며,
 - Front Matter를 통해 메타데이터 정의
 - 파일 시스템이 콘텐츠의 단일 기준(Source of Truth)
 
-```
+```bash
 contents/
  ├─ security/
  │   ├─ web/
@@ -102,7 +102,7 @@ contents/
 
 게시글 메타데이터는 Front Matter로 관리합니다.
 
-```
+```bash
 ---
 title: "Post Title"
 tags: ["security", "ai"]
