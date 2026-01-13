@@ -10,7 +10,7 @@
 
 블로그는 정적 웹을 기반으로 다음과 같은 흐름으로 구성되어 있습니다.
 
-```bash
+```
 [Git Repository]
    └─ Markdown Contents
         ↓
