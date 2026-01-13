@@ -46,7 +46,10 @@ export function stripMarkdown(markdown, maxLength = 150) {
         // 1. If marked is available, we can parse to HTML then extract text
         // This is cleaner than regex for complex markdown
         if (typeof marked !== 'undefined') {
-            const html = marked.parse(markdown);
+            const html = marked.parse(markdown, {
+                gfm: true,
+                breaks: false   // ✅ 여기서도 false
+            });
             const tmp = document.createElement('DIV');
             tmp.innerHTML = html;
             let plain = tmp.textContent || tmp.innerText || '';
