@@ -102,7 +102,7 @@ contents/
 
 게시글 메타데이터는 Front Matter로 관리합니다.
 
-```bash
+```
 ---
 title: "Post Title"
 tags: ["security", "ai"]
