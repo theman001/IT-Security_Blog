@@ -777,3 +777,40 @@ pre.language-bash code {
     background-color: #2b3445;
 }
 
+/* ===============================
+   Code Block Normalization FIX
+   =============================== */
+
+.markdown-body pre {
+    margin: 1.2rem 0;
+    padding: 0.75rem 1rem;           /* ⬅️ 여백 줄임 */
+    background: #0b0f14;              /* 내부 색 통일 */
+    border-radius: 10px;              /* 둥글게 */
+    overflow-x: auto;
+
+    /* 🔑 핵심 */
+    white-space: pre;                 /* 절대 pre-wrap 금지 */
+    line-height: 1.45;                /* 문단 영향 제거 */
+}
+
+.markdown-body pre code {
+    display: block;
+    padding: 0;
+    margin: 0;
+
+    white-space: inherit;             /* pre 기준 따름 */
+    line-height: inherit;
+    background: transparent;
+    font-family: var(--font-code);
+    font-size: 0.9rem;
+}
+
+/* Line numbers spacing fix */
+pre.line-numbers {
+    padding-left: 3.2em !important;
+}
+
+.line-numbers-rows > span {
+    line-height: 1.45 !important;
+}
+
