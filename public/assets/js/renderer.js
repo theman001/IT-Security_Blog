@@ -1,89 +1,115 @@
 /**
- * Renders Markdown content into HTML using Marked.js and cleans it with DOMPurify.
- * @param {string} markdown - The raw markdown string.
- * @returns {string} The sanitized and rendered HTML.
+ * Markdown Renderer
+ * - Uses Marked.js for parsing
+ * - Uses DOMPurify for sanitization
+ * - Ensures code blocks are treated as pure text
  */
+
 export function renderMarkdown(markdown) {
     if (!markdown) return '';
 
     if (typeof marked === 'undefined') {
+        console.warn('Marked.js not loaded');
         return markdown;
     }
 
-    // ✅ 커스텀 렌더링 규칙
+    // 🔒 핵심 설정
+    marked.setOptions({
+        gfm: true,
+        breaks: false,          // ❗ 매우 중요: 개행 깨짐 방지
+        headerIds: false,
+        mangle: false,
+        smartLists: true,
+        smartypants: false
+    });
+
+    /**
+     * Renderer override
+     * - 코드블럭은 마크다운 문법 무시
+     * - plain text 그대로 출력
+     */
     const renderer = new marked.Renderer();
 
-    // 🔒 코드블럭은 "순수 텍스트"로만 처리
+    // ``` 코드블럭
     renderer.code = (code, language) => {
-        const escaped = code
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-
         const langClass = language ? `language-${language}` : 'language-plain';
 
         return `
-<pre class="code-block ${langClass}">
-<code>${escaped}</code>
+<pre class="code-block">
+    <div class="code-toolbar">
+        <span class="code-lang">${language || 'text'}</span>
+        <button class="copy-btn" data-copy>Copy</button>
+    </div>
+    <code class="${langClass}">${escapeHtml(code)}</code>
 </pre>`;
     };
 
-    marked.setOptions({
-        gfm: true,
-        breaks: false,      // 🔥 반드시 false
-        headerIds: false,
-        mangle: false,
-        renderer
-    });
+    // 인라인 코드
+    renderer.codespan = (code) => {
+        return `<code class="inline-code">${escapeHtml(code)}</code>`;
+    };
 
-    const rawHtml = marked.parse(markdown);
+    let rawHtml;
+    try {
+        rawHtml = marked.parse(markdown, { renderer });
+    } catch (e) {
+        console.error('Markdown parse error:', e);
+        return '<p class="error">Markdown rendering failed.</p>';
+    }
 
+    // 🔐 Sanitize
     if (typeof DOMPurify !== 'undefined') {
         return DOMPurify.sanitize(rawHtml, {
             USE_PROFILES: { html: true },
-            ADD_TAGS: ['pre', 'code'],
-            ADD_ATTR: ['class']
+            ADD_TAGS: ['pre', 'code', 'button', 'div', 'span'],
+            ADD_ATTR: ['class', 'data-copy']
         });
     }
 
     return rawHtml;
 }
 
-
 /**
- * Strips markdown syntax to return plain text for previews.
- * @param {string} markdown 
- * @param {number} maxLength 
- * @returns {string} Plain text excerpt
+ * Markdown → Plain text (preview용)
  */
 export function stripMarkdown(markdown, maxLength = 150) {
     if (!markdown) return '';
 
     try {
-        // 1. If marked is available, we can parse to HTML then extract text
-        // This is cleaner than regex for complex markdown
         if (typeof marked !== 'undefined') {
-            const html = marked.parse(markdown, {
+            marked.setOptions({
                 gfm: true,
-                breaks: false   // ✅ 여기서도 false
+                breaks: false,
+                headerIds: false,
+                mangle: false
             });
-            const tmp = document.createElement('DIV');
-            tmp.innerHTML = html;
-            let plain = tmp.textContent || tmp.innerText || '';
 
-            // Collapse whitespaces
+            const html = marked.parse(markdown);
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+
+            let plain = tmp.textContent || tmp.innerText || '';
             plain = plain.replace(/\s+/g, ' ').trim();
 
-            if (plain.length > maxLength) {
-                return plain.substring(0, maxLength) + '...';
-            }
-            return plain;
+            return plain.length > maxLength
+                ? plain.slice(0, maxLength) + '...'
+                : plain;
         }
 
-        // Fallback simple regex if marked is missing (unlikely now)
-        return markdown.replace(/[#*`]/g, '').substring(0, maxLength) + '...';
-
-    } catch (e) {
-        return markdown.substring(0, maxLength);
+        return markdown.slice(0, maxLength);
+    } catch {
+        return markdown.slice(0, maxLength);
     }
+}
+
+/**
+ * HTML escape (코드블럭 보호용)
+ */
+function escapeHtml(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
