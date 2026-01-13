@@ -165,7 +165,7 @@ main {
 
 footer {
     display: flex;
-    justify-content: center;   /* 가로 가운데 */
+    text-align: center;   /* 가로 가운데 */
     align-items: flex-end;     /* 세로 아래 */
     
     text-align: center;
