@@ -19,6 +19,15 @@ export function renderMarkdown(markdown) {
         mangle: false
     });
 
+    marked.use({
+        renderer: {
+            link(href, title, text) {
+                if (!href) return text;
+                return `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
+            }
+        }
+    });
+
     let html = '';
     try {
         html = marked.parse(markdown);
