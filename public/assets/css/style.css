@@ -628,29 +628,7 @@ header {
     display: block;
 }
 
-/* =========================================================
-   Line Numbers (CSS-only, Prism compatible)
-========================================================= */
-.markdown-body pre {
-    counter-reset: line;
-}
-
-.markdown-body pre code>span {
-    display: block;
-    counter-increment: line;
-}
-
-.markdown-body pre code>span::before {
-    content: counter(line);
-    position: absolute;
-    left: 0;
-    width: 3rem;
-    padding-right: 0.8rem;
-    text-align: right;
-    color: #6b7280;
-    opacity: 0.6;
-    user-select: none;
-}
+/* CSS-only Line Numbers removed to fix layout issues */
 
 /* =========================================================
    Prism Syntax Highlighting (IDE Theme)
