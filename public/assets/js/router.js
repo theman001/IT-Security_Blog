@@ -11,7 +11,8 @@ const routes = [
     { path: '/categories/:slug', view: '../../pages/home.js' },
     { path: '/posts/:slug', view: '../../pages/post.js' },
     { path: '/about', view: '../../pages/static.js' },
-    { path: '/architecture', view: '../../pages/static.js' }
+    { path: '/architecture', view: '../../pages/static.js' },
+    { path: '/hidden', view: '../../pages/hidden.js' } // Easter Egg
 ];
 
 const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
