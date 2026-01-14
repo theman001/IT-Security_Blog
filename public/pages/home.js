@@ -1,5 +1,5 @@
 import { fetchPosts, fetchPostsByCategory } from '../assets/js/api.js';
-import { stripMarkdown } from '../assets/js/renderer.js';
+import { stripMarkdown, renderMarkdown } from '../assets/js/renderer.js';
 
 export default async function render(container, params) {
     let mode = 'latest';
@@ -32,8 +32,18 @@ export default async function render(container, params) {
             }
 
         } else {
-            // --- Home View (All Posts) ---
-            posts = await fetchPosts();
+            // --- Home View (Introduction from main.md) ---
+            const res = await fetch('/static/main.md');
+            if (res.ok) {
+                const text = await res.text();
+                const htmlContent = renderMarkdown(text);
+                container.innerHTML = `<div class="markdown-body" style="padding: 1rem 0;">${htmlContent}</div>`;
+                return; // Stop here, do not run post list rendering logic below
+            } else {
+                // Fallback if main.md is missing
+                console.warn('main.md not found, falling back to post list.');
+                posts = await fetchPosts();
+            }
         }
     } catch (e) {
         console.error('Home Render Error:', e);
@@ -41,7 +51,7 @@ export default async function render(container, params) {
         return;
     }
 
-    // --- Render Header ---
+    // --- Render Header (Only for Category View now) ---
     let html = `
         <h1 style="margin-bottom: 0.5rem;">${pageTitle}</h1>
         <p style="color: var(--muted); margin-bottom: 2rem;">${pageDesc}</p>
@@ -64,7 +74,7 @@ export default async function render(container, params) {
         html += `</div>`;
     }
 
-    // --- Render Posts ---
+    // --- Render Posts (For Category View) ---
     if (posts.length > 0) {
         if (mode === 'category') html += `<div class="section-title">Posts</div>`;
 
@@ -88,7 +98,7 @@ export default async function render(container, params) {
             html += `<div style="text-align: center; color: var(--muted); padding: 2rem;">
                         <p>This folder is currently empty.</p>
                       </div>`;
-        } else if (subCategories.length === 0) { // Only show Not Found if no subcategories either
+        } else if (subCategories.length === 0 && mode === 'category') { // Only show Not Found if no subcategories either
             html += `<div style="text-align: center; color: var(--muted); padding: 2rem;">
                         <h3>Post not found.</h3>
                       </div>`;

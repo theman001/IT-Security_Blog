@@ -19,14 +19,8 @@ export function renderMarkdown(markdown) {
         mangle: false
     });
 
-    marked.use({
-        renderer: {
-            link(href, title, text) {
-                if (!href) return text;
-                return `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
-            }
-        }
-    });
+    /* Custom renderer removed to avoid link issues */
+    /* marked.use({ ... }) */
 
     let html = '';
     try {
@@ -64,7 +58,7 @@ export function stripMarkdown(markdown, maxLength = 150) {
                 ? text.slice(0, maxLength) + '...'
                 : text;
         }
-    } catch {}
+    } catch { }
 
     return markdown.slice(0, maxLength);
 }
