@@ -244,6 +244,7 @@ export default async function render(container) {
                 font-size: 12px;
                 border-left: 1px solid rgba(0,0,0,0.2);
                 height: 100%;
+                box-sizing: border-box;
                 display: flex;
                 align-items: center;
                 box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
