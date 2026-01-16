@@ -1,5 +1,6 @@
 // --- Database Client Configuration ---
-const DATABASE_URL = "***REMOVED***";
+// const DATABASE_URL = "***REMOVED***";
+const DATABASE_URL = "postgresql://anonymous@ep-cold-butterfly-ahxb42ii-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
 // Cache Mechanism
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
