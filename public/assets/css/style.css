@@ -386,8 +386,12 @@ footer {
     margin: 1rem 0;
 }
 
-.markdown-body blockquote > :last-child {
+.markdown-body blockquote> :last-child {
     margin-bottom: 0;
+}
+
+.markdown-body blockquote> :first-child {
+    margin-top: 0;
 }
 
 .markdown-body ul,
