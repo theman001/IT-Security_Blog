@@ -1,5 +1,4 @@
 // --- Database Client Configuration ---
-// const DATABASE_URL = "postgresql://neondb_owner:npg_KC8RGJNSLq6j@ep-cold-butterfly-ahxb42ii-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require";
 const DATABASE_URL = "postgresql://app_reader:STRONG_PASSWORD_HERE@ep-cold-butterfly-ahxb42ii-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
 // Cache Mechanism
