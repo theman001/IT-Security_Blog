@@ -1,5 +1,13 @@
 // --- Database Client Configuration ---
 const DATABASE_URL = "postgresql://app_reader:STRONG_PASSWORD_HERE@ep-cold-butterfly-ahxb42ii-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+/* ============================================================
+   Role Name : app_reader
+   Purpose   : Edge / Serverless API 전용 READ-ONLY 계정
+               - 정적 웹 / 블로그 게시글 조회용
+               - INSERT / UPDATE / DELETE 불가
+               - 보안 최소 권한 원칙 적용
+   ============================================================ */
+
 
 // Cache Mechanism
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
