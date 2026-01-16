@@ -383,7 +383,11 @@ footer {
     padding: 0.5em 1em;
     background-color: var(--card-bg);
     border-radius: 0 8px 8px 0;
-    margin: 1.5em 0;
+    margin: 1rem 0;
+}
+
+.markdown-body blockquote > :last-child {
+    margin-bottom: 0;
 }
 
 .markdown-body ul,
