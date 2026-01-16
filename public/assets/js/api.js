@@ -90,18 +90,14 @@ export async function fetchCategories() {
 export async function fetchPostsByCategory(slugInput) {
     if (!slugInput) return { posts: [], subCategories: [] };
 
-    // 1. Get All Categories to find the ID
     const categories = await fetchCategories();
 
-    // Normalize Check: DB path might be 'contents/test', input might be 'test'
-    // Or input 'contents/test' and DB 'contents/test'
-    // We try to match the suffx or exact match
-    let category = categories.find(c => c.path === slugInput || c.slug === slugInput); // Check computed path or raw slug
+    let category = categories.find(
+        c => c.path === slugInput || c.slug === slugInput
+    );
 
     if (!category) {
-        // Try precise split matching if simple match fails
-        const parts = slugInput.split('/');
-        const lastPart = parts[parts.length - 1];
+        const lastPart = slugInput.split('/').pop();
         category = categories.find(c => c.slug === lastPart);
     }
 
@@ -110,29 +106,25 @@ export async function fetchPostsByCategory(slugInput) {
         return { posts: [], subCategories: [] };
     }
 
-    // 2. Fetch Posts
     const postsSql = `
         SELECT 
             r.id, r.title, r.slug, r.created_at, r.content_md,
             c.name as category_name
         FROM reports r
         JOIN categories c ON r.category_id = c.id
-        WHERE c.id = ${category.id} -- Safe enough for internal integer ID
+        WHERE c.id = $1
         ORDER BY r.created_at ASC, r.id ASC
     `;
 
-    const rawPosts = await query(postsSql);
-    const posts = rawPosts.map(mapReport);
-
-    // 3. Subcategories (Direct children)
-    const subCategories = categories.filter(c => c.parent_id === category.id);
+    const rawPosts = await query(postsSql, [category.id]);
 
     return {
         category,
-        posts,
-        subCategories
+        posts: rawPosts.map(mapReport),
+        subCategories: categories.filter(c => c.parent_id === category.id)
     };
 }
+
 
 export async function fetchPosts() {
     // Simplified Query to debug "No posts found"
