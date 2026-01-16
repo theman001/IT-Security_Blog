@@ -6,6 +6,7 @@ const DATABASE_URL = "postgresql://app_reader:STRONG_PASSWORD_HERE@ep-cold-butte
                - 정적 웹 / 블로그 게시글 조회용
                - INSERT / UPDATE / DELETE 불가
                - 보안 최소 권한 원칙 적용
+   Target DB : neondb
    ============================================================ */
 
 
