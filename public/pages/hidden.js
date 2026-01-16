@@ -607,7 +607,7 @@ Feel free to look around, but don't touch the kernel files.
                     <span style="font-size:11px; margin-top:5px;">autoexec.bat</span>
                 </div>
                  <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;" onclick="window.openNotepad()">
-                    <img src="/assets/xp/icons/notepad.png" width="32" height="32">
+                    <img src="/assets/xp/icons/notepad.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">ReadMe.txt</span>
                 </div>
             </div>
