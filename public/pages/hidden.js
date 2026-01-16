@@ -622,15 +622,15 @@ Feel free to look around, but don't touch the kernel files.
         const content = `
             <div style="padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px;">
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;" onclick="window.openDriveC()">
-                    <img src="/assets/xp/icons/disk_drive.png" width="32" height="32">
+                    <img src="/assets/xp/icons/disk_drive.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">Local Disk (C:)</span>
                 </div>
                  <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;" onclick="alert('Please insert a disk')">
-                    <img src="/assets/xp/icons/cd_drive.png" width="32" height="32">
+                    <img src="/assets/xp/icons/cd_drive.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">Audio CD (D:)</span>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;" onclick="alert('Restricted')">
-                    <img src="/assets/xp/icons/control_panel.png" width="32" height="32">
+                    <img src="/assets/xp/icons/control_panel.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">Control Panel</span>
                 </div>
             </div>
