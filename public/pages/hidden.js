@@ -120,6 +120,30 @@ export default async function render(container) {
                 font-weight: bold;
             }
 
+            .maximized {
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+            }
+
+            .resize-handle {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 15px;
+                height: 15px;
+                cursor: nwse-resize;
+                z-index: 101;
+                /* XP-style resize grip visual (diagonal dots) */
+                background-image: radial-gradient(circle at 1px 1px, #666 1px, transparent 0);
+                background-size: 4px 4px;
+                background-position: 2px 2px;
+                opacity: 0.5;
+            }
+
             .window-content {
                 flex: 1;
                 padding: 2px;
@@ -442,6 +466,47 @@ Feel free to look around, but don't touch the kernel files.
         if (win.taskItem) win.taskItem.classList.remove('active');
     };
 
+    window.toggleMaximize = (btn) => {
+        const win = btn.closest('.window');
+        if (win.classList.contains('maximized')) {
+            // Restore
+            win.classList.remove('maximized');
+            win.style.left = win.dataset.prevLeft;
+            win.style.top = win.dataset.prevTop;
+            win.style.width = win.dataset.prevWidth;
+            win.style.height = win.dataset.prevHeight;
+        } else {
+            // Maximize
+            win.dataset.prevLeft = win.style.left;
+            win.dataset.prevTop = win.style.top;
+            win.dataset.prevWidth = win.style.width;
+            win.dataset.prevHeight = win.style.height;
+            win.classList.add('maximized');
+        }
+    };
+
+    window.startResize = (e, handle) => {
+        e.preventDefault();
+        const win = handle.parentElement;
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = parseInt(document.defaultView.getComputedStyle(win).width, 10);
+        const startHeight = parseInt(document.defaultView.getComputedStyle(win).height, 10);
+
+        function doDrag(e) {
+            win.style.width = (startWidth + e.clientX - startX) + 'px';
+            win.style.height = (startHeight + e.clientY - startY) + 'px';
+        }
+
+        function stopDrag() {
+            document.documentElement.removeEventListener('mousemove', doDrag, false);
+            document.documentElement.removeEventListener('mouseup', stopDrag, false);
+        }
+
+        document.documentElement.addEventListener('mousemove', doDrag, false);
+        document.documentElement.addEventListener('mouseup', stopDrag, false);
+    };
+
     window.createWindow = function (title, contentHtml, width = 400, height = 300, appId = null) {
         const desktop = document.getElementById('xp-desktop');
 
@@ -490,13 +555,14 @@ Feel free to look around, but don't touch the kernel files.
                 </div>
                 <div class="title-bar-controls">
                     <div class="control-btn" onclick="window.minimizeWindow(this)">_</div>
-                    <div class="control-btn" onclick="/* Maximize */">□</div>
+                    <div class="control-btn" onclick="window.toggleMaximize(this)">□</div>
                     <div class="control-btn close-btn" onclick="window.closeWindow(this)">X</div>
                 </div>
             </div>
             <div class="window-content">
                 ${contentHtml}
             </div>
+            <div class="resize-handle" onmousedown="window.startResize(event, this)"></div>
         `;
 
         win.onmousedown = () => window.focusWindow(win);
