@@ -896,8 +896,8 @@ pre.line-numbers {
 
 /* File Icon Specifics */
 .file-icon {
-    color: #3b82f6;
-    /* Blue for Light Mode */
+    color: #10b981;
+    /* Emerald Green for Light Mode - Distinct from Folder Blue */
     opacity: 1 !important;
     /* Remove inline opacity */
 }
