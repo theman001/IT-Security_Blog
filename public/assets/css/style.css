@@ -315,8 +315,16 @@ footer {
 
 /* Typography (Markdown Optimized) */
 .markdown-body {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
+    /* Improved Readability */
     line-height: 1.8;
+    /* Relaxed line height */
+    color: var(--text-color);
+    letter-spacing: -0.01em;
+}
+
+.markdown-body p {
+    margin-bottom: 1.6rem;
 }
 
 .markdown-body h1,
@@ -324,10 +332,10 @@ footer {
 .markdown-body h3,
 .markdown-body h4,
 .markdown-body h5 {
-    margin-top: 2em;
+    margin-top: 2.2em;
     margin-bottom: 1rem;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.3;
 }
 
 .markdown-body h1 {
@@ -359,10 +367,9 @@ footer {
     color: var(--h5-color);
 }
 
-.markdown-body strong,
-.markdown-body b {
+.markdown-body strong {
     color: var(--bold-color);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .markdown-body p {
@@ -378,10 +385,12 @@ footer {
 .markdown-body blockquote {
     color: var(--secondary-color);
     border-left: 4px solid var(--primary-color);
-    padding: 1.35em 1em;
+    padding: 1.2em 1.5em;
+    /* Increased padding */
     background-color: var(--card-bg);
-    border-radius: 0 8px 8px 0;
-    margin: 2.7rem 0;
+    border-radius: 8px;
+    /* Rounded blockquote */
+    margin: 2.5rem 0;
 }
 
 .markdown-body blockquote> :last-child {
@@ -404,21 +413,24 @@ footer {
 
 .markdown-body img {
     max-width: 100%;
-    border-radius: 8px;
-    box-shadow: var(--card-shadow);
-    margin: 2rem 0;
+    border-radius: 12px;
+    /* Smooth corners */
+    box-shadow: var(--shadow);
+    margin: 2.5rem 0;
 }
 
 /* Inline Code */
 .markdown-body code:not([class*="language-"]) {
     background-color: var(--code-bg);
-    color: #e01e5a;
-    /* Slack-like code color or match theme */
-    padding: 0.2em 0.4em;
-    border-radius: 4px;
-    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    color: #eb5757;
+    /* More vibrant red/pink */
+    padding: 0.2em 0.5em;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', Consolas, monospace;
     font-size: 0.9em;
 }
+
+
 
 /* Dark Mode Overrides (Controlled by data-theme attribute on <html>) */
 [data-theme="dark"] {
@@ -438,9 +450,35 @@ footer {
     /* Cyan 400 */
 }
 
+/* Post Title Color Toned Down for Dark Mode (List View Only) */
+[data-theme="dark"] .post-card .post-title,
+[data-theme="dark"] .post-card .post-title a {
+    color: #3bb876 !important;
+    /* User requested green #3bb876 */
+}
+
+/* Ensure Detail Page Title uses original highlighted color */
+[data-theme="dark"] .post-header .post-title {
+    color: var(--h1-color) !important;
+    /* Restore Blue/Cyan for detail view */
+}
+
 [data-theme="dark"] .markdown-body code:not([class*="language-"]) {
     color: #ff79c6;
     background-color: #2d3748;
+}
+
+/* Post Title Link Clean Style */
+.post-title a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.post-title a:hover,
+.post-title a:visited,
+.post-title a:active {
+    color: inherit;
+    text-decoration: none;
 }
 
 /* Table Styles */
