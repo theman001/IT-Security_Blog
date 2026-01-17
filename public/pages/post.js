@@ -34,6 +34,25 @@ export default async function render(container, params) {
         ? `<span class="post-category-label">${post.categoryName}</span>`
         : '';
 
+    // Navigation Logic (Prev / List / Next)
+    // 1. List Button: Go to category page
+    const listUrl = (post.categoryName && post.categoryName !== 'Uncategorized')
+        ? `/categories/contents/${post.categoryName}`
+        : '/categories';
+
+    // 2. Prev/Next Buttons using fetched data
+    // Slug already contains 'contents/...' structure from DB
+    const prevLink = post.prev
+        ? `<a href="/posts/${post.prev.slug}" data-link class="nav-btn prev-btn" title="${post.prev.title}">← Prev</a>`
+        : `<span class="nav-btn disabled">← Prev</span>`;
+
+    const nextLink = post.next
+        ? `<a href="/posts/${post.next.slug}" data-link class="nav-btn next-btn" title="${post.next.title}">Next →</a>`
+        : `<span class="nav-btn disabled">Next →</span>`;
+
+    const listLink = `<a href="${listUrl}" data-link class="nav-btn list-btn">List</a>`;
+
+    // Inject styles and content
     container.innerHTML = `
         <article class="post-content">
             <header class="post-header">
@@ -57,8 +76,10 @@ export default async function render(container, params) {
                 ${htmlContent}
             </div>
             
-            <div class="back-link-container">
-                <a href="/" data-link class="back-link">← Back to Home</a>
+            <div class="post-navigation-container">
+                ${prevLink}
+                ${listLink}
+                ${nextLink}
             </div>
         </article>
     `;
