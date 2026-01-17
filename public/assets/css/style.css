@@ -205,12 +205,10 @@ main {
 footer {
     text-align: center;
 
-    padding-top: 0.05rem;
-    /* 상단 여백 줄이기 */
-    padding-bottom: 0.25rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
 
-    line-height: 1.2;
-    /* 글자를 아래쪽으로 당기는 느낌 */
+    line-height: 1.5;
 
     color: var(--secondary-color);
     border-top: 1px solid var(--border-color);
