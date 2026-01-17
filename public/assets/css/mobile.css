@@ -14,13 +14,22 @@
 
     /* --- Layout Adjustments --- */
     body {
-        padding-bottom: 65px;
-        /* Exact space for bottom nav (65px) to remove gap */
+        padding-bottom: 0;
+        /* Reset body padding, move spacing to #app */
     }
 
     #app {
-        /* Prevents content from jumping when nav hidden/shown on scrolling in some browsers */
-        min-height: calc(100vh - 70px);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 65px;
+        /* Ensure footer sits above nav */
+        box-sizing: border-box;
+    }
+
+    footer {
+        margin-top: auto;
+        /* Push footer to bottom */
     }
 
     main {
@@ -176,4 +185,15 @@
     .mobile-nav {
         height: 55px;
     }
+
+    /* Match app padding to smaller nav height */
+    #app {
+        padding-bottom: 55px;
+    }
+}
+
+/* Footer spacing fix */
+footer p {
+    margin: 0;
+    padding: 0;
 }
