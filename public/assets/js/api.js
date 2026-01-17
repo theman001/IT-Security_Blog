@@ -174,12 +174,24 @@ export async function fetchAllPostsSimple() {
 export async function fetchPostBySlug(slug) {
     console.log('[DEBUG] fetchPostBySlug Input:', slug); // Debug Log
     const sql = `
+        WITH PostNeighbors AS (
+            SELECT 
+                id, 
+                LAG(slug) OVER (PARTITION BY category_id ORDER BY created_at ASC, id ASC) as prev_slug,
+                LAG(title) OVER (PARTITION BY category_id ORDER BY created_at ASC, id ASC) as prev_title,
+                LEAD(slug) OVER (PARTITION BY category_id ORDER BY created_at ASC, id ASC) as next_slug,
+                LEAD(title) OVER (PARTITION BY category_id ORDER BY created_at ASC, id ASC) as next_title
+            FROM reports
+        )
         SELECT 
             r.id, r.title, r.slug, r.created_at, r.content_md, 
             r.category_id, r.author_type, r.tags,
-            c.name as category_name
+            c.name as category_name,
+            pn.prev_slug, pn.prev_title,
+            pn.next_slug, pn.next_title
         FROM reports r
         LEFT JOIN categories c ON r.category_id = c.id
+        LEFT JOIN PostNeighbors pn ON r.id = pn.id
         WHERE r.slug = $1
     `;
 
@@ -222,7 +234,9 @@ function mapReport(r) {
         content: r.content_md, // Correct Column
         categoryName: r.category_name || 'Uncategorized', // Fallback
         authorType: r.author_type || 'Unknown',
-        tags: tags
+        tags: tags,
+        prev: r.prev_slug ? { slug: r.prev_slug, title: r.prev_title } : null,
+        next: r.next_slug ? { slug: r.next_slug, title: r.next_title } : null
     };
 }
 

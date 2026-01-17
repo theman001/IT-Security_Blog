@@ -115,6 +115,21 @@
     .mobile-nav-item.active,
     .mobile-nav-item:hover {
         color: var(--primary-color);
+        position: relative;
+    }
+
+    /* Active Indicator (Top Line) */
+    .mobile-nav-item.active::after {
+        content: "";
+        position: absolute;
+        top: -12px;
+        /* Position at top of nav bar */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 3px;
+        background-color: var(--primary-color);
+        border-radius: 0 0 4px 4px;
     }
 
     /* Dark Mode Specifics for Mobile Nav */
@@ -170,9 +185,27 @@
         border-radius: 0 4px 4px 0 !important;
     }
 
-    /* Back link floating style or hidden (since bottom nav exists) */
+    /* Back link floating style or hidden (since bottom nav exists) 
+       UPDATE: Unhidden for better UX as requested */
     .back-link-container {
-        display: none;
+        display: block;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .back-link {
+        width: 100%;
+        display: block;
+        text-align: center;
+        padding: 0.8rem;
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-color);
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
 }
 
