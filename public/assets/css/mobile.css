@@ -46,12 +46,9 @@
 
     /* --- Compact Header --- */
     header {
-        position: sticky;
-        top: 0;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        background-color: var(--header-bg) !important;
-        opacity: 0.95;
+        position: static;
+        /* Scroll with content */
+        background-color: var(--header-bg);
         border-bottom: 1px solid var(--border-color);
     }
 
