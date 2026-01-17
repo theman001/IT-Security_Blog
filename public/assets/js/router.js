@@ -68,6 +68,9 @@ export const router = async () => {
 
         await module.default(container, params);
 
+        // Update active highlights
+        updateActiveLinks();
+
         // Prism syntax highlight (manual)
         if (window.Prism) {
             Prism.highlightAll();
@@ -77,6 +80,25 @@ export const router = async () => {
         console.error('Render Error:', e);
         container.innerHTML = '<h2>Error loading page</h2>';
     }
+};
+
+const updateActiveLinks = () => {
+    const currentPath = location.pathname;
+    const links = document.querySelectorAll('[data-link]');
+
+    links.forEach(link => {
+        const href = link.getAttribute('href');
+
+        // Reset
+        link.classList.remove('active');
+
+        // Logic: Home is strict, others are prefix or match
+        if (href === '/' && currentPath === '/') {
+            link.classList.add('active');
+        } else if (href !== '/' && currentPath.startsWith(href)) {
+            link.classList.add('active');
+        }
+    });
 };
 
 // Handle Browser Back/Forward
