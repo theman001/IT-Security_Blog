@@ -68,7 +68,9 @@ export default async function render(container, params) {
                     <a href="/categories/${sub.slug}" data-link style="text-decoration: none; color: var(--text-color); font-weight: 600; display: flex; align-items: center;">
                         <span style="margin-right: 8px;">📂</span> ${sub.name}
                     </a>
-                    <span style="background: var(--code-bg); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; color: var(--muted);">${sub.post_count || 0}</span>
+                    <span style="background: var(--code-bg); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; color: var(--muted);">
+                        ${(parseInt(sub.post_count || 0) + parseInt(sub.sub_category_count || 0))}
+                    </span>
                 </div>`;
         });
         html += `</div>`;

@@ -88,7 +88,8 @@ export async function fetchCategories() {
         )
         SELECT 
             c.*,
-            (SELECT COUNT(*) FROM reports r WHERE r.category_id = c.id) as post_count
+            (SELECT COUNT(*) FROM reports r WHERE r.category_id = c.id) as post_count,
+            (SELECT COUNT(*) FROM categories child WHERE child.parent_id = c.id) as sub_category_count
         FROM CategoryTree c
         ORDER BY path;
     `;
