@@ -67,8 +67,8 @@ footer {
 }
 
 .markdown-body blockquote {
-    color: #d1d5db;
-    /* Lighter gray for readability in dark mode */
+    color: #e9d5ff;
+    /* Soft Purple - Distinct from normal text */
 }
 
 .markdown-body h1,
