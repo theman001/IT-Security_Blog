@@ -104,6 +104,8 @@ const updateActiveLinks = () => {
             link.classList.add('active');
         } else if (href !== '/' && currentPath.startsWith(href)) {
             link.classList.add('active');
+        } else if (href === '/categories' && currentPath.startsWith('/posts/')) {
+            link.classList.add('active');
         }
     });
 };
