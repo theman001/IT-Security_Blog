@@ -154,6 +154,21 @@ export async function fetchPosts() {
     }
 }
 
+export async function fetchAllPostsSimple() {
+    const sql = `
+        SELECT id, title, slug, category_id, created_at
+        FROM reports
+        ORDER BY title ASC
+    `;
+    try {
+        const result = await query(sql);
+        return result;
+    } catch (e) {
+        console.error('FetchAllPostsSimple Error:', e);
+        return [];
+    }
+}
+
 // Added Missing Function
 export async function fetchPostBySlug(slug) {
     console.log('[DEBUG] fetchPostBySlug Input:', slug); // Debug Log

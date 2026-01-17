@@ -231,114 +231,7 @@ footer {
     box-shadow: var(--card-shadow);
 }
 
-.tree-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    position: relative;
-}
-
-/* Indentation Guide Line */
-.tree-item .tree-list {
-    padding-left: 1.5rem;
-    margin-left: 0.75rem;
-    border-left: 1px solid var(--border-color);
-}
-
-.tree-item {
-    margin: 2px 0;
-}
-
-.tree-content {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: var(--text-color);
-}
-
-.tree-content:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    /* Subtle hover in dark mode */
-}
-
-/* Link Style */
-.tree-label {
-    flex-grow: 1;
-    color: inherit;
-    text-decoration: none;
-    font-weight: 500;
-    margin-left: 8px;
-}
-
-.tree-label:hover {
-    text-decoration: underline;
-}
-
-/* Icons and Toggles */
-.tree-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    margin-right: 4px;
-    border-radius: 4px;
-    transition: transform 0.2s ease;
-    color: var(--secondary-color);
-    /* Assuming --muted is similar to --secondary-color */
-}
-
-.tree-toggle:hover {
-    background-color: rgba(128, 128, 128, 0.2);
-    color: var(--text-color);
-}
-
-.tree-toggle.hidden {
-    visibility: hidden;
-}
-
-.tree-icon {
-    display: flex;
-    align-items: center;
-    color: var(--primary-color);
-    /* Folder color */
-}
-
-/* Badge */
-.tree-badge {
-    font-size: 0.75rem;
-    background-color: var(--bg-color);
-    border: 1px solid var(--border-color);
-    color: var(--secondary-color);
-    /* Assuming --muted is similar to --secondary-color */
-    padding: 2px 8px;
-    border-radius: 12px;
-    margin-left: auto;
-}
-
-/* Expand/Collapse Logic */
-.tree-item>.tree-list {
-    display: none;
-    /* Collapsed by default */
-}
-
-.tree-item.expanded>.tree-list {
-    display: block;
-    /* Expanded */
-}
-
-/* Rotate Chevron when Expanded */
-.tree-item.expanded>.tree-content .chevron-icon {
-    transform: rotate(90deg);
-}
-
-.chevron-icon {
-    transition: transform 0.2s ease;
-}
-
+/* Old Tree Styles Removed */
 .post-list {
     display: grid;
     gap: 2rem;
@@ -627,23 +520,33 @@ header {
 }
 
 /* Cache Reset Button in Footer */
-.reset-cache-btn {
-    background: none;
-    border: none;
+/* Button Styles */
+.btn-icon-only {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
     color: var(--secondary-color);
-    font-size: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
     cursor: pointer;
-    text-decoration: underline;
-    opacity: 0.6;
-    margin-top: 0rem;
-    padding: 0.2rem;
-    transition: opacity 0.2s;
+    transition: all 0.2s ease;
 }
 
-.reset-cache-btn:hover {
-    opacity: 1;
-    color: var(--text-color);
+.btn-icon-only:hover {
+    background: var(--card-bg);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: rotate(180deg);
 }
+
+.btn-icon-only:active {
+    transform: rotate(180deg) scale(0.95);
+}
+
+
 
 /* Utility */
 /* Hidden Link in Footer */
@@ -883,6 +786,112 @@ pre.line-numbers {
     padding-left: 3.2em !important;
 }
 
+
 .line-numbers-rows>span {
     line-height: 1.45 !important;
+}
+
+/* --- Category Tree Styles --- */
+.tree-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tree-item {
+    margin-bottom: 0;
+}
+
+.tree-content {
+    display: flex;
+    align-items: center;
+    padding: 0.4rem 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.tree-content:hover {
+    background-color: var(--card-bg);
+}
+
+.tree-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+    color: var(--muted);
+    transition: transform 0.2s ease;
+}
+
+.tree-toggle.hidden {
+    visibility: hidden;
+}
+
+/* Rotate Chevron when Expanded */
+.tree-item.expanded>.tree-content .tree-toggle svg {
+    transform: rotate(90deg);
+}
+
+.tree-icon {
+    display: inline-flex;
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+
+.tree-label {
+    flex: 1;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.tree-badge {
+    background-color: var(--bg-color);
+    color: var(--muted);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+/* Hide children by default */
+.tree-children {
+    display: none;
+    /* Indentation Logic:
+       Align with Folder Icon Center:
+       Padding(8) + Toggle(24) + Margin(4) + HalfIcon(9) - Border(1) ≈ 43px
+    */
+    margin-left: 43px;
+    border-left: 1px solid var(--border-color);
+
+    /* Content indentation from the line */
+    /* Reduced to 0 to minimize gap since we restored the toggle spacer for alignment */
+    padding-left: 0;
+    margin-top: 0;
+}
+
+/* Show children when expanded */
+.tree-item.expanded>.tree-children {
+    display: block;
+}
+
+/* Post Item Specifics */
+.tree-post-item .tree-label {
+    font-weight: 400;
+    font-size: 0.95rem;
+}
+
+.tree-post-item .tree-icon {
+    color: var(--secondary-color);
+}
+
+/* Maintain alignment with folders by keeping the toggle space, but invisible */
+.tree-post-item .tree-toggle {
+    display: inline-flex;
+    /* Restore display */
+    visibility: hidden;
+    /* Hide visually but keep space */
 }

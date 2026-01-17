@@ -16,6 +16,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/themes/light.css" id="theme-style">
+    <link rel="stylesheet" href="/assets/css/mobile.css">
 
     <!-- Libraries (CDN) -->
     <script>
@@ -74,23 +75,49 @@
         <footer>
             <p><a href="/hidden" class="footer-copyright-link" data-link>&copy; 2026 IT Security Blog. All rights
                     reserved.</a></p>
-            <button id="reset-cache-btn" class="reset-cache-btn" style="float: right;">↻ Reset DB Cache</button>
         </footer>
+        <nav class="mobile-nav">
+            <a href="/" data-link class="mobile-nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Home</span>
+            </a>
+            <a href="/categories" data-link class="mobile-nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Categories</span>
+            </a>
+            <a href="/architecture" data-link class="mobile-nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                <span>System</span>
+            </a>
+            <a href="/about" data-link class="mobile-nav-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>About</span>
+            </a>
+        </nav>
     </div>
 
     <!-- Scripts -->
     <script type="module" src="/assets/js/router.js"></script>
     <script type="module" src="/assets/js/app.js"></script>
-    <script type="module">
-        import { resetCache } from '/assets/js/api.js';
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('reset-cache-btn');
-            if (btn) {
-                btn.addEventListener('click', resetCache);
-            }
-        });
-    </script>
 </body>
 
 </html>
