@@ -68,6 +68,13 @@ export const router = async () => {
 
         await module.default(container, params);
 
+        // Toggle hidden-route class for mobile nav visibility
+        if (location.pathname === '/hidden') {
+            document.body.classList.add('hidden-route');
+        } else {
+            document.body.classList.remove('hidden-route');
+        }
+
         // Update active highlights
         updateActiveLinks();
 
