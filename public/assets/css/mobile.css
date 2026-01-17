@@ -18,6 +18,14 @@
         /* Reset body padding, move spacing to #app */
     }
 
+    body.hidden-route .mobile-nav {
+        display: none !important;
+    }
+
+    body.hidden-route #app {
+        padding-bottom: 0 !important;
+    }
+
     #app {
         min-height: 100vh;
         display: flex;
