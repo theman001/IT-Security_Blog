@@ -14,8 +14,8 @@
 
     /* --- Layout Adjustments --- */
     body {
-        padding-bottom: 100px;
-        /* Space for bottom nav */
+        padding-bottom: 65px;
+        /* Exact space for bottom nav (65px) to remove gap */
     }
 
     #app {
