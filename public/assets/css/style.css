@@ -893,3 +893,18 @@ pre.line-numbers {
     visibility: hidden;
     /* Hide visually but keep space */
 }
+
+/* File Icon Specifics */
+.file-icon {
+    color: #3b82f6;
+    /* Blue for Light Mode */
+    opacity: 1 !important;
+    /* Remove inline opacity */
+}
+
+[data-theme="dark"] .file-icon {
+    color: inherit;
+    /* Reset for Dark Mode */
+    opacity: 0.7 !important;
+    /* Restore opacity */
+}
