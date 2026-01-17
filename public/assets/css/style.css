@@ -226,7 +226,8 @@ footer {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: none;
+    /* Flat */
 }
 
 /* Old Tree Styles Removed */
@@ -240,13 +241,17 @@ footer {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 1.5rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: var(--card-shadow);
+    transition: border-color 0.2s, transform 0.2s;
+    box-shadow: none;
+    /* Flat */
 }
 
 .post-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+    /* Highlight border instead of shadow */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    /* Slight lift */
 }
 
 .theme-toggle {
