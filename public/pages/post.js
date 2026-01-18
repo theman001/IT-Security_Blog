@@ -65,6 +65,8 @@ export default async function render(container, params) {
                     ${post.title}
                 </h1>
                 
+                ${post.description ? `<p class="post-description">${post.description}</p>` : ''}
+                
                 ${tagsHtml}
 
                 <div class="post-meta-info">

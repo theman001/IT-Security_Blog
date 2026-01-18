@@ -82,7 +82,8 @@ export default async function render(container, params) {
 
         html += `<div class="post-list">`;
         posts.forEach(post => {
-            const excerpt = stripMarkdown(post.content || '', 180);
+            // Use description if available, otherwise fallback to stripped content
+            const excerpt = post.description || stripMarkdown(post.content || '', 180);
             html += `
                 <article class="post-card">
                     <div class="post-meta" style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">${post.date}</div>
