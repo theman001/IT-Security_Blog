@@ -91,3 +91,47 @@ footer {
     background: transparent !important;
     border-bottom-color: var(--border-color);
 }
+
+/* --- Consolidating Dark Mode Styles moved from style.css --- */
+
+/* Heading Colors (Dark Mode Override) */
+:root[data-theme="dark"] {
+    --h1-color: #60a5fa;
+    /* Blue 400 */
+    --h2-color: #2dd4bf;
+    /* Teal 400 */
+    --h3-color: #fbbf24;
+    /* Amber 400 */
+    --h4-color: #fb7185;
+    /* Rose 400 */
+    --h5-color: #a78bfa;
+    /* Violet 400 */
+    --bold-color: #22d3ee;
+    /* Cyan 400 */
+}
+
+/* Post Title Color (List View) */
+[data-theme="dark"] .post-card .post-title,
+[data-theme="dark"] .post-card .post-title a {
+    color: #3bb876 !important;
+    /* User requested green */
+}
+
+/* Detail Page Title (Restore original) */
+[data-theme="dark"] .post-header .post-title {
+    color: var(--h1-color) !important;
+}
+
+/* Inline Code (Dark Mode) */
+[data-theme="dark"] .markdown-body code:not(pre code) {
+    background-color: #1e293b;
+    color: #ff79c6;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] .markdown-body code:not([class*="language-"]) {
+    background-color: #1e293b;
+    /* Unified background */
+    color: #ff79c6;
+}
