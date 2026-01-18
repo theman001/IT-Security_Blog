@@ -1,274 +1,110 @@
-# API Contract – IT-Security_Blog
+# Data Model Contract – IT-Security_Blog
 
 ## 1. 목적 (Purpose)
-
-이 문서는 **IT-Security_Blog 프로젝트의 API 계약서**이다.
-
-- 프론트엔드는 이 문서에 정의된 **응답 형식만 신뢰**한다.
-- API 구현체(Cloudflare Workers, Vercel, Fly.io 등)는  
-  **이 계약을 반드시 만족해야 한다.**
-- DB(Neon PostgreSQL)는 이 계약의 내부 구현 사항일 뿐,  
-  프론트엔드와 직접적인 연관이 없다.
-
-> ❗ 이 문서는 배포 플랫폼과 무관하며,  
-> 프론트 재빌드 없는 콘텐츠 반영을 전제로 한다.
+이 문서는 **IT-Security_Blog** 프론트엔드가 사용하는 **데이터 모델(Data Model)과 스키마(Schema)** 를 정의한다.
+REST API가 아닌 **Direct Serverless SQL** 방식을 사용하므로, API 엔드포인트 대신 **SQL 쿼리 결과(JSON Object)** 와 **DB 테이블 스키마**가 프론트엔드와 데이터 계층 간의 계약(Contract) 역할을 한다.
 
 ---
 
-## 2. 공통 규칙 (Global Rules)
+## 2. 데이터 모델 (Domain Objects)
 
-### 2.1 Base URL
+프론트엔드(`api.js`)가 반환하는 핵심 도메인 객체의 형태이다.
 
-```
-/v1
-```
+### 2.1 Post (게시글)
 
-모든 API는 `/v1` prefix를 가진다.
+게시글 목록 또는 상세 조회 시 반환되는 객체.
 
----
-
-### 2.2 Content-Type
-
-```
-Content-Type: application/json; charset=utf-8
-```
-
----
-
-### 2.3 시간 포맷
-
-모든 시간 값은 **ISO 8601 (UTC)** 형식을 사용한다.
-
-```
-2026-01-12T03:57:09Z
-```
-
----
-
-### 2.4 공통 응답 래퍼
-
-단순성을 위해 **기본적으로 래핑하지 않는다**.
-
-```
+```json
 {
-  "data": ...
-}
-```
-
-❌ 사용하지 않음  
-👉 API 응답은 **최상위 JSON이 실제 데이터**
-
----
-
-## 3. Post (게시글) 모델
-
-### 3.1 Post Object
-
-```
-{
-  "id": 1,
-  "slug": "contents/TEST/test",
-  "title": "정적 웹 호스팅 테스트용 글",
-  "summary": "AI가 생성한 테스트용 보고서",
-  "content_md": "# 개요\n이 문서는 ...",
-  "category": {
-    "id": 10,
-    "name": "TEST",
-    "slug": "TEST"
-  },
-  "tags": ["test", "ai"],
+  "id": 101,
+  "title": "KakaoTalk Analysis Part 1",
+  "slug": "contents/Security/Reverse/kakao-analysis",
+  "content_md": "# Introduction...",
+  "created_at": "2026-01-12T03:57:09.987Z",
+  "tags": ["reversing", "android"],
   "author_type": "ai",
-  "created_at": "2026-01-12T03:57:09Z",
-  "updated_at": "2026-01-12T03:57:09Z"
+  "category_id": 10,
+  "category_name": "Security"
 }
 ```
-
----
-
-### 3.2 필드 설명
 
 | 필드 | 타입 | 설명 |
 |---|---|---|
-| id | number | 내부 식별자 |
-| slug | string | URL 식별자 |
-| title | string | 게시글 제목 |
-| summary | string | 목록용 요약 |
-| content_md | string | Markdown 원문 |
-| category | object | 1-depth 카테고리 |
-| tags | string[] | 태그 |
-| author_type | string | ai / human |
-| created_at | string | 생성 시각 |
-| updated_at | string | 수정 시각 |
+| `id` | Integer | 게시글 고유 ID (PK) |
+| `title` | String | 게시글 제목 |
+| `slug` | String | URL Path 및 고유 식별자 |
+| `content_md` | String | Markdown 원본 (목록 조회시 일부만 가져오거나 제외될 수 있음) |
+| `created_at` | DateTime (ISO) | 작성 일시 |
+| `tags` | Array\<String\> | 태그 목록 |
+| `author_type` | String | 작성자 유형 (`ai`, `human`) |
+| `category_id` | Integer | 카테고리 ID |
+| `category_name`| String | (JOIN 결과) 카테고리 이름 |
+| `previous_post`| Object (Optional) | 이전 글 정보 (상세 조회 시) |
+| `next_post` | Object (Optional) | 다음 글 정보 (상세 조회 시) |
 
----
+### 2.2 Category (카테고리)
 
-## 4. API 목록
+카테고리 트리 구조를 구성하는 객체.
 
-### 4.1 게시글 목록 조회
-
-```
-GET /v1/posts
-```
-
-#### Query Parameters
-
-| 이름 | 타입 | 설명 |
-|---|---|---|
-| category | string | 카테고리 slug |
-| tag | string | 태그 |
-| limit | number | 기본 20 |
-| offset | number | 기본 0 |
-| v | number | 캐시 무효화 버전 |
-
-#### Response 200
-
-```
-[
-  {
-    "id": 1,
-    "slug": "contents/TEST/test",
-    "title": "정적 웹 호스팅 테스트용 글",
-    "summary": "AI가 생성한 테스트용 보고서",
-    "category": {
-      "id": 10,
-      "name": "TEST",
-      "slug": "TEST"
-    },
-    "tags": ["test"],
-    "created_at": "2026-01-12T03:57:09Z",
-    "updated_at": "2026-01-12T03:57:09Z"
-  }
-]
-```
-
-📌 목록 API에서는 `content_md`를 포함하지 않는다.
-
----
-
-### 4.2 게시글 상세 조회
-
-```
-GET /v1/posts/{slug}
-```
-
-#### Response 200
-
-```
+```json
 {
-  "id": 1,
-  "slug": "contents/TEST/test",
-  "title": "정적 웹 호스팅 테스트용 글",
-  "summary": "AI가 생성한 테스트용 보고서",
-  "content_md": "# 개요\n이 문서는 ...",
-  "category": {
-    "id": 10,
-    "name": "TEST",
-    "slug": "TEST"
-  },
-  "tags": ["test"],
-  "author_type": "ai",
-  "created_at": "2026-01-12T03:57:09Z",
-  "updated_at": "2026-01-12T03:57:09Z"
+  "id": 10,
+  "name": "Security",
+  "slug": "Security",
+  "parent_id": null,
+  "path": "Security",
+  "level": 1,
+  "post_count": 5,
+  "sub_category_count": 2,
+  "children": []
 }
 ```
 
----
-
-### 4.3 카테고리 목록
-
-```
-GET /v1/categories
-```
-
-```
-[
-  {
-    "id": 10,
-    "name": "TEST",
-    "slug": "TEST",
-    "depth": 1,
-    "parent_id": null
-  }
-]
-```
-
----
-
-### 4.4 태그 목록
-
-```
-GET /v1/tags
-```
-
-```
-[
-  {
-    "name": "test",
-    "count": 5
-  }
-]
-```
-
----
-
-## 5. 캐시 계약 (Cache Contract)
-
-### 5.1 Cache-Control 정책
-
-| API | Cache-Control |
-|---|---|
-| /v1/posts | public, max-age=60 |
-| /v1/posts/{slug} | public, max-age=300 |
-| /v1/categories | public, max-age=3600 |
-| /v1/tags | public, max-age=3600 |
-
----
-
-### 5.2 캐시 무효화 전략
-
-- 모든 읽기 API는 `v` 파라미터를 허용
-- 콘텐츠 변경 시 `v` 증가
-- URL 변경으로 캐시 자동 무효화
-- 명시적 purge API는 사용하지 않음
-
----
-
-## 6. 에러 응답 규격
-
-### 6.1 공통 에러 형식
-
-```
-{
-  "error": {
-    "code": "POST_NOT_FOUND",
-    "message": "Post not found"
-  }
-}
-```
-
----
-
-### 6.2 에러 코드
-
-| HTTP | code | 설명 |
+| 필드 | 타입 | 설명 |
 |---|---|---|
-| 400 | BAD_REQUEST | 잘못된 요청 |
-| 404 | POST_NOT_FOUND | 게시글 없음 |
-| 404 | CATEGORY_NOT_FOUND | 카테고리 없음 |
-| 500 | INTERNAL_ERROR | 서버 오류 |
+| `id` | Integer | 카테고리 ID (PK) |
+| `name` | String | 표시 이름 |
+| `slug` | String | URL Segment |
+| `parent_id` | Integer | 상위 카테고리 ID (Root는 null) |
+| `path` | String | 전체 계층 경로 (예: `Security/Reversing`) |
+| `level` | Integer | 계층 깊이 (1-based) |
+| `children` | Array\<Category\> | 하위 카테고리 목록 (재귀적 구조) |
+| `post_count` | Integer | 해당 카테고리의 게시글 수 |
 
 ---
 
-## 7. Out of Scope
+## 3. Database Schema (Expectations)
 
-- 인증 / 권한
-- 쓰기 API
-- 관리자 API
-- DB 스키마
+프론트엔드 SQL이 정상 작동하기 위해 필요한 Neon DB 테이블 구조.
+
+### 3.1 `reports` Table (게시글)
+
+| Column | Type | Nullable | Description |
+|---|---|---|---|
+| `id` | SERIAL | NO | Primary Key |
+| `title` | VARCHAR | NO | 제목 |
+| `slug` | VARCHAR | NO | URL 식별자 (Unique) |
+| `content_md` | TEXT | YES | Markdown 본문 |
+| `created_at` | TIMESTAMP | NO | 생성일 (Default: NOW()) |
+| `category_id` | INTEGER | YES | FK -> `categories.id` |
+| `tags` | JSONB / TEXT[] | YES | 태그 배열 |
+| `author_type` | VARCHAR | YES | 'ai' or 'human' |
+
+### 3.2 `categories` Table (카테고리)
+
+| Column | Type | Nullable | Description |
+|---|---|---|---|
+| `id` | SERIAL | NO | Primary Key |
+| `name` | VARCHAR | NO | 카테고리명 |
+| `slug` | VARCHAR | NO | URL Segment |
+| `parent_id` | INTEGER | YES | FK -> `categories.id` (Self Reference) |
 
 ---
 
-## 8. 변경 정책
+## 4. Query Interface (Frontend Usage)
 
-- 본 문서 변경은 Breaking Change
-- 변경 시 `/v2`로 버전 분기
+`public/assets/js/api.js` 참조.
+
+- **`fetchCategories()`**: Recursive CTE를 사용하여 트리 구조 조회.
+- **`fetchPosts(category, tag, page)`**: 조건부 `WHERE` 절 동적 생성.
+- **`fetchPostBySlug(slug)`**: 단일 게시글 및 인접 게시글(Lead/Lag) 조회.

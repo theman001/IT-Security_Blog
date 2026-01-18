@@ -1,32 +1,8 @@
 /* Global Styles */
 :root {
-    /* Colors */
-    --bg-color: #ffffff;
-    --text-color: #1f2937;
-    --primary-color: #3b82f6;
-    --secondary-color: #6b7280;
-    --link-color: #2563eb;
-    --border-color: #e5e7eb;
-    --card-bg: #f9fafb;
-    --code-bg: #f3f4f6;
-    --bg-gradient: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
-    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* Colors moved to light.css (default theme) */
 
-    /* Heading Colors (Light Mode Default) */
-    --h1-color: #1a56db;
-    /* Deep Blue */
-    --h2-color: #0e7490;
-    /* Cyan/Teal */
-    --h3-color: #b45309;
-    /* Amber/Brown */
-    --h4-color: #be185d;
-    /* Pink/Rose */
-    --h5-color: #6d28d9;
-    /* Violet/Purple */
-
-    /* Bold Text Color (Light Mode) */
-    --bold-color: #4338ca;
-    /* Indigo 700 */
+    /* Fonts */
 
     /* Fonts */
     --font-heading: 'Montserrat', sans-serif;
@@ -432,41 +408,9 @@ footer {
 
 
 
-/* Dark Mode Overrides (Controlled by data-theme attribute on <html>) */
-[data-theme="dark"] {
-    --h1-color: #60a5fa;
-    /* Blue 400 */
-    --h2-color: #2dd4bf;
-    /* Teal 400 */
-    --h3-color: #fbbf24;
-    /* Amber 400 */
-    --h4-color: #fb7185;
-    /* Rose 400 */
-    --h5-color: #a78bfa;
-    /* Violet 400 */
+/* Dark Mode Overrides moved to dark.css */
+/* Post Title Color Overrides moved to dark.css */
 
-    /* Bold Text Color (Dark Mode) */
-    --bold-color: #22d3ee;
-    /* Cyan 400 */
-}
-
-/* Post Title Color Toned Down for Dark Mode (List View Only) */
-[data-theme="dark"] .post-card .post-title,
-[data-theme="dark"] .post-card .post-title a {
-    color: #3bb876 !important;
-    /* User requested green #3bb876 */
-}
-
-/* Ensure Detail Page Title uses original highlighted color */
-[data-theme="dark"] .post-header .post-title {
-    color: var(--h1-color) !important;
-    /* Restore Blue/Cyan for detail view */
-}
-
-[data-theme="dark"] .markdown-body code:not([class*="language-"]) {
-    color: #ff79c6;
-    background-color: #2d3748;
-}
 
 /* Post Title Link Clean Style */
 .post-title a {
@@ -510,7 +454,7 @@ footer {
     /* No background to blend in */
 }
 
-/* Old .post-category-label removed */
+
 
 .post-title {
     margin: 0 0 0.5rem 0;
@@ -561,7 +505,7 @@ header {
 
 /* ... (omitted) ... */
 
-/* Removed Duplicate Metadata Styles (Consolidated above) */
+
 
 /* Responsive Mobile Layout */
 @media (max-width: 768px) {
@@ -784,11 +728,7 @@ pre.language-bash code {
     font-size: 0.9em;
 }
 
-/* Dark mode inline code */
-[data-theme="dark"] .markdown-body code:not(pre code) {
-    background-color: #1e293b;
-    color: #ff79c6;
-}
+
 
 /* =========================================================
    Basic Code Block (``` without language) — Refined

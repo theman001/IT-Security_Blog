@@ -1,12 +1,38 @@
 :root {
-    --bg: #ffffff;
-    --text: #1a202c;
-    --muted: #718096;
-    --border: #e2e8f0;
+    /* Colors - Synchronized with style.css usage */
+    --bg-color: #ffffff;
+    --text-color: #1f2937;
+    --primary-color: #3b82f6;
+    --secondary-color: #6b7280;
+    --link-color: #2563eb;
+    --border-color: #e5e7eb;
+    --card-bg: #f9fafb;
+    --code-bg: #f3f4f6;
 
-    --link: #3182ce;
-    --link-hover: #2c5282;
+    /* Gradients & Shadows */
+    --bg-gradient: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-    --card-bg: #ffffff;
-    --code-bg: #f7fafc;
+    /* Heading Colors (Light Mode Default) */
+    --h1-color: #1a56db;
+    /* Deep Blue */
+    --h2-color: #0e7490;
+    /* Cyan/Teal */
+    --h3-color: #b45309;
+    /* Amber/Brown */
+    --h4-color: #be185d;
+    /* Pink/Rose */
+    --h5-color: #6d28d9;
+    /* Violet/Purple */
+
+    /* Bold Text Color (Light Mode) */
+    --bold-color: #4338ca;
+    /* Indigo 700 */
+
+    /* Legacy/Unused map (kept for safety if used elsewhere or generic matching) */
+    --bg: var(--bg-color);
+    --text: var(--text-color);
+    --muted: var(--secondary-color);
+    --border: var(--border-color);
+    --link: var(--link-color);
 }
