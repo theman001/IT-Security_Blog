@@ -468,6 +468,14 @@ footer {
     font-size: 0.95rem;
 }
 
+.post-description {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
 .back-link-container {
     margin-top: 4rem;
     padding-top: 2rem;

@@ -117,7 +117,7 @@ export async function fetchPostsByCategory(slugInput) {
 
     const postsSql = `
         SELECT 
-            r.id, r.title, r.slug, r.created_at, r.content_md,
+            r.id, r.title, r.slug, r.created_at, r.content_md, r.description,
             c.name as category_name
         FROM reports r
         JOIN categories c ON r.category_id = c.id
@@ -139,7 +139,7 @@ export async function fetchPosts() {
     // Simplified Query to debug "No posts found"
     // Using correct column name 'content_md'
     const sql = `
-        SELECT r.id, r.title, r.slug, r.created_at, r.content_md
+        SELECT r.id, r.title, r.slug, r.created_at, r.content_md, r.description
         FROM reports r
         ORDER BY r.created_at DESC
         LIMIT 20
@@ -157,7 +157,7 @@ export async function fetchPosts() {
 
 export async function fetchAllPostsSimple() {
     const sql = `
-        SELECT id, title, slug, category_id, created_at
+        SELECT id, title, slug, category_id, created_at, description
         FROM reports
         ORDER BY title ASC
     `;
@@ -184,7 +184,7 @@ export async function fetchPostBySlug(slug) {
             FROM reports
         )
         SELECT 
-            r.id, r.title, r.slug, r.created_at, r.content_md, 
+            r.id, r.title, r.slug, r.created_at, r.content_md, r.description,
             r.category_id, r.author_type, r.tags,
             c.name as category_name,
             pn.prev_slug, pn.prev_title,
@@ -232,6 +232,7 @@ function mapReport(r) {
         rawDate: r.created_at,
         date: dateStr,
         content: r.content_md, // Correct Column
+        description: r.description || '', // New Description Column
         categoryName: r.category_name || 'Uncategorized', // Fallback
         authorType: r.author_type || 'Unknown',
         tags: tags,
