@@ -139,6 +139,15 @@
         box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
     }
 
+    /* Scroll-aware Navigation Transition */
+    .mobile-nav {
+        transition: transform 0.3s ease-in-out;
+    }
+
+    body.nav-hidden .mobile-nav {
+        transform: translateY(100%);
+    }
+
     /* --- Post Card Optimization --- */
     .post-card {
         margin: 0 0 1.2rem 0 !important;
