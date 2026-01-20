@@ -113,8 +113,7 @@ footer {
 /* Post Title Color (List View) */
 [data-theme="dark"] .post-card .post-title,
 [data-theme="dark"] .post-card .post-title a {
-    color: #3bb876 !important;
-    /* User requested green */
+    color: #ffffff !important;
 }
 
 /* Detail Page Title (Restore original) */
