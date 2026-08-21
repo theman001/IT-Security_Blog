@@ -35,8 +35,23 @@ export const navigateTo = url => {
     router();
 };
 
+// Some browsers (this Chromium build included) fire `popstate` even for a
+// same-document in-page anchor click (e.g. a TOC link), not just real
+// back/forward navigation — contrary to what the spec implies. Without this
+// guard, that popstate re-ran the whole router, which re-rendered the page
+// and reset scroll to 0 (post.js does that on purpose for real navigations),
+// silently cancelling the native "scroll to #fragment" the click just asked
+// for. Only re-render when the app-relative path actually changed.
+let lastRenderedPath = null;
+
+const handlePopstate = () => {
+    if (toAppPath(location.pathname) === lastRenderedPath) return; // hash-only change — let the browser's native anchor scroll happen
+    router();
+};
+
 export const router = async () => {
     const appPath = toAppPath(location.pathname);
+    lastRenderedPath = appPath;
 
     // 1. Match Route
     const potentialMatches = routes.map(route => {
@@ -117,4 +132,4 @@ const updateActiveLinks = () => {
 };
 
 // Handle Browser Back/Forward
-window.addEventListener("popstate", router);
+window.addEventListener("popstate", handlePopstate);

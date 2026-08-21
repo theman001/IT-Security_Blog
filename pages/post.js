@@ -29,9 +29,15 @@ export default async function render(container, params) {
     // Render MD to HTML (using marked + dompurify from renderer.js)
     const htmlContent = renderMarkdown(post.content);
 
-    // 1. List Button: Go to category page
-    const listUrl = (post.categoryName && post.categoryName !== 'Uncategorized')
-        ? `/categories/contents/${post.categoryName}`
+    // 1. List Button: Go to this post's category page. Derived from the
+    // post's own slug (which already encodes the full category path, e.g.
+    // "Security/Hack/Reversing/some-post") rather than post.categoryName —
+    // category slugs in this schema ARE the full nested path already, and
+    // the old "/categories/contents/{displayName}" URL this used to build
+    // never matched any category's slug/path, so List always came up empty.
+    const postPathParts = post.slug.split('/');
+    const listUrl = postPathParts.length > 1
+        ? `/categories/${postPathParts.slice(0, -1).join('/')}`
         : '/categories';
 
     container.innerHTML = `
