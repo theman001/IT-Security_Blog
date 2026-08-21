@@ -1,0 +1,19 @@
+{
+  "name": "it-security-blog",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "0.5.4",
+    "dompurify": "^3.4.14",
+    "marked": "^4.3.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}
