@@ -1,3 +1,8 @@
+/* Hallmark · genre: editorial · design-system: design.md · designed-as-app
+ * Multi-page redesign reading from the project's own /design.md (3-palette ×
+ * 2-mode OKLCH system, liquid-glass surfaces) — not a Hallmark catalog theme.
+ * Per-page macrostructure comes from design.md Section 6, not the 21-name catalog.
+ */
 /* Global Styles */
 :root {
     /* Colors moved to light.css (default theme) */
@@ -8,6 +13,11 @@
     --font-heading: 'Montserrat', sans-serif;
     --font-body: 'Inter', sans-serif;
     --font-code: 'JetBrains Mono', monospace;
+}
+
+html,
+body {
+    overflow-x: clip;
 }
 
 body {
@@ -63,14 +73,14 @@ pre,
     min-height: 100vh;
 }
 
-header {
+#app > header {
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
-header nav {
+#app > header nav {
     max-width: 1400px;
     /* Expand Navbar Width */
     width: 100%;
@@ -389,12 +399,18 @@ footer {
 
 /* Typography (Markdown Optimized) */
 .markdown-body {
+    max-width: var(--measure-reading);
+    margin-left: auto;
+    margin-right: auto;
     font-size: 1.1rem;
     /* Improved Readability */
     line-height: 1.8;
     /* Relaxed line height */
     color: var(--text-color);
     letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+    /* Long unbroken inline-code tokens (hashes, identifiers) must wrap, not
+       force the whole page into horizontal scroll on mobile */
 }
 
 .markdown-body p {
@@ -543,6 +559,12 @@ footer {
 }
 
 /* Post Detail Styles */
+.post-content {
+    max-width: var(--measure-reading);
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .post-header {
     margin-bottom: 2rem;
     padding-bottom: 1rem;
@@ -601,7 +623,7 @@ footer {
 /* --- Header & Navigation ---
    Background/blur now come from .glass-full (liquid-glass.css + liquid-glass.ts) —
    this rule only sets the shadow that separates it from scrolled content. */
-header {
+#app > header {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 

@@ -29,6 +29,10 @@
     --text-3xl: 2.25rem;
     --text-4xl: 2.75rem;
 
+    /* Comfortable reading measure for long-form prose (post body, static pages) —
+       grid pages (post list, category tree) intentionally stay at main's full width. */
+    --measure-reading: 760px;
+
     /* Fallback color/radius/motion (= Terminal Noir / dark) in case JS hasn't
        set data-palette/data-mode yet (e.g. no-JS). The head inline script in
        index.html normally sets both before first paint. */

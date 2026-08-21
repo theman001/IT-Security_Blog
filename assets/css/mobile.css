@@ -45,14 +45,14 @@
     }
 
     /* --- Compact Header --- */
-    header {
+    #app > header {
         position: static;
         /* Scroll with content */
         background-color: var(--header-bg);
         border-bottom: 1px solid var(--border-color);
     }
 
-    header nav {
+    #app > header nav {
         display: flex;
         justify-content: space-between;
         align-items: center;

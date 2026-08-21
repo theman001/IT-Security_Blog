@@ -116,3 +116,4 @@ Radius: `sm 8px / md 16px / lg 28px` (가장 둥글고 유기적). Motion: `ease
 ## 7. 변경 이력
 
 - v1 (Phase 0.1): 초기 작성. 사용자 결정으로 "1개 Theme 확정" 대신 "3개 Theme 전부 구현 + 런타임 전환"으로 스코프 확장.
+- v2 (Phase 1-3): `liquid-glass.ts`/`components.js`/`code-enhance.js` 구현 완료. 신규 구조 토큰 `--measure-reading`(760px) 추가 — `.markdown-body`/`.post-content`가 `main`의 그리드 폭(1200px)과 별개로 이 값을 읽어 읽기 전용 콘텐츠의 measure를 제한한다(그리드 페이지는 그대로 1200px 유지). `hallmark redesign` 멀티페이지 경로로 페이지별 타이포/컴포넌트 폴리시 진행, 이 프로젝트의 design.md가 카탈로그 매크로구조를 완전히 대체.
