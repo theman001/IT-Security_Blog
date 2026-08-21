@@ -1,3 +1,5 @@
+import { renderErrorState } from '../assets/js/components.js';
+
 export default async function render(container) {
     const params = new URLSearchParams(window.location.search);
     const type = params.get('type');
@@ -29,12 +31,5 @@ export default async function render(container) {
             break;
     }
 
-    container.innerHTML = `
-        <div style="text-align: center; padding: 4rem 0;">
-            <h1 style="font-size: 4rem; margin-bottom: 1rem; color: var(--link);">${title}</h1>
-            <h2 style="margin-bottom: 1rem;">${message}</h2>
-            <p style="color: var(--muted); margin-bottom: 2rem;">${detail}</p>
-            <a href="/" data-link style="display: inline-block; padding: 0.8rem 1.5rem; background: var(--link); color: #fff; border-radius: var(--radius-md); transition: background 0.2s;">Go Home</a>
-        </div>
-    `;
+    container.innerHTML = renderErrorState({ title, message, detail });
 }

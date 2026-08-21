@@ -64,15 +64,13 @@ pre,
 }
 
 header {
-    background: var(--header-bg);
-    /* backdrop-filter: blur(10px); Removed for solid bg */
     border-bottom: 1px solid var(--border-color);
-    /* position: sticky; Removed */
-    /* top: 0; Removed */
+    position: sticky;
+    top: 0;
     z-index: 100;
 }
 
-nav {
+header nav {
     max-width: 1400px;
     /* Expand Navbar Width */
     width: 100%;
@@ -206,9 +204,61 @@ footer {
     /* Flat */
 }
 
+.section-title {
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 2.5rem 0 1rem;
+}
+
+.explorer-header {
+    margin-bottom: 2rem;
+}
+
+.explorer-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.5rem;
+}
+
+.explorer-header-row h1 {
+    margin: 0;
+}
+
+.explorer-subtitle {
+    color: var(--muted);
+    margin: 0 0 1rem;
+}
+
+.category-filter-input {
+    width: 100%;
+    max-width: 360px;
+    padding: 0.5rem 0.9rem;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--text-color);
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: border-color var(--dur-fast) var(--ease-glass);
+}
+
+.category-filter-input:hover {
+    border-color: var(--primary-color);
+}
+
+.category-filter-input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--primary-color);
+}
+
 /* Old Tree Styles Removed */
 .post-list {
     display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem;
 }
 
@@ -220,6 +270,17 @@ footer {
     transition: border-color 0.2s, transform 0.2s;
     box-shadow: none;
     /* Flat */
+}
+
+.post-meta {
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.post-excerpt {
+    color: var(--muted);
+    font-size: 0.95rem;
 }
 
 
@@ -396,7 +457,7 @@ footer {
 }
 
 .markdown-body blockquote {
-    color: var(--secondary-color);
+    color: var(--accent-2);
     border-left: 4px solid var(--primary-color);
     padding: 1.2em 1.5em;
     /* Increased padding */
@@ -435,8 +496,7 @@ footer {
 /* Inline Code */
 .markdown-body code:not([class*="language-"]) {
     background-color: var(--code-bg);
-    color: #eb5757;
-    /* More vibrant red/pink */
+    color: var(--accent-2);
     padding: 0.2em 0.5em;
     border-radius: 6px;
     font-family: 'JetBrains Mono', Consolas, monospace;
@@ -538,14 +598,11 @@ footer {
     box-shadow: var(--card-shadow);
 }
 
-/* --- Header & Navigation --- */
+/* --- Header & Navigation ---
+   Background/blur now come from .glass-full (liquid-glass.css + liquid-glass.ts) —
+   this rule only sets the shadow that separates it from scrolled content. */
 header {
-    background-color: var(--header-bg);
-    /* Opacity fix */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    position: relative;
-    /* Remove sticky */
-    z-index: 100;
 }
 
 /* ... (omitted) ... */
@@ -559,7 +616,7 @@ header {
         /* Compact padding */
     }
 
-    nav {
+    header nav {
         padding: 1rem;
         /* Compact nav padding on mobile */
     }
@@ -649,36 +706,112 @@ header {
    - Bash / Security Terminal Style
 ========================================================= */
 
+/* --- Code Block Wrapper + Titlebar (real DOM, see code-enhance.js) ---
+   The macOS dots and copy button used to be a ::before decoration baked
+   into <pre>; they're a real titlebar now so the copy button can be
+   interactive. */
+.code-block-wrapper {
+    margin: 2.8rem 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+.code-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.9rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.code-dots {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.code-dots .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.code-dots .dot.r {
+    background: #ff5f56;
+}
+
+.code-dots .dot.y {
+    background: #ffbd2e;
+}
+
+.code-dots .dot.g {
+    background: #27c93f;
+}
+
+.copy-code-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-sm);
+    color: #cbd5e1;
+    font-family: var(--font-code);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-glass), color var(--dur-fast) var(--ease-glass);
+}
+
+.copy-code-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.copy-code-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.copy-code-btn:active {
+    transform: translateY(1px);
+}
+
+.copy-code-btn:disabled {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.copy-code-btn.copied {
+    color: #4ade80;
+    border-color: #4ade80;
+}
+
+.copy-code-btn.copy-failed {
+    color: var(--danger);
+    border-color: var(--danger);
+}
+
+.code-block-wrapper .markdown-body,
+.code-block-wrapper pre {
+    margin: 0;
+}
+
 /* --- Base Code Block Container --- */
 .markdown-body pre[class*="language-"] {
     position: relative;
     background: #0d1117;
     /* GitHub / IDE Dark */
     color: #e5e7eb;
-    padding: 2.8rem 1.2rem 1.4rem 3.5rem;
-    /* left space for line numbers */
-    border-radius: 12px;
+    padding: 1.2rem;
+    border-radius: 0;
     overflow-x: auto;
-    margin: 2.8rem 0;
+    margin: 0;
     font-family: var(--font-code);
     font-size: 0.9rem;
     line-height: 1.65;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
-}
-
-/* --- macOS Window Dots --- */
-.markdown-body pre[class*="language-"]::before {
-    content: "";
-    position: absolute;
-    top: 10px;
-    left: 12px;
-    width: 12px;
-    height: 12px;
-    background: #ff5f56;
-    border-radius: 50%;
-    box-shadow:
-        20px 0 0 #ffbd2e,
-        40px 0 0 #27c93f;
 }
 
 /* --- Code Element --- */
@@ -766,7 +899,7 @@ pre.language-bash code {
 ========================================================= */
 .markdown-body code:not(pre code) {
     background-color: var(--code-bg);
-    color: #e01e5a;
+    color: var(--accent-2);
     padding: 0.2em 0.4em;
     border-radius: 4px;
     font-family: var(--font-code);
@@ -781,25 +914,15 @@ pre.language-bash code {
 
 .markdown-body pre:not([class*="language-"]) {
     background-color: #2f3a4d;
-    /* 내부/외부 통일 */
     color: #e5e7eb;
-
     padding: 0.9rem 1.2rem;
-    /* 🔽 내부 여백 축소 */
-    margin: 1.4rem 0;
-    /* 🔽 바깥 여백 축소 */
-
-    border-radius: 10px;
-    /* 살짝만 둥글게 */
+    margin: 0;
+    border-radius: 0;
     font-family: var(--font-code);
     font-size: 0.95rem;
     line-height: 1.65;
-
     overflow-x: auto;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-
-    /* 그림자 약화 (레이어 느낌 제거) */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    border: none;
 }
 
 /* 내부 code 태그 — 완전 플랫 */
@@ -823,20 +946,11 @@ pre.language-bash code {
    =============================== */
 
 .markdown-body pre {
-    margin: 1.2rem 0;
-    padding: 0.75rem 1rem;
-    /* ⬅️ 여백 줄임 */
-    background: #0b0f14;
-    /* 내부 색 통일 */
-    border-radius: 10px;
-    /* 둥글게 */
+    margin: 0;
+    border-radius: 0;
     overflow-x: auto;
-
-    /* 🔑 핵심 */
     white-space: pre;
     /* 절대 pre-wrap 금지 */
-    line-height: 1.45;
-    /* 문단 영향 제거 */
 }
 
 .markdown-body pre code {
@@ -980,4 +1094,171 @@ pre.line-numbers {
     /* Reset for Dark Mode */
     opacity: 0.7 !important;
     /* Restore opacity */
+}
+
+/* =========================================================
+   Sub-category tiles (Section A: home.js category view)
+   ========================================================= */
+.subcategory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    margin-bottom: 3rem;
+}
+
+.subcategory-tile {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.subcategory-link {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.subcategory-icon {
+    display: inline-flex;
+    color: var(--primary-color);
+}
+
+/* =========================================================
+   Empty / Error states
+   ========================================================= */
+.empty-state,
+.error-state {
+    text-align: center;
+    color: var(--secondary-color);
+    padding: 4rem 1rem;
+}
+
+.error-state-title {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: var(--link-color);
+}
+
+.error-state-message {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.error-state-detail {
+    color: var(--secondary-color);
+    margin-bottom: 2rem;
+}
+
+/* =========================================================
+   Skeleton loading states — respects prefers-reduced-motion
+   ========================================================= */
+.skeleton-line {
+    height: 0.9em;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--border-color) 25%, var(--card-bg) 50%, var(--border-color) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+    margin-bottom: 0.75rem;
+}
+
+.skeleton-line-meta {
+    width: 40%;
+    height: 0.75em;
+}
+
+.skeleton-line-title {
+    width: 70%;
+    height: 1.4em;
+}
+
+.skeleton-line-heading {
+    width: 55%;
+    height: 2em;
+    margin-bottom: 1.25rem;
+}
+
+.skeleton-line-excerpt {
+    width: 90%;
+}
+
+.skeleton-post {
+    padding: 1rem 0;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-line {
+        animation: none;
+        background: var(--border-color);
+    }
+}
+
+/* =========================================================
+   Reading progress + table of contents (post detail)
+   ========================================================= */
+.reading-progress {
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    height: 3px;
+    background: transparent;
+    border: none;
+}
+
+.reading-progress-bar {
+    height: 100%;
+    width: 0;
+    background: var(--accent, var(--primary-color));
+    transition: width 100ms linear;
+}
+
+.post-toc {
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 2rem;
+}
+
+.post-toc-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--secondary-color);
+    margin-bottom: 0.6rem;
+}
+
+.post-toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.post-toc li {
+    margin-bottom: 0.4rem;
+}
+
+.post-toc li.post-toc-sub {
+    padding-left: 1rem;
+}
+
+.post-toc a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.92rem;
+}
+
+.post-toc a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
 }

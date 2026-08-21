@@ -1,5 +1,6 @@
 import { router, navigateTo } from './router.js';
 import { initThemeSwitcher } from './theme-switcher.js';
+import { initLiquidGlass } from './liquid-glass.ts';
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,6 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Init Router (Wait for DOM)
     router();
+
+    // 3. Wire up the persistent chrome's glass surfaces (header now; mobile
+    //    nav/category tree get their .glass-full class in later phases)
+    initLiquidGlass();
 
     // 3. Global Link Interception (SPA behavior)
     document.body.addEventListener('click', e => {

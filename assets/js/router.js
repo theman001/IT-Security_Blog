@@ -3,6 +3,9 @@ import categories from '../../pages/categories.js';
 import post from '../../pages/post.js';
 import staticPage from '../../pages/static.js';
 import errorPage from '../../pages/error.js';
+import { renderSkeletonList, renderSkeletonPost } from './components.js';
+import { enhanceCodeBlocks } from './code-enhance.js';
+import { initLiquidGlass } from './liquid-glass.ts';
 
 // Route Definition
 const routes = [
@@ -44,7 +47,7 @@ export const router = async () => {
 
     if (!match) {
         match = {
-            route: { view: '../../pages/error.js' },
+            route: { view: '../../pages/error.js', path: '/error' },
             result: [location.pathname]
         };
     }
@@ -55,16 +58,13 @@ export const router = async () => {
 
     // 3. Render
     try {
-        container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #888;">Loading...</div>'; // Simple Loading
+        container.innerHTML = match.route.path === '/posts/:slug'
+            ? renderSkeletonPost()
+            : renderSkeletonList();
 
         // Dynamic Import
         const module = await import(match.route.view);
         const params = match.result ? getParams(match) : {};
-
-        // Fix for categories/slug merging params
-        if (match.route.path === '/categories/:slug' && params.slug) {
-            // keep params as is
-        }
 
         await module.default(container, params);
 
@@ -78,10 +78,13 @@ export const router = async () => {
         // Update active highlights
         updateActiveLinks();
 
-        // Prism syntax highlight (manual)
+        // Prism syntax highlight (manual), then the glass/copy-button hooks that
+        // depend on the highlighted markup being final
         if (window.Prism) {
             Prism.highlightAll();
         }
+        enhanceCodeBlocks(container);
+        initLiquidGlass(container);
 
     } catch (e) {
         console.error('Render Error:', e);

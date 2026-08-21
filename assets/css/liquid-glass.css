@@ -1,0 +1,39 @@
+/* ============================================================
+   Liquid glass surface tiers — see /design.md Section 4 and the
+   plan's Section D application map (only header, mobile-nav and
+   the category tree container ever get .glass-full; everything
+   else that wants a cheap blur uses .glass-lite; repeated list
+   items stay flat).
+
+   .glass-full — JS (liquid-glass.js) drives a real feDisplacementMap
+     backdrop-filter on Chromium. The rules here are the fallback that
+     applies until JS runs, and permanently on browsers/settings where
+     JS opts out (see .glass-reduced below).
+   .glass-lite — pure CSS blur, no JS involvement ever.
+   .glass-reduced — JS adds this (removing any inline filter) when
+     the browser can't do backdrop-filter:url(), or the user has
+     prefers-reduced-transparency / prefers-reduced-motion set.
+   ============================================================ */
+
+.glass-full,
+.glass-lite {
+    background: var(--glass-fallback-bg);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+}
+
+.glass-reduced {
+    backdrop-filter: blur(12px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+
+    .glass-full,
+    .glass-lite,
+    .glass-reduced {
+        background: var(--surface);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}
