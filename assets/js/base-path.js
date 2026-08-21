@@ -1,9 +1,8 @@
-// Vite sets BASE_URL to match vite.config.js's `base` — '/' in production
-// (Cloudflare Pages, served from the real domain root) but a dev-only path
-// prefix when developing through the remote code-server's path-based proxy
-// (dev.taeuk.site/proxy/5173/). Everything that reads/writes location.pathname
-// needs to go through these two helpers so routing works under either.
-export const BASE_PATH = import.meta.env.BASE_URL;
+// Matches vite.config.js's `base` — dev is accessed through code-server's
+// /absproxy/<port>/ (not /proxy/<port>/, which strips its prefix before
+// forwarding and breaks Vite's dev-mode module graph; see vite.config.js).
+// Production (Cloudflare Pages) is served from the real domain root.
+export const BASE_PATH = import.meta.env.DEV ? '/absproxy/5173/' : '/';
 
 const BASE_NO_TRAILING_SLASH = BASE_PATH.endsWith('/') ? BASE_PATH.slice(0, -1) : BASE_PATH;
 
