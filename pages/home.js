@@ -1,6 +1,7 @@
 import { fetchPosts, fetchPostsByCategory } from '../assets/js/api.js';
 import { renderMarkdown, stripMarkdown } from '../assets/js/renderer.js';
 import { renderPostList, renderSubCategoryGrid, renderEmptyState } from '../assets/js/components.js';
+import { BASE_PATH } from '../assets/js/base-path.js';
 
 function withExcerpt(post) {
     return { ...post, excerpt: post.description || stripMarkdown(post.content || '', 180) };
@@ -37,7 +38,7 @@ export default async function render(container, params) {
 
         } else {
             // --- Home View (Introduction from main.md + recent posts teaser) ---
-            const [res, allPosts] = await Promise.all([fetch('/static/main.md'), fetchPosts()]);
+            const [res, allPosts] = await Promise.all([fetch(`${BASE_PATH}static/main.md`), fetchPosts()]);
             if (res.ok) {
                 const text = await res.text();
                 const htmlContent = renderMarkdown(text);

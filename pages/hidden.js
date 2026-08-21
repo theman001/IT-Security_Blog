@@ -1,3 +1,5 @@
+import { BASE_PATH, toRealPath } from '../assets/js/base-path.js';
+
 export default async function render(container) {
     // 1. Inject XP Style (Scoped to prevent leaks, though we hide other elements)
     const styleId = 'xp-desktop-style';
@@ -651,7 +653,7 @@ Feel free to look around, but don't touch the kernel files.
                         <button style="font-size:11px; padding:0 5px;" onclick="window.navigateBrowser(document.getElementById('ie-address').value)">Go</button>
                     </div>
                 </div>
-                <iframe id="ie-iframe" src="/" style="flex:1; border:none;"></iframe>
+                <iframe id="ie-iframe" src="${BASE_PATH}" style="flex:1; border:none;"></iframe>
             </div>
         `;
         window.createWindow('Internet Explorer - IT Security Blog', content, 800, 600, 'ie');
@@ -726,7 +728,7 @@ Feel free to look around, but don't touch the kernel files.
         document.body.style.transition = 'opacity 2s';
         document.body.style.opacity = '0';
         setTimeout(() => {
-            history.pushState(null, null, '/');
+            history.pushState(null, null, toRealPath('/'));
             cleanup();
             document.body.style.opacity = '1';
             location.reload();
