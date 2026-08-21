@@ -246,14 +246,283 @@ footer {
 
 
 /* Components */
-/* --- Modern Tree Explorer Styles --- */
-.category-tree-container {
+/* --- Category Graph (force-directed, replaces the old folder tree) --- */
+.category-graph-container {
+    position: relative;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: none;
-    /* Flat */
+    height: 480px;
+    overflow: hidden;
+}
+
+.category-graph-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.category-graph-labels {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.graph-node-label {
+    position: absolute;
+    transform: translate(-50%, 0);
+    font-family: var(--font-code);
+    font-size: 0.78rem;
+    color: var(--text-color);
+    white-space: nowrap;
+    text-shadow: 0 1px 3px var(--bg), 0 0 8px var(--bg);
+    transition: opacity var(--dur-fast) var(--ease-glass);
+}
+
+.graph-node-label.dimmed {
+    opacity: 0.15;
+}
+
+/* Real, keyboard/screen-reader reachable category list — the canvas above
+   is a pointer-only decorative layer on top of this, not a replacement for it. */
+.category-graph-fallback {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.category-graph-fallback:focus-within {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 1rem;
+    clip: auto;
+    overflow: visible;
+    background: var(--card-bg);
+}
+
+.graph-fallback-count {
+    color: var(--muted);
+    font-size: 0.85em;
+}
+
+@media (max-width: 768px) {
+    .category-graph-container {
+        height: 360px;
+    }
+}
+
+/* =========================================================
+   Home — Bento dashboard (replaces the old linear intro+list home page)
+   ========================================================= */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+        "hero hero graph"
+        "hero hero stats"
+        "posts posts posts"
+        "interview interview interview"
+        "egg egg egg";
+    gap: var(--space-5);
+}
+
+.bento-tile {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    position: relative;
+    overflow: hidden;
+}
+
+.bento-tile-label {
+    font-family: var(--font-code);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: var(--space-3);
+}
+
+.bento-hero {
+    grid-area: hero;
+    min-height: 320px;
+    display: flex;
+    align-items: flex-end;
+    padding: var(--space-6);
+}
+
+.bento-hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Solid scrim between the shader and the text — more robust than a
+   text-shadow (which visibly glitched compositing against the animated
+   canvas on some GPU drivers) and better contrast besides. */
+.bento-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.15) 65%, transparent);
+    pointer-events: none;
+}
+
+.bento-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.bento-hero-title {
+    font-size: var(--text-4xl);
+    margin: 0 0 0.4em;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.bento-hero-tagline {
+    max-width: 32rem;
+    /* Hardcoded, not var(--text-color) — the hero tile is always dark
+       (shader + scrim) regardless of the site-wide light/dark mode. */
+    color: rgba(255, 255, 255, 0.92);
+    margin: 0;
+}
+
+.bento-graph-preview {
+    grid-area: graph;
+    display: flex;
+    flex-direction: column;
+}
+
+.bento-mini-graph {
+    position: relative;
+    flex: 1;
+    min-height: 220px;
+}
+
+.bento-tile-link {
+    display: inline-block;
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.bento-tile-link:hover {
+    text-decoration: underline;
+}
+
+.bento-posts {
+    grid-area: posts;
+}
+
+.bento-posts .post-list {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-4);
+}
+
+.bento-stats {
+    grid-area: stats;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.bento-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2em;
+}
+
+.bento-stat-value {
+    font-family: var(--font-heading);
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.bento-stat-label {
+    font-family: var(--font-code);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+
+.bento-interview {
+    grid-area: interview;
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+.bento-interview .home-intro {
+    max-width: none;
+    margin: 0;
+}
+
+/* main.md's own H1 is now redundant — the bento hero tile carries the title. */
+.bento-interview .home-intro>h1:first-child {
+    display: none;
+}
+
+.bento-egg {
+    grid-area: egg;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: var(--font-code);
+    transition: border-color var(--dur-fast) var(--ease-glass);
+}
+
+.bento-egg:hover {
+    border-color: var(--accent);
+}
+
+.bento-egg:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.bento-egg-arrow {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "hero"
+            "graph"
+            "posts"
+            "stats"
+            "interview"
+            "egg";
+    }
+
+    .bento-hero {
+        min-height: 240px;
+    }
 }
 
 .section-title {
@@ -1059,63 +1328,9 @@ pre.line-numbers {
     line-height: 1.45 !important;
 }
 
-/* --- Category Tree Styles --- */
-.tree-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.tree-item {
-    margin-bottom: 0;
-}
-
-.tree-content {
-    display: flex;
-    align-items: center;
-    padding: 0.4rem 0.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.tree-content:hover {
-    background-color: var(--card-bg);
-}
-
-.tree-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    margin-right: 4px;
-    color: var(--muted);
-    transition: transform 0.2s ease;
-}
-
-.tree-toggle.hidden {
-    visibility: hidden;
-}
-
-/* Rotate Chevron when Expanded */
-.tree-item.expanded>.tree-content .tree-toggle svg {
-    transform: rotate(90deg);
-}
-
-.tree-icon {
-    display: inline-flex;
-    margin-right: 8px;
-    color: var(--primary-color);
-}
-
-.tree-label {
-    flex: 1;
-    color: var(--text-color);
-    text-decoration: none;
-    font-weight: 500;
-}
-
+/* Small numeric badge — still used by components.js's renderSubCategoryTile
+   (the folder tree itself was replaced by the force-directed graph, see
+   assets/js/graph.js and .category-graph-* above). */
 .tree-badge {
     background-color: var(--bg-color);
     color: var(--muted);
@@ -1123,60 +1338,6 @@ pre.line-numbers {
     padding: 2px 8px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
-}
-
-/* Hide children by default */
-.tree-children {
-    display: none;
-    /* Indentation Logic:
-       Align with Folder Icon Center:
-       Padding(8) + Toggle(24) + Margin(4) + HalfIcon(9) - Border(1) ≈ 43px
-    */
-    margin-left: 43px;
-    border-left: 1px solid var(--border-color);
-
-    /* Content indentation from the line */
-    /* Reduced to 0 to minimize gap since we restored the toggle spacer for alignment */
-    padding-left: 0;
-    margin-top: 0;
-}
-
-/* Show children when expanded */
-.tree-item.expanded>.tree-children {
-    display: block;
-}
-
-/* Post Item Specifics */
-.tree-post-item .tree-label {
-    font-weight: 400;
-    font-size: 0.95rem;
-}
-
-.tree-post-item .tree-icon {
-    color: var(--secondary-color);
-}
-
-/* Maintain alignment with folders by keeping the toggle space, but invisible */
-.tree-post-item .tree-toggle {
-    display: inline-flex;
-    /* Restore display */
-    visibility: hidden;
-    /* Hide visually but keep space */
-}
-
-/* File Icon Specifics */
-.file-icon {
-    color: #10b981;
-    /* Emerald Green for Light Mode - Distinct from Folder Blue */
-    opacity: 1 !important;
-    /* Remove inline opacity */
-}
-
-[data-mode="dark"] .file-icon {
-    color: inherit;
-    /* Reset for Dark Mode */
-    opacity: 0.7 !important;
-    /* Restore opacity */
 }
 
 /* =========================================================
