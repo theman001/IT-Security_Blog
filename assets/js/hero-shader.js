@@ -76,17 +76,23 @@ function compileShader(gl, type, source) {
     return shader;
 }
 
+// getComputedStyle(probeEl).color looked like the obvious way to resolve an
+// oklch()/etc custom property to concrete rgb, but on this Chromium build it
+// hands the string straight back as "oklch(0.48 0.15 25)" instead of
+// converting it — a naive numeric-match parse then silently read L/C/H as if
+// they were 0-255 RGB, producing near-black nonsense colors. Canvas
+// fillStyle + getImageData is spec-guaranteed to resolve to concrete 8-bit
+// sRGB regardless of the input notation, so use that instead.
+const _colorProbeCanvas = document.createElement('canvas');
+_colorProbeCanvas.width = 1;
+_colorProbeCanvas.height = 1;
+const _colorProbeCtx = _colorProbeCanvas.getContext('2d', { willReadFrequently: true });
 function hexToRgb01(cssColorString) {
-    // Reads a computed color (oklch()/rgb()/etc — browsers normalize
-    // getComputedStyle color reads to rgb()/rgba() strings) into 0..1 floats.
-    const probe = document.createElement('div');
-    probe.style.color = cssColorString;
-    probe.style.display = 'none';
-    document.body.appendChild(probe);
-    const rgb = getComputedStyle(probe).color;
-    document.body.removeChild(probe);
-    const match = rgb.match(/[\d.]+/g) || ['128', '128', '128'];
-    return [match[0] / 255, match[1] / 255, match[2] / 255];
+    _colorProbeCtx.clearRect(0, 0, 1, 1);
+    _colorProbeCtx.fillStyle = cssColorString;
+    _colorProbeCtx.fillRect(0, 0, 1, 1);
+    const [r, g, b] = _colorProbeCtx.getImageData(0, 0, 1, 1).data;
+    return [r / 255, g / 255, b / 255];
 }
 
 /**

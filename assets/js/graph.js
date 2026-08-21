@@ -38,6 +38,28 @@ const LABEL_FONT = '600 12px "JetBrains Mono", monospace';
 const POINTER_RADIUS = 100;
 const CLICK_DRAG_THRESHOLD = 6; // px — beyond this, a mouseup is a drag, not a click
 
+// oklch()/etc aren't safe to feed directly into a canvas radial-gradient
+// lighten-mix by hand. getComputedStyle(probeEl).color looked like the
+// obvious way to resolve them to concrete rgb, but this Chromium build
+// hands the string straight back as "oklch(0.48 0.15 25)" instead of
+// converting it — so a naive numeric-match parse silently read L/C/H as if
+// they were 0-255 RGB and produced near-black nonsense colors. Canvas
+// fillStyle + getImageData is spec-guaranteed to resolve to concrete 8-bit
+// sRGB no matter the input notation, so use that instead.
+const _colorProbeCanvas = document.createElement('canvas');
+_colorProbeCanvas.width = 1;
+_colorProbeCanvas.height = 1;
+const _colorProbeCtx = _colorProbeCanvas.getContext('2d', { willReadFrequently: true });
+function resolveRgb(cssColor) {
+    _colorProbeCtx.clearRect(0, 0, 1, 1);
+    _colorProbeCtx.fillStyle = cssColor;
+    _colorProbeCtx.fillRect(0, 0, 1, 1);
+    const [r, g, b] = _colorProbeCtx.getImageData(0, 0, 1, 1).data;
+    return { r, g, b };
+}
+const lighten = ({ r, g, b }, amt) => ({ r: r + (255 - r) * amt, g: g + (255 - g) * amt, b: b + (255 - b) * amt });
+const rgba = ({ r, g, b }, a) => `rgba(${r | 0}, ${g | 0}, ${b | 0}, ${a})`;
+
 /**
  * Renders an interactive force-directed graph of `categories` into
  * `container`. Calls `onNodeNavigate(path)` with an app-relative path
@@ -120,6 +142,26 @@ export function renderCategoryGraph(container, categories, { onNodeNavigate } = 
     let draggingNode = null;
     let matchSet = null; // null = no active filter; Set of ids = filtered
 
+    // Resolving oklch() -> rgb via a probe element is too slow to redo every
+    // frame; only recompute when the palette actually changes.
+    let lastAccentRaw = null;
+    let colorCache = null;
+    function getPaletteColors(style) {
+        const accentRaw = style.getPropertyValue('--accent').trim();
+        const accent2Raw = style.getPropertyValue('--accent-2').trim();
+        const key = accentRaw + '|' + accent2Raw;
+        if (colorCache && lastAccentRaw === key) return colorCache;
+        lastAccentRaw = key;
+        const accent = resolveRgb(accentRaw);
+        const accent2 = resolveRgb(accent2Raw);
+        colorCache = {
+            accent, accent2,
+            accentLight: lighten(accent, 0.4),
+            accent2Light: lighten(accent2, 0.4),
+        };
+        return colorCache;
+    }
+
     function draw() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const pxW = Math.round(width * dpr);
@@ -135,8 +177,7 @@ export function renderCategoryGraph(container, categories, { onNodeNavigate } = 
 
         const style = getComputedStyle(document.documentElement);
         const borderColor = style.getPropertyValue('--border').trim();
-        const accent = style.getPropertyValue('--accent').trim();
-        const accent2 = style.getPropertyValue('--accent-2').trim();
+        const { accent, accent2, accentLight, accent2Light } = getPaletteColors(style);
 
         ctx.strokeStyle = borderColor;
         ctx.lineWidth = 1;
@@ -150,12 +191,46 @@ export function renderCategoryGraph(container, categories, { onNodeNavigate } = 
         nodes.forEach(n => {
             const r = radiusFor(n);
             const dimmed = matchSet && !matchSet.has(n.id);
+            const active = n === hoveredNode || n === draggingNode;
+            const alpha = dimmed ? 0.15 : (active ? 1 : 0.85);
+            const base = n.isRoot ? accent : accent2;
+            const light = n.isRoot ? accentLight : accent2Light;
+
+            // Soft halo — gives the node some depth instead of a flat disc.
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, r * (active ? 2.1 : 1.7), 0, Math.PI * 2);
+            ctx.fillStyle = rgba(base, alpha * 0.16);
+            ctx.fill();
+
+            // Body — small radial gradient (off-center highlight) rather than
+            // a single flat fill.
+            const grad = ctx.createRadialGradient(
+                n.x - r * 0.35, n.y - r * 0.35, r * 0.1,
+                n.x, n.y, r
+            );
+            grad.addColorStop(0, rgba(light, alpha));
+            grad.addColorStop(1, rgba(base, alpha));
             ctx.beginPath();
             ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-            ctx.fillStyle = n.isRoot ? accent : accent2;
-            ctx.globalAlpha = dimmed ? 0.15 : (n === hoveredNode || n === draggingNode ? 1 : 0.85);
+            ctx.fillStyle = grad;
             ctx.fill();
-            ctx.globalAlpha = 1;
+
+            // Thin bright rim for definition against busy backgrounds.
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+            ctx.strokeStyle = rgba(light, alpha * 0.9);
+            ctx.lineWidth = 1.25;
+            ctx.stroke();
+
+            // Root categories get a second, wider ring — a hierarchy cue that
+            // doesn't rely on color alone.
+            if (n.isRoot && !dimmed) {
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, r + 5, 0, Math.PI * 2);
+                ctx.strokeStyle = rgba(base, 0.45);
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
         });
 
         labelsLayer.innerHTML = nodes.map(n => {
