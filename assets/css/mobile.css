@@ -52,7 +52,7 @@
         border-bottom: 1px solid var(--border-color);
     }
 
-    nav {
+    header nav {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -130,13 +130,6 @@
         height: 3px;
         background-color: var(--primary-color);
         border-radius: 0 0 4px 4px;
-    }
-
-    /* Dark Mode Specifics for Mobile Nav */
-    [data-mode="dark"] .mobile-nav {
-        background-color: #1a1a1a;
-        border-top-color: #333;
-        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
     }
 
     /* Scroll-aware Navigation Transition */

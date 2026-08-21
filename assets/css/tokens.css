@@ -61,6 +61,30 @@
     --dur-fast: 120ms;
     --dur-base: 220ms;
     --dur-slow: 420ms;
+
+    /* Liquid glass params (depth/strength/chromaticAberration/blur/brightness/saturate)
+       per surface — see design.md Section 4. Mode-independent (tint varies by mode instead,
+       see --glass-fallback-bg below). */
+    --glass-header-depth: 14;
+    --glass-header-strength: 90;
+    --glass-header-cab: 6;
+    --glass-header-blur: 4;
+    --glass-header-brightness: 1.08;
+    --glass-header-saturate: 1.35;
+
+    --glass-mobile-nav-depth: 10;
+    --glass-mobile-nav-strength: 70;
+    --glass-mobile-nav-cab: 3;
+    --glass-mobile-nav-blur: 6;
+    --glass-mobile-nav-brightness: 1.05;
+    --glass-mobile-nav-saturate: 1.30;
+
+    --glass-tree-depth: 18;
+    --glass-tree-strength: 110;
+    --glass-tree-cab: 8;
+    --glass-tree-blur: 3;
+    --glass-tree-brightness: 1.10;
+    --glass-tree-saturate: 1.40;
 }
 
 [data-palette="signal"] {
@@ -71,6 +95,27 @@
     --dur-fast: 100ms;
     --dur-base: 200ms;
     --dur-slow: 360ms;
+
+    --glass-header-depth: 12;
+    --glass-header-strength: 70;
+    --glass-header-cab: 2;
+    --glass-header-blur: 6;
+    --glass-header-brightness: 1.05;
+    --glass-header-saturate: 1.15;
+
+    --glass-mobile-nav-depth: 8;
+    --glass-mobile-nav-strength: 55;
+    --glass-mobile-nav-cab: 1;
+    --glass-mobile-nav-blur: 8;
+    --glass-mobile-nav-brightness: 1.03;
+    --glass-mobile-nav-saturate: 1.10;
+
+    --glass-tree-depth: 14;
+    --glass-tree-strength: 80;
+    --glass-tree-cab: 3;
+    --glass-tree-blur: 5;
+    --glass-tree-brightness: 1.06;
+    --glass-tree-saturate: 1.20;
 }
 
 [data-palette="prism"] {
@@ -81,6 +126,36 @@
     --dur-fast: 140ms;
     --dur-base: 260ms;
     --dur-slow: 480ms;
+
+    --glass-header-depth: 16;
+    --glass-header-strength: 100;
+    --glass-header-cab: 14;
+    --glass-header-blur: 3;
+    --glass-header-brightness: 1.12;
+    --glass-header-saturate: 1.50;
+
+    --glass-mobile-nav-depth: 10;
+    --glass-mobile-nav-strength: 75;
+    --glass-mobile-nav-cab: 8;
+    --glass-mobile-nav-blur: 5;
+    --glass-mobile-nav-brightness: 1.08;
+    --glass-mobile-nav-saturate: 1.40;
+
+    --glass-tree-depth: 20;
+    --glass-tree-strength: 120;
+    --glass-tree-cab: 16;
+    --glass-tree-blur: 2;
+    --glass-tree-brightness: 1.15;
+    --glass-tree-saturate: 1.55;
+}
+
+/* Non-Chrome / reduced-transparency fallback tint — varies by Mode only (design.md 4) */
+[data-mode="dark"] {
+    --glass-fallback-bg: rgba(10, 12, 16, 0.55);
+}
+
+[data-mode="light"] {
+    --glass-fallback-bg: rgba(255, 255, 255, 0.55);
 }
 
 /* ============================================================

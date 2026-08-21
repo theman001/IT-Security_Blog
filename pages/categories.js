@@ -1,4 +1,5 @@
 import { fetchCategories, fetchAllPostsSimple, resetCache } from '../assets/js/api.js';
+import { renderEmptyState } from '../assets/js/components.js';
 
 export default async function render(container) {
     try {
@@ -8,12 +9,16 @@ export default async function render(container) {
         ]);
 
         const tree = buildTree(flatCategories, flatPosts);
+        const filterInput = `
+            <input type="search" id="category-filter" class="category-filter-input"
+                   placeholder="Filter categories and posts..." aria-label="Filter categories and posts">
+        `;
 
         container.innerHTML = `
-            <div class="explorer-header" style="margin-bottom: 2rem;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
-                    <h1 style="margin: 0;">Category Explorer</h1>
-                    <button id="reset-cache-btn" class="btn-icon-only" title="Reset DB Cache" style="width: 32px; height: 32px; border: none;">
+            <div class="explorer-header">
+                <div class="explorer-header-row">
+                    <h1>Category Explorer</h1>
+                    <button id="reset-cache-btn" class="btn-icon-only" title="Reset DB Cache">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                             <path d="M3 3v5h5"></path>
@@ -22,9 +27,10 @@ export default async function render(container) {
                         </svg>
                     </button>
                 </div>
-                <p style="color: var(--muted); margin: 0;">Navigate through the knowledge base.</p>
+                <p class="explorer-subtitle">Navigate through the knowledge base.</p>
+                ${filterInput}
             </div>
-            <div class="category-tree-container">
+            <div class="category-tree-container glass-full" data-glass-surface="tree">
                 ${renderTree(tree)}
             </div>
         `;
@@ -62,10 +68,49 @@ export default async function render(container) {
             }
         });
 
+        // Filter Input — pure client-side, tree data is already in memory
+        const filterEl = container.querySelector('#category-filter');
+        filterEl.addEventListener('input', () => filterTree(treeContainer, filterEl.value));
+
     } catch (e) {
         console.error('Categories Render Error:', e);
-        container.innerHTML = '<p class="error">Failed to load categories.</p>';
+        container.innerHTML = renderEmptyState('Failed to load categories.');
     }
+}
+
+// Show only tree items whose label matches `query`, auto-expanding their
+// ancestors; restore the full tree when the query is cleared.
+function filterTree(treeContainer, query) {
+    const term = query.trim().toLowerCase();
+    const items = treeContainer.querySelectorAll('.tree-item');
+
+    if (!term) {
+        items.forEach(item => {
+            item.style.display = '';
+            item.classList.remove('expanded');
+        });
+        return;
+    }
+
+    items.forEach(item => { item.style.display = 'none'; });
+
+    items.forEach(item => {
+        const label = item.querySelector(':scope > .tree-content .tree-label');
+        if (!label || !label.textContent.toLowerCase().includes(term)) return;
+
+        // Show the matched item, everything nested inside it, and every
+        // ancestor tree-item up to the root (auto-expanding folders along the way)
+        item.querySelectorAll('.tree-item').forEach(descendant => {
+            descendant.style.display = '';
+        });
+
+        let node = item;
+        while (node) {
+            node.style.display = '';
+            if (node.classList.contains('has-children')) node.classList.add('expanded');
+            node = node.parentElement.closest('.tree-item');
+        }
+    });
 }
 
 // Convert Flat List to Nested Tree & Skip Root 'contents'
