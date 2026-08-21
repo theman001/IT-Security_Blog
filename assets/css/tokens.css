@@ -1,0 +1,183 @@
+/* ============================================================
+   Design token contract — see /design.md for the full rationale.
+   Two independent axes on <html>: data-palette (noir|signal|prism)
+   × data-mode (dark|light). Structural tokens below are shared
+   by all 3 palettes; only color/radius/motion vary per palette.
+   ============================================================ */
+
+:root {
+    /* Structural (palette-independent) */
+    --font-heading: 'Montserrat', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-code: 'JetBrains Mono', monospace;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+
+    --text-xs: .8rem;
+    --text-sm: .9rem;
+    --text-base: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 1.875rem;
+    --text-3xl: 2.25rem;
+    --text-4xl: 2.75rem;
+
+    /* Fallback color/radius/motion (= Terminal Noir / dark) in case JS hasn't
+       set data-palette/data-mode yet (e.g. no-JS). The head inline script in
+       index.html normally sets both before first paint. */
+    --bg: oklch(16% 0.01 260);
+    --surface: oklch(20% 0.012 260);
+    --text: oklch(92% 0.005 260);
+    --text-muted: oklch(65% 0.01 260);
+    --border: oklch(30% 0.015 260);
+    --accent: oklch(78% 0.16 175);
+    --accent-2: oklch(72% 0.18 45);
+    --danger: oklch(62% 0.19 25);
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-fast: 120ms;
+    --dur-base: 220ms;
+    --dur-slow: 420ms;
+}
+
+/* ============================================================
+   Per-palette radius + motion (mode-independent — the "skin's"
+   shape/feel doesn't change with light/dark, only its colors do)
+   ============================================================ */
+[data-palette="noir"] {
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --ease-glass: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-fast: 120ms;
+    --dur-base: 220ms;
+    --dur-slow: 420ms;
+}
+
+[data-palette="signal"] {
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 14px;
+    --ease-glass: cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-fast: 100ms;
+    --dur-base: 200ms;
+    --dur-slow: 360ms;
+}
+
+[data-palette="prism"] {
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 28px;
+    --ease-glass: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast: 140ms;
+    --dur-base: 260ms;
+    --dur-slow: 480ms;
+}
+
+/* ============================================================
+   Per-palette × per-mode colors (6 combinations, symmetric keys)
+   ============================================================ */
+[data-palette="noir"][data-mode="dark"] {
+    --bg: oklch(16% 0.01 260);
+    --surface: oklch(20% 0.012 260);
+    --text: oklch(92% 0.005 260);
+    --text-muted: oklch(65% 0.01 260);
+    --border: oklch(30% 0.015 260);
+    --accent: oklch(78% 0.16 175);
+    --accent-2: oklch(72% 0.18 45);
+    --danger: oklch(62% 0.19 25);
+}
+
+[data-palette="noir"][data-mode="light"] {
+    --bg: oklch(98% 0.004 260);
+    --surface: oklch(96% 0.006 260);
+    --text: oklch(20% 0.01 260);
+    --text-muted: oklch(45% 0.01 260);
+    --border: oklch(85% 0.01 260);
+    --accent: oklch(52% 0.14 175);
+    --accent-2: oklch(55% 0.16 45);
+    --danger: oklch(50% 0.18 25);
+}
+
+[data-palette="signal"][data-mode="light"] {
+    --bg: oklch(97% 0.006 90);
+    --surface: oklch(94% 0.008 90);
+    --text: oklch(22% 0.01 90);
+    --text-muted: oklch(48% 0.01 90);
+    --border: oklch(82% 0.012 90);
+    --accent: oklch(48% 0.15 25);
+    --accent-2: oklch(55% 0.12 230);
+    --danger: oklch(50% 0.18 25);
+}
+
+[data-palette="signal"][data-mode="dark"] {
+    --bg: oklch(18% 0.008 90);
+    --surface: oklch(22% 0.01 90);
+    --text: oklch(90% 0.006 90);
+    --text-muted: oklch(62% 0.01 90);
+    --border: oklch(32% 0.012 90);
+    --accent: oklch(62% 0.17 25);
+    --accent-2: oklch(68% 0.12 230);
+    --danger: oklch(62% 0.19 25);
+}
+
+[data-palette="prism"][data-mode="dark"] {
+    --bg: oklch(14% 0.02 280);
+    --surface: oklch(19% 0.025 280);
+    --text: oklch(93% 0.01 280);
+    --text-muted: oklch(68% 0.015 280);
+    --border: oklch(32% 0.03 280);
+    --accent: oklch(75% 0.19 200);
+    --accent-2: oklch(70% 0.20 330);
+    --danger: oklch(63% 0.20 20);
+}
+
+[data-palette="prism"][data-mode="light"] {
+    --bg: oklch(98% 0.006 280);
+    --surface: oklch(95% 0.01 280);
+    --text: oklch(18% 0.02 280);
+    --text-muted: oklch(46% 0.015 280);
+    --border: oklch(84% 0.015 280);
+    --accent: oklch(55% 0.17 200);
+    --accent-2: oklch(52% 0.19 330);
+    --danger: oklch(52% 0.19 20);
+}
+
+/* ============================================================
+   TEMPORARY legacy bridge — style.css / mobile.css / error.js
+   still reference the pre-renewal token names. Remove this block
+   once Phase 2/3 rewrites style.css onto the tokens above directly.
+   ============================================================ */
+:root {
+    --bg-color: var(--bg);
+    --text-color: var(--text);
+    --primary-color: var(--accent);
+    --secondary-color: var(--text-muted);
+    --link-color: var(--accent);
+    --link: var(--accent);
+    --border-color: var(--border);
+    --card-bg: var(--surface);
+    --code-bg: var(--surface);
+    --header-bg: var(--surface);
+    --muted: var(--text-muted);
+    --bold-color: var(--accent-2);
+    --h1-color: var(--accent);
+    --h2-color: var(--accent-2);
+    --h3-color: var(--text);
+    --h4-color: var(--text);
+    --h5-color: var(--text-muted);
+    --bg-gradient: var(--bg);
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+    --shadow: 0 4px 6px rgba(0, 0, 0, .3);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .08);
+    --radius: var(--radius-md);
+}

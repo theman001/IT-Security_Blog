@@ -1,0 +1,983 @@
+/* Global Styles */
+:root {
+    /* Colors moved to light.css (default theme) */
+
+    /* Fonts */
+
+    /* Fonts */
+    --font-heading: 'Montserrat', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-code: 'JetBrains Mono', monospace;
+}
+
+body {
+    font-family: var(--font-body);
+    line-height: 1.6;
+    color: var(--text-color);
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-heading);
+}
+
+h1 {
+    color: var(--h1-color) !important;
+}
+
+h2 {
+    color: var(--h2-color) !important;
+}
+
+h3 {
+    color: var(--h3-color) !important;
+}
+
+h4 {
+    color: var(--h4-color) !important;
+}
+
+h5 {
+    color: var(--h5-color) !important;
+}
+
+code,
+pre,
+.category-tree {
+    font-family: var(--font-code) !important;
+}
+
+/* Layout */
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background: var(--header-bg);
+    /* backdrop-filter: blur(10px); Removed for solid bg */
+    border-bottom: 1px solid var(--border-color);
+    /* position: sticky; Removed */
+    /* top: 0; Removed */
+    z-index: 100;
+}
+
+nav {
+    max-width: 1400px;
+    /* Expand Navbar Width */
+    width: 100%;
+    /* Ensure full width usage */
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    /* Add side padding */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    /* Include padding in width */
+}
+
+.logo {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    line-height: 1.1;
+    /* Tight line height for 2 lines */
+    font-size: 1.1rem;
+    /* Slightly smaller font */
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--primary-color), #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-decoration: none;
+    letter-spacing: -0.02em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.nav-links a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover {
+    color: var(--primary-color);
+}
+
+/* --- Responsive Layout & Main Frame --- */
+main {
+    flex: 1;
+    max-width: 1200px;
+    /* Expanded Width */
+    width: 100%;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    /* Better Padding */
+    box-sizing: border-box;
+}
+
+/* ... (omitted) ... */
+
+/* Consolidated Metadata Styles */
+.post-meta-top {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.post-category-label,
+.post-author-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    /* Precise Fixed Height */
+    line-height: normal;
+    font-size: 0.75rem;
+    font-family: var(--font-code), monospace;
+    /* Unified Font */
+    padding: 0 10px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-sizing: border-box;
+}
+
+.post-category-label {
+    color: var(--primary-color);
+    background: rgba(187, 134, 252, 0.1);
+    border: 1px solid rgba(187, 134, 252, 0.1);
+}
+
+.post-author-label {
+    color: var(--secondary-color);
+    background: var(--code-bg);
+    border: 1px solid var(--code-bg);
+}
+
+footer {
+    text-align: center;
+
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+
+    line-height: 1.5;
+
+    color: var(--secondary-color);
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-color);
+
+    margin-top: auto;
+}
+
+
+
+/* Components */
+/* --- Modern Tree Explorer Styles --- */
+.category-tree-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: none;
+    /* Flat */
+}
+
+/* Old Tree Styles Removed */
+.post-list {
+    display: grid;
+    gap: 2rem;
+}
+
+.post-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+    box-shadow: none;
+    /* Flat */
+}
+
+
+
+/* --- Post Navigation (Prev/List/Next) --- */
+.post-navigation-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+}
+
+.nav-btn {
+    display: inline-block;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    text-align: center;
+}
+
+.nav-btn:hover:not(.disabled) {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.nav-btn.list-btn {
+    font-weight: 600;
+    border-color: transparent;
+    background: transparent;
+}
+
+.nav-btn.list-btn:hover {
+    background: color-mix(in oklch, var(--primary-color) 5%, transparent);
+    border-color: transparent;
+}
+
+.nav-btn.disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+    border-color: transparent;
+    background: transparent;
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.theme-toggle:hover {
+    background-color: var(--border-color);
+}
+
+.palette-switcher {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+
+.palette-btn {
+    font-family: var(--font-code);
+    font-size: 0.7rem;
+    font-weight: 600;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease-glass), color var(--dur-fast) var(--ease-glass);
+}
+
+.palette-btn:hover {
+    color: var(--text);
+}
+
+.palette-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.palette-btn.active {
+    background: var(--accent);
+    color: var(--bg);
+}
+
+/* Typography (Markdown Optimized) */
+.markdown-body {
+    font-size: 1.1rem;
+    /* Improved Readability */
+    line-height: 1.8;
+    /* Relaxed line height */
+    color: var(--text-color);
+    letter-spacing: -0.01em;
+}
+
+.markdown-body p {
+    margin-bottom: 1.6rem;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5 {
+    margin-top: 2.2em;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.markdown-body h1 {
+    font-size: 2.2em;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.3em;
+    color: var(--h1-color);
+}
+
+.markdown-body h2 {
+    font-size: 1.75em;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.3em;
+    color: var(--h2-color);
+}
+
+.markdown-body h3 {
+    font-size: 1.4em;
+    color: var(--h3-color);
+}
+
+.markdown-body h4 {
+    font-size: 1.2em;
+    color: var(--h4-color);
+}
+
+.markdown-body h5 {
+    font-size: 1.1em;
+    color: var(--h5-color);
+}
+
+.markdown-body strong {
+    color: var(--bold-color);
+    font-weight: 600;
+}
+
+.markdown-body p {
+    margin-bottom: 1.5em;
+}
+
+.markdown-body a {
+    color: var(--link-color);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.markdown-body blockquote {
+    color: var(--secondary-color);
+    border-left: 4px solid var(--primary-color);
+    padding: 1.2em 1.5em;
+    /* Increased padding */
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    /* Rounded blockquote */
+    margin: 2.5rem 0;
+}
+
+.markdown-body blockquote> :last-child {
+    margin-bottom: 0;
+}
+
+.markdown-body blockquote> :first-child {
+    margin-top: 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+    padding-left: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+.markdown-body li {
+    margin-bottom: 0.5em;
+}
+
+.markdown-body img {
+    max-width: 100%;
+    border-radius: 12px;
+    /* Smooth corners */
+    box-shadow: var(--shadow);
+    margin: 2.5rem 0;
+}
+
+/* Inline Code */
+.markdown-body code:not([class*="language-"]) {
+    background-color: var(--code-bg);
+    color: #eb5757;
+    /* More vibrant red/pink */
+    padding: 0.2em 0.5em;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.9em;
+}
+
+
+
+/* Dark Mode Overrides moved to dark.css */
+/* Post Title Color Overrides moved to dark.css */
+
+
+/* Post Title Link Clean Style */
+.post-title a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.post-title a:hover,
+.post-title a:visited,
+.post-title a:active {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Table Styles */
+.markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    display: block;
+}
+
+.markdown-body th,
+.markdown-body td {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+}
+
+.markdown-body th {
+    background-color: var(--card-bg);
+    font-weight: 600;
+}
+
+/* Post Detail Styles */
+.post-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    background: transparent;
+    /* No background to blend in */
+}
+
+
+
+.post-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.2rem;
+    line-height: 1.3;
+    color: var(--h1-color);
+}
+
+.post-meta-info {
+    color: var(--secondary-color);
+    font-size: 0.95rem;
+}
+
+.post-description {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.back-link-container {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.back-link {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.back-link:hover {
+    background-color: var(--border-color);
+    transform: translateY(-1px);
+    box-shadow: var(--card-shadow);
+}
+
+/* --- Header & Navigation --- */
+header {
+    background-color: var(--header-bg);
+    /* Opacity fix */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    /* Remove sticky */
+    z-index: 100;
+}
+
+/* ... (omitted) ... */
+
+
+
+/* Responsive Mobile Layout */
+@media (max-width: 768px) {
+    main {
+        padding: 1rem;
+        /* Compact padding */
+    }
+
+    nav {
+        padding: 1rem;
+        /* Compact nav padding on mobile */
+    }
+
+    .markdown-body h1 {
+        font-size: 1.8rem;
+    }
+
+    .post-title {
+        font-size: 1.6rem;
+    }
+
+    .post-header {
+        margin-bottom: 1.5rem;
+    }
+}
+
+.post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.tag-badge {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.1);
+    /* Light Blue Tint */
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+/* Cache Reset Button in Footer */
+/* Button Styles */
+.btn-icon-only {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon-only:hover {
+    background: var(--card-bg);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: rotate(180deg);
+}
+
+.btn-icon-only:active {
+    transform: rotate(180deg) scale(0.95);
+}
+
+
+
+/* Utility */
+/* Hidden Link in Footer */
+.footer-copyright-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: default;
+    /* Keep default cursor */
+}
+
+.footer-copyright-link:hover,
+.footer-copyright-link:active,
+.footer-copyright-link:visited {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   IDE-STYLE MARKDOWN CODE BLOCK (Security Blog Optimized)
+   - macOS Window Frame
+   - Copy Button
+   - Line Numbers
+   - Prism Syntax Highlighting
+   - Bash / Security Terminal Style
+========================================================= */
+
+/* --- Base Code Block Container --- */
+.markdown-body pre[class*="language-"] {
+    position: relative;
+    background: #0d1117;
+    /* GitHub / IDE Dark */
+    color: #e5e7eb;
+    padding: 2.8rem 1.2rem 1.4rem 3.5rem;
+    /* left space for line numbers */
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 2.8rem 0;
+    font-family: var(--font-code);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* --- macOS Window Dots --- */
+.markdown-body pre[class*="language-"]::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    width: 12px;
+    height: 12px;
+    background: #ff5f56;
+    border-radius: 50%;
+    box-shadow:
+        20px 0 0 #ffbd2e,
+        40px 0 0 #27c93f;
+}
+
+/* --- Code Element --- */
+.markdown-body pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font-family: inherit;
+    white-space: pre;
+    display: block;
+}
+
+/* CSS-only Line Numbers removed to fix layout issues */
+
+/* =========================================================
+   Prism Syntax Highlighting (IDE Theme)
+========================================================= */
+.token.comment {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.token.keyword {
+    color: #f472b6;
+}
+
+.token.class-name,
+.token.function {
+    color: #38bdf8;
+}
+
+.token.string {
+    color: #a7f3d0;
+}
+
+.token.number {
+    color: #facc15;
+}
+
+.token.operator {
+    color: #e5e7eb;
+}
+
+.token.punctuation {
+    color: #9ca3af;
+}
+
+/* =========================================================
+   Bash / Security Terminal Style
+========================================================= */
+pre.language-bash {
+    background: #020617;
+    /* Darker terminal */
+    color: #d1d5db;
+}
+
+pre.language-bash .token.comment {
+    color: #64748b;
+    font-style: italic;
+}
+
+pre.language-bash .token.function {
+    color: #22d3ee;
+}
+
+pre.language-bash .token.string {
+    color: #86efac;
+}
+
+pre.language-bash .token.operator {
+    color: #f97316;
+}
+
+pre.language-bash .token.keyword {
+    color: #f87171;
+}
+
+/* Prompt-like 느낌 */
+pre.language-bash code {
+    font-size: 0.85rem;
+}
+
+/* =========================================================
+   Inline Code (Non-block)
+========================================================= */
+.markdown-body code:not(pre code) {
+    background-color: var(--code-bg);
+    color: #e01e5a;
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-family: var(--font-code);
+    font-size: 0.9em;
+}
+
+
+
+/* =========================================================
+   Basic Code Block (``` without language) — Refined
+   ========================================================= */
+
+.markdown-body pre:not([class*="language-"]) {
+    background-color: #2f3a4d;
+    /* 내부/외부 통일 */
+    color: #e5e7eb;
+
+    padding: 0.9rem 1.2rem;
+    /* 🔽 내부 여백 축소 */
+    margin: 1.4rem 0;
+    /* 🔽 바깥 여백 축소 */
+
+    border-radius: 10px;
+    /* 살짝만 둥글게 */
+    font-family: var(--font-code);
+    font-size: 0.95rem;
+    line-height: 1.65;
+
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+
+    /* 그림자 약화 (레이어 느낌 제거) */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* 내부 code 태그 — 완전 플랫 */
+.markdown-body pre:not([class*="language-"])>code {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: pre;
+    display: block;
+}
+
+[data-mode="light"] .markdown-body pre:not([class*="language-"]) {
+    background-color: #2b3445;
+}
+
+/* ===============================
+   Code Block Normalization FIX
+   =============================== */
+
+.markdown-body pre {
+    margin: 1.2rem 0;
+    padding: 0.75rem 1rem;
+    /* ⬅️ 여백 줄임 */
+    background: #0b0f14;
+    /* 내부 색 통일 */
+    border-radius: 10px;
+    /* 둥글게 */
+    overflow-x: auto;
+
+    /* 🔑 핵심 */
+    white-space: pre;
+    /* 절대 pre-wrap 금지 */
+    line-height: 1.45;
+    /* 문단 영향 제거 */
+}
+
+.markdown-body pre code {
+    display: block;
+    padding: 0;
+    margin: 0;
+
+    white-space: inherit;
+    /* pre 기준 따름 */
+    line-height: inherit;
+    background: transparent;
+    font-family: var(--font-code);
+    font-size: 0.9rem;
+}
+
+/* Line numbers spacing fix */
+pre.line-numbers {
+    padding-left: 3.2em !important;
+}
+
+
+.line-numbers-rows>span {
+    line-height: 1.45 !important;
+}
+
+/* --- Category Tree Styles --- */
+.tree-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tree-item {
+    margin-bottom: 0;
+}
+
+.tree-content {
+    display: flex;
+    align-items: center;
+    padding: 0.4rem 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.tree-content:hover {
+    background-color: var(--card-bg);
+}
+
+.tree-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+    color: var(--muted);
+    transition: transform 0.2s ease;
+}
+
+.tree-toggle.hidden {
+    visibility: hidden;
+}
+
+/* Rotate Chevron when Expanded */
+.tree-item.expanded>.tree-content .tree-toggle svg {
+    transform: rotate(90deg);
+}
+
+.tree-icon {
+    display: inline-flex;
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+
+.tree-label {
+    flex: 1;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.tree-badge {
+    background-color: var(--bg-color);
+    color: var(--muted);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+/* Hide children by default */
+.tree-children {
+    display: none;
+    /* Indentation Logic:
+       Align with Folder Icon Center:
+       Padding(8) + Toggle(24) + Margin(4) + HalfIcon(9) - Border(1) ≈ 43px
+    */
+    margin-left: 43px;
+    border-left: 1px solid var(--border-color);
+
+    /* Content indentation from the line */
+    /* Reduced to 0 to minimize gap since we restored the toggle spacer for alignment */
+    padding-left: 0;
+    margin-top: 0;
+}
+
+/* Show children when expanded */
+.tree-item.expanded>.tree-children {
+    display: block;
+}
+
+/* Post Item Specifics */
+.tree-post-item .tree-label {
+    font-weight: 400;
+    font-size: 0.95rem;
+}
+
+.tree-post-item .tree-icon {
+    color: var(--secondary-color);
+}
+
+/* Maintain alignment with folders by keeping the toggle space, but invisible */
+.tree-post-item .tree-toggle {
+    display: inline-flex;
+    /* Restore display */
+    visibility: hidden;
+    /* Hide visually but keep space */
+}
+
+/* File Icon Specifics */
+.file-icon {
+    color: #10b981;
+    /* Emerald Green for Light Mode - Distinct from Folder Blue */
+    opacity: 1 !important;
+    /* Remove inline opacity */
+}
+
+[data-mode="dark"] .file-icon {
+    color: inherit;
+    /* Reset for Dark Mode */
+    opacity: 0.7 !important;
+    /* Restore opacity */
+}
