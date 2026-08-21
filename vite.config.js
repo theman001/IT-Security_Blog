@@ -1,5 +1,29 @@
 import { defineConfig } from 'vite';
 
+// Vite's dev server serves index.html for the *base path with its trailing
+// slash* (and for any nested SPA route past it), but a request for the bare
+// base with no trailing slash — exactly what a code-server "Ports" link or a
+// hand-typed URL often is — 404s outright instead of redirecting. Confirmed:
+// GET /absproxy/5173 -> 404, GET /absproxy/5173/ -> 200, GET /absproxy/5173/categories -> 200.
+function redirectBareBasePlugin(base) {
+  const baseNoSlash = base.endsWith('/') ? base.slice(0, -1) : base;
+  return {
+    name: 'redirect-bare-base-to-trailing-slash',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url.split('?')[0];
+        if (url === baseNoSlash) {
+          res.statusCode = 302;
+          res.setHeader('Location', base + (req.url.includes('?') ? '?' + req.url.split('?')[1] : ''));
+          res.end();
+          return;
+        }
+        next();
+      });
+    },
+  };
+}
+
 export default defineConfig(({ command }) => ({
   // repo root doubles as the Vite project root; `public/` (assets/xp, static/*.md)
   // is Vite's default publicDir and is copied to dist/ verbatim, since those
@@ -19,6 +43,7 @@ export default defineConfig(({ command }) => ({
   // the dev server. Production (Cloudflare Pages) is served from the real
   // domain root, so `base` stays '/' there.
   base: command === 'serve' ? '/absproxy/5173/' : '/',
+  plugins: command === 'serve' ? [redirectBareBasePlugin('/absproxy/5173/')] : [],
   server: {
     // Listen on all interfaces, not just 127.0.0.1 — the forwarding proxy may
     // reach the dev server over an interface other than loopback.

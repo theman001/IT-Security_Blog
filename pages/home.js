@@ -48,30 +48,24 @@ async function renderBentoHome(container) {
                     <canvas class="bento-hero-canvas"></canvas>
                     <div class="bento-hero-content">
                         <h1 class="bento-hero-title">THEMAN의 블로그</h1>
-                        <p class="bento-hero-tagline">보안 · 인프라 · 실험적 기록. 재현 안 되는 버그와 재현되는 실수들에 대한 고찰.</p>
+                        <p class="bento-hero-tagline">보안 · 인프라 · 실험적 기록. 지금까지 ${totalPosts}개의 분석과 ${categories.length}개의 갈래로 뻗어나간, 재현 안 되는 버그와 재현되는 실수들에 대한 고찰.</p>
                     </div>
                 </div>
                 <div class="bento-tile bento-graph-preview" data-glass-surface="tree">
-                    <div class="bento-tile-label">Category Graph</div>
                     <div class="bento-mini-graph"></div>
-                    <a href="/categories" data-link class="bento-tile-link">Explore full graph →</a>
+                    <a href="/categories" data-link class="bento-tile-link">전체 그래프 열기 →</a>
                 </div>
-                <div class="bento-tile bento-posts">
-                    <div class="bento-tile-label">Recent Posts</div>
-                    ${renderPostList(recentPosts)}
-                </div>
-                <div class="bento-tile bento-stats glass-lite">
-                    <div class="bento-stat"><span class="bento-stat-value">${totalPosts}</span><span class="bento-stat-label">Posts</span></div>
-                    <div class="bento-stat"><span class="bento-stat-value">${categories.length}</span><span class="bento-stat-label">Categories</span></div>
-                </div>
-                <div class="bento-tile bento-interview">
+                <div class="bento-interview bento-tile">
                     <div class="markdown-body home-intro">${introHtml}</div>
                 </div>
-                <a href="/hidden" data-link class="bento-tile bento-egg">
-                    <span>🕵️ 자잘한 이스터에그가 존재합니다. 버그처럼 보인다면 그건 이스터에그입니다.</span>
-                    <span class="bento-egg-arrow">→</span>
-                </a>
             </div>
+            <section class="home-posts">
+                <h2 class="home-posts-heading">최근에 쓴 것들</h2>
+                ${renderPostList(recentPosts)}
+            </section>
+            <a href="/hidden" data-link class="home-egg">
+                🕵️ 이 페이지 어딘가에 자잘한 이스터에그가 있다. 버그처럼 보인다면 그건 이스터에그다 <span class="home-egg-arrow">→</span>
+            </a>
         `;
 
         const heroCanvas = container.querySelector('.bento-hero-canvas');
