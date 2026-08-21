@@ -31,6 +31,48 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
+/* Ambient background glow — soft, palette-colored blur sitting behind
+   everything so the sticky header's liquid-glass has something to refract
+   even at scroll position 0 (previously only visible once page content had
+   scrolled under it). Purely decorative chrome, not applied to any content
+   surface — home.js's intro text stays plain typography per design.md. */
+.ambient-glow {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.ambient-glow .glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.35;
+}
+
+.ambient-glow .glow-1 {
+    top: -12%;
+    left: -8%;
+    width: 46vw;
+    height: 46vw;
+    background: var(--accent);
+}
+
+.ambient-glow .glow-2 {
+    top: -8%;
+    right: -12%;
+    width: 40vw;
+    height: 40vw;
+    background: var(--accent-2);
+}
+
+@media (prefers-reduced-transparency: reduce),
+(prefers-reduced-motion: reduce) {
+    .ambient-glow {
+        display: none;
+    }
+}
+
 h1,
 h2,
 h3,
@@ -436,6 +478,22 @@ footer {
     border-bottom: 2px solid var(--border-color);
     padding-bottom: 0.3em;
     color: var(--h1-color);
+}
+
+/* Home page hero title — bigger, no rule, gradient across the two accents so
+   it reads as a statement rather than a generic markdown H1 (and shifts with
+   the active palette, unlike a fixed brand color would). */
+.home-intro h1 {
+    font-size: var(--text-4xl);
+    margin-top: 0;
+    letter-spacing: -0.02em;
+    border-bottom: none;
+    padding-bottom: 0;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 .markdown-body h2 {
