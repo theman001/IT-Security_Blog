@@ -6,6 +6,7 @@ import errorPage from '../../pages/error.js';
 import { renderSkeletonList, renderSkeletonPost } from './components.js';
 import { enhanceCodeBlocks } from './code-enhance.js';
 import { initLiquidGlass } from './liquid-glass.ts';
+import { toAppPath, toRealPath } from './base-path.js';
 
 // Route Definition
 const routes = [
@@ -30,16 +31,18 @@ const getParams = match => {
 };
 
 export const navigateTo = url => {
-    history.pushState(null, null, url);
+    history.pushState(null, null, toRealPath(url));
     router();
 };
 
 export const router = async () => {
+    const appPath = toAppPath(location.pathname);
+
     // 1. Match Route
     const potentialMatches = routes.map(route => {
         return {
             route: route,
-            result: location.pathname.match(pathToRegex(route.path))
+            result: appPath.match(pathToRegex(route.path))
         };
     });
 
@@ -48,7 +51,7 @@ export const router = async () => {
     if (!match) {
         match = {
             route: { view: '../../pages/error.js', path: '/error' },
-            result: [location.pathname]
+            result: [appPath]
         };
     }
 
@@ -69,7 +72,7 @@ export const router = async () => {
         await module.default(container, params);
 
         // Toggle hidden-route class for mobile nav visibility
-        if (location.pathname === '/hidden') {
+        if (appPath === '/hidden') {
             document.body.classList.add('hidden-route');
         } else {
             document.body.classList.remove('hidden-route');
@@ -93,7 +96,7 @@ export const router = async () => {
 };
 
 const updateActiveLinks = () => {
-    const currentPath = location.pathname;
+    const currentPath = toAppPath(location.pathname);
     const links = document.querySelectorAll('[data-link]');
 
     links.forEach(link => {
