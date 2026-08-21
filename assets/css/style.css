@@ -228,23 +228,6 @@ main {
     border: 1px solid var(--code-bg);
 }
 
-footer {
-    text-align: center;
-
-    padding-top: 1.5rem;
-    padding-bottom: 1.5rem;
-
-    line-height: 1.5;
-
-    color: var(--secondary-color);
-    border-top: 1px solid var(--border-color);
-    background: var(--bg-color);
-
-    margin-top: auto;
-}
-
-
-
 /* Components */
 /* --- Category Graph (force-directed, replaces the old folder tree) --- */
 .category-graph-container {
@@ -321,45 +304,38 @@ footer {
 }
 
 /* =========================================================
-   Home — Bento dashboard (replaces the old linear intro+list home page)
+   Home — asymmetric collage (replaces the old linear intro+list home page,
+   and deliberately NOT a symmetric SaaS-dashboard bento: no uppercase
+   eyebrow kickers, no big-number stat tiles, tiles don't all match — some
+   are boxed, the post list and easter-egg line aren't boxed at all).
    ========================================================= */
 .bento-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: auto auto auto auto;
+    grid-template-columns: 7fr 5fr;
     grid-template-areas:
-        "hero hero graph"
-        "hero hero stats"
-        "posts posts posts"
-        "interview interview interview"
-        "egg egg egg";
+        "hero graph"
+        "interview interview";
     gap: var(--space-5);
+    margin-bottom: var(--space-7);
 }
 
 .bento-tile {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
     padding: var(--space-5);
     position: relative;
     overflow: hidden;
 }
 
-.bento-tile-label {
-    font-family: var(--font-code);
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    margin-bottom: var(--space-3);
-}
-
 .bento-hero {
     grid-area: hero;
-    min-height: 320px;
+    min-height: 340px;
     display: flex;
     align-items: flex-end;
     padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    /* Angled corner — breaks the "everything is a rounded rectangle" tell. */
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 88% 100%, 0 100%);
 }
 
 .bento-hero-canvas {
@@ -408,6 +384,12 @@ footer {
     grid-area: graph;
     display: flex;
     flex-direction: column;
+    border-radius: var(--space-3);
+    /* Slight tilt + overlap onto the hero tile — a pinned-note feel instead
+       of a same-size grid neighbor. */
+    transform: rotate(0.8deg);
+    margin-left: -28px;
+    z-index: 2;
 }
 
 .bento-mini-graph {
@@ -428,48 +410,11 @@ footer {
     text-decoration: underline;
 }
 
-.bento-posts {
-    grid-area: posts;
-}
-
-.bento-posts .post-list {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--space-4);
-}
-
-.bento-stats {
-    grid-area: stats;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-}
-
-.bento-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2em;
-}
-
-.bento-stat-value {
-    font-family: var(--font-heading);
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    color: var(--accent);
-}
-
-.bento-stat-label {
-    font-family: var(--font-code);
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-}
-
 .bento-interview {
     grid-area: interview;
-    max-height: 520px;
+    max-height: 480px;
     overflow-y: auto;
+    border-radius: var(--radius-lg) var(--space-2) var(--radius-lg) var(--space-2);
 }
 
 .bento-interview .home-intro {
@@ -482,30 +427,44 @@ footer {
     display: none;
 }
 
-.bento-egg {
-    grid-area: egg;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    color: var(--text-color);
+/* Recent posts — deliberately NOT boxed like the tiles above; it just sits
+   on the page, only the individual post cards have their own edges. */
+.home-posts {
+    margin-bottom: var(--space-7);
+}
+
+.home-posts-heading {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    margin: 0 0 var(--space-4);
+}
+
+.home-posts .post-list {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-4);
+}
+
+.home-egg {
+    display: block;
+    color: var(--muted);
     text-decoration: none;
     font-family: var(--font-code);
-    transition: border-color var(--dur-fast) var(--ease-glass);
+    font-size: var(--text-sm);
+    border-top: 1px dashed var(--border-color);
+    padding-top: var(--space-4);
 }
 
-.bento-egg:hover {
-    border-color: var(--accent);
+.home-egg:hover {
+    color: var(--accent);
 }
 
-.bento-egg:focus-visible {
+.home-egg:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
-.bento-egg-arrow {
+.home-egg-arrow {
     color: var(--accent);
-    flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
@@ -514,14 +473,17 @@ footer {
         grid-template-areas:
             "hero"
             "graph"
-            "posts"
-            "stats"
-            "interview"
-            "egg";
+            "interview";
     }
 
     .bento-hero {
         min-height: 240px;
+        clip-path: none;
+    }
+
+    .bento-graph-preview {
+        transform: none;
+        margin-left: 0;
     }
 }
 
@@ -1031,22 +993,6 @@ footer {
 }
 
 
-
-/* Utility */
-/* Hidden Link in Footer */
-.footer-copyright-link {
-    text-decoration: none;
-    color: inherit;
-    cursor: default;
-    /* Keep default cursor */
-}
-
-.footer-copyright-link:hover,
-.footer-copyright-link:active,
-.footer-copyright-link:visited {
-    color: inherit;
-    text-decoration: none;
-}
 
 
 /* =========================================================
