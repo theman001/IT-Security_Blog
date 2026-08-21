@@ -398,6 +398,9 @@ footer {
 }
 
 /* Typography (Markdown Optimized) */
+/* Own max-width even though post-detail's .post-content already sets the
+   same value — this class is also used bare (home intro, static about/
+   architecture pages) with no .post-content ancestor to constrain it. */
 .markdown-body {
     max-width: var(--measure-reading);
     margin-left: auto;
@@ -638,7 +641,7 @@ footer {
         /* Compact padding */
     }
 
-    header nav {
+    #app > header nav {
         padding: 1rem;
         /* Compact nav padding on mobile */
     }

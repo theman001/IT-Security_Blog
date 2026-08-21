@@ -107,7 +107,7 @@ Radius: `sm 8px / md 16px / lg 28px` (가장 둥글고 유기적). Motion: `ease
 
 ## 6. 페이지 타입별 매크로구조
 
-- **Home**: `main.md` 개인 인트로(글래스 미적용, 순수 타이포) + 최근 게시글 티저 렉(3~5 카드, flat)
+- **Home**: `main.md` 개인 인트로(글래스 미적용, 순수 타이포, `--measure-reading` 760px로 중앙 정렬) + 최근 게시글 티저 렉(3~5 카드, flat, `main`의 전체 그리드 폭 1200px 유지) — 좁은 읽기 컬럼에서 넓은 카드 그리드로 전환되는 폭 차이는 의도된 것
 - **Categories**: 외곽 컨테이너만 glass(`tree` 파라미터), 트리 행은 flat, 필터 입력창 추가
 - **Post detail**: 리딩 프로그레스 pill(glass-lite) + TOC + flat 본문
 - **Static (About/Architecture)**: 타이포만 토큰화, 글래스 없음

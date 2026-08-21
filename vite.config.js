@@ -7,5 +7,12 @@ export default defineConfig({
   // statements Vite's bundler can see.
   build: {
     target: 'es2020'
+  },
+  server: {
+    // Listen on all interfaces, not just 127.0.0.1 — this project is developed
+    // through a remote code-server, and the port-forwarding proxy may reach
+    // the dev server over an interface other than loopback.
+    host: true,
+    allowedHosts: "dev.taeuk.site"
   }
 });
