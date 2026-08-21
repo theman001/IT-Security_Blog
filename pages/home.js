@@ -1,86 +1,124 @@
-import { fetchPosts, fetchPostsByCategory } from '../assets/js/api.js';
+import { fetchPosts, fetchPostsByCategory, fetchCategories } from '../assets/js/api.js';
 import { renderMarkdown, stripMarkdown } from '../assets/js/renderer.js';
 import { renderPostList, renderSubCategoryGrid, renderEmptyState } from '../assets/js/components.js';
 import { BASE_PATH } from '../assets/js/base-path.js';
+import { mountHeroShader } from '../assets/js/hero-shader.js';
+import { renderCategoryGraph } from '../assets/js/graph.js';
+import { navigateTo } from '../assets/js/router.js';
 
 function withExcerpt(post) {
     return { ...post, excerpt: post.description || stripMarkdown(post.content || '', 180) };
 }
 
+// The SPA router only swaps #main-content's innerHTML — it never reloads the
+// page — so the previous visit's WebGL context and graph simulation must be
+// torn down explicitly before a new one starts, or they keep running behind
+// a detached canvas.
+let currentTeardowns = [];
+function teardownPrevious() {
+    currentTeardowns.forEach(fn => fn());
+    currentTeardowns = [];
+}
+
 export default async function render(container, params) {
-    let mode = 'latest';
-    let posts = [];
-    let subCategories = []; // Separate variable for subs
-    let pageTitle = 'Latest Posts';
-    let pageDesc = 'Exploring the world of IT Security and Development.';
+    teardownPrevious();
 
+    if (params && params.slug) {
+        await renderCategoryView(container, params);
+    } else {
+        await renderBentoHome(container);
+    }
+}
+
+async function renderBentoHome(container) {
     try {
-        if (params && params.slug) {
-            // --- Category View ---
-            mode = 'category';
+        const [mdRes, allPosts, categories] = await Promise.all([
+            fetch(`${BASE_PATH}static/main.md`),
+            fetchPosts(),
+            fetchCategories(),
+        ]);
 
-            // Should return { posts: [], subCategories: [], category: {...} }
-            const result = await fetchPostsByCategory(params.slug);
+        const introHtml = mdRes.ok ? renderMarkdown(await mdRes.text()) : '';
+        const recentPosts = allPosts.slice(0, 4).map(withExcerpt);
+        const totalPosts = categories.reduce((sum, c) => sum + parseInt(c.post_count || 0, 10), 0);
 
-            posts = result.posts || [];
-            subCategories = result.subCategories || [];
+        container.innerHTML = `
+            <div class="bento-grid">
+                <div class="bento-tile bento-hero">
+                    <canvas class="bento-hero-canvas"></canvas>
+                    <div class="bento-hero-content">
+                        <h1 class="bento-hero-title">THEMAN의 블로그</h1>
+                        <p class="bento-hero-tagline">보안 · 인프라 · 실험적 기록. 재현 안 되는 버그와 재현되는 실수들에 대한 고찰.</p>
+                    </div>
+                </div>
+                <div class="bento-tile bento-graph-preview" data-glass-surface="tree">
+                    <div class="bento-tile-label">Category Graph</div>
+                    <div class="bento-mini-graph"></div>
+                    <a href="/categories" data-link class="bento-tile-link">Explore full graph →</a>
+                </div>
+                <div class="bento-tile bento-posts">
+                    <div class="bento-tile-label">Recent Posts</div>
+                    ${renderPostList(recentPosts)}
+                </div>
+                <div class="bento-tile bento-stats glass-lite">
+                    <div class="bento-stat"><span class="bento-stat-value">${totalPosts}</span><span class="bento-stat-label">Posts</span></div>
+                    <div class="bento-stat"><span class="bento-stat-value">${categories.length}</span><span class="bento-stat-label">Categories</span></div>
+                </div>
+                <div class="bento-tile bento-interview">
+                    <div class="markdown-body home-intro">${introHtml}</div>
+                </div>
+                <a href="/hidden" data-link class="bento-tile bento-egg">
+                    <span>🕵️ 자잘한 이스터에그가 존재합니다. 버그처럼 보인다면 그건 이스터에그입니다.</span>
+                    <span class="bento-egg-arrow">→</span>
+                </a>
+            </div>
+        `;
 
-            // Set Titles
-            const parts = params.slug.split('/');
-            const folderName = parts[parts.length - 1];
-            pageTitle = folderName;
+        const heroCanvas = container.querySelector('.bento-hero-canvas');
+        currentTeardowns.push(mountHeroShader(heroCanvas));
 
-            if (result.category && result.category.post_count) {
-                pageDesc = `${result.category.post_count} posts in this category`;
-            } else {
-                pageDesc = `Browsing ${folderName}`;
-            }
+        const miniGraphEl = container.querySelector('.bento-mini-graph');
+        const miniGraph = renderCategoryGraph(miniGraphEl, categories, {
+            onNodeNavigate: (path) => navigateTo(path),
+        });
+        currentTeardowns.push(miniGraph.teardown);
 
-        } else {
-            // --- Home View (Introduction from main.md + recent posts teaser) ---
-            const [res, allPosts] = await Promise.all([fetch(`${BASE_PATH}static/main.md`), fetchPosts()]);
-            if (res.ok) {
-                const text = await res.text();
-                const htmlContent = renderMarkdown(text);
-                const recentPosts = allPosts.slice(0, 5).map(withExcerpt);
-                container.innerHTML = `
-                    <div class="markdown-body home-intro">${htmlContent}</div>
-                    ${recentPosts.length > 0 ? `
-                        <div class="section-title">Recent Posts</div>
-                        ${renderPostList(recentPosts)}
-                    ` : ''}
-                `;
-                return; // Stop here, do not run category-view rendering logic below
-            } else {
-                // Fallback if main.md is missing
-                console.warn('main.md not found, falling back to post list.');
-                posts = allPosts;
-            }
-        }
     } catch (e) {
         console.error('Home Render Error:', e);
         container.innerHTML = renderEmptyState('Failed to load content.');
-        return;
     }
+}
 
-    // --- Render Header (Only for Category View now) ---
-    let html = `
-        <h1 style="margin-bottom: 0.5rem;">${pageTitle}</h1>
-        <p style="color: var(--muted); margin-bottom: 2rem;">${pageDesc}</p>
-    `;
+async function renderCategoryView(container, params) {
+    try {
+        const result = await fetchPostsByCategory(params.slug);
+        const posts = result.posts || [];
+        const subCategories = result.subCategories || [];
 
-    // --- Render Sub-Categories ---
-    if (mode === 'category' && subCategories.length > 0) {
-        html += `<div class="section-title">Sub-Categories</div>${renderSubCategoryGrid(subCategories)}`;
+        const parts = params.slug.split('/');
+        const folderName = parts[parts.length - 1];
+        const pageDesc = result.category && result.category.post_count
+            ? `${result.category.post_count} posts in this category`
+            : `Browsing ${folderName}`;
+
+        let html = `
+            <h1 style="margin-bottom: 0.5rem;">${folderName}</h1>
+            <p style="color: var(--muted); margin-bottom: 2rem;">${pageDesc}</p>
+        `;
+
+        if (subCategories.length > 0) {
+            html += `<div class="section-title">Sub-Categories</div>${renderSubCategoryGrid(subCategories)}`;
+        }
+
+        if (posts.length > 0) {
+            html += `<div class="section-title">Posts</div>${renderPostList(posts.map(withExcerpt))}`;
+        } else if (subCategories.length === 0) {
+            html += renderEmptyState('This folder is currently empty.');
+        }
+
+        container.innerHTML = html;
+    } catch (e) {
+        console.error('Category View Render Error:', e);
+        container.innerHTML = renderEmptyState('Failed to load content.');
     }
-
-    // --- Render Posts (For Category View) ---
-    if (posts.length > 0) {
-        if (mode === 'category') html += `<div class="section-title">Posts</div>`;
-        html += renderPostList(posts.map(withExcerpt));
-    } else if (mode === 'category' && subCategories.length === 0) {
-        html += renderEmptyState('This folder is currently empty.');
-    }
-
-    container.innerHTML = html;
 }

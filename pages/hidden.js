@@ -17,7 +17,7 @@ export default async function render(container) {
                 width: 100%;
                 height: 100%;
                 background-color: #0099cc; /* Fallback */
-                background-image: url('/assets/xp/wallpaper.jpg');
+                background-image: url('${BASE_PATH}assets/xp/wallpaper.jpg');
                 background-size: cover;
                 background-position: center;
                 position: relative;
@@ -199,7 +199,7 @@ export default async function render(container) {
                 width: 20px;
                 height: 20px;
                 margin-right: 5px;
-                background: url('/assets/xp/icons/start_button.png') no-repeat left center;
+                background: url('${BASE_PATH}assets/xp/icons/start_button.png') no-repeat left center;
                 background-size: auto 100%; /* Scale height to fit, trim width */
                 filter: drop-shadow(0 0 1px rgba(0,0,0,0.2));
             }
@@ -350,7 +350,7 @@ export default async function render(container) {
     }
 
     // 2. Play Startup Sound
-    const startupSound = new Audio('/assets/xp/startup.mp3');
+    const startupSound = new Audio(`${BASE_PATH}assets/xp/startup.mp3`);
     startupSound.volume = 0.5;
     startupSound.play().catch(() => { }); // Autoplay might block it
 
@@ -359,19 +359,19 @@ export default async function render(container) {
         <div id="xp-desktop">
             <div class="desktop-icons">
                 <div class="icon" onclick="window.openNotepad()">
-                    <div class="icon-img" style="background-image: url('/assets/xp/icons/notepad.ico');"></div>
+                    <div class="icon-img" style="background-image: url('${BASE_PATH}assets/xp/icons/notepad.ico');"></div>
                     <div class="icon-text">ReadMe.txt</div>
                 </div>
                 <div class="icon" onclick="window.openBrowser()">
-                    <div class="icon-img" style="background-image: url('/assets/xp/icons/internet_explorer.ico');"></div>
+                    <div class="icon-img" style="background-image: url('${BASE_PATH}assets/xp/icons/internet_explorer.ico');"></div>
                     <div class="icon-text">Internet<br>Explorer</div>
                 </div>
                 <div class="icon" onclick="window.openMyComputer()">
-                    <div class="icon-img" style="background-image: url('/assets/xp/icons/my_computer.ico');"></div>
+                    <div class="icon-img" style="background-image: url('${BASE_PATH}assets/xp/icons/my_computer.ico');"></div>
                     <div class="icon-text">My Computer</div>
                 </div>
                 <div class="icon" onclick="window.playError()">
-                    <div class="icon-img" style="background-image: url('/assets/xp/icons/recycle_bin_empty.ico');"></div>
+                    <div class="icon-img" style="background-image: url('${BASE_PATH}assets/xp/icons/recycle_bin_empty.ico');"></div>
                     <div class="icon-text">Recycle Bin</div>
                 </div>
             </div>
@@ -379,20 +379,20 @@ export default async function render(container) {
             <!-- Start Menu -->
             <div id="start-menu">
                 <div class="start-header">
-                     <div class="user-pic" style="background-image: url('/assets/xp/icons/user_pic.ico');"></div>
+                     <div class="user-pic" style="background-image: url('${BASE_PATH}assets/xp/icons/user_pic.ico');"></div>
                      <span style="font-size: 14px; margin-left:10px; margin-top: -10px;">Administrator</span>
                 </div>
                 <div class="start-items">
                      <div class="start-item" onclick="window.openBrowser()">
-                        <div class="start-icon" style="background-image: url('/assets/xp/icons/internet_explorer.ico');"></div>
+                        <div class="start-icon" style="background-image: url('${BASE_PATH}assets/xp/icons/internet_explorer.ico');"></div>
                         <span>Internet Explorer</span>
                      </div>
                      <div class="start-item" onclick="window.openNotepad()">
-                        <div class="start-icon" style="background-image: url('/assets/xp/icons/notepad.ico');"></div>
+                        <div class="start-icon" style="background-image: url('${BASE_PATH}assets/xp/icons/notepad.ico');"></div>
                         <span>Notepad</span>
                      </div>
                      <div class="start-item" onclick="window.playError()">
-                        <div class="start-icon" style="background-image: url('/assets/xp/icons/outlook_express.png');"></div>
+                        <div class="start-icon" style="background-image: url('${BASE_PATH}assets/xp/icons/outlook_express.png');"></div>
                         <span>E-mail</span>
                      </div>
                 </div>
@@ -431,7 +431,7 @@ Feel free to look around, but don't touch the kernel files.
 - The Architect`;
 
     window.playError = () => {
-        new Audio('/assets/xp/error.mp3').play().catch(() => { });
+        new Audio(`${BASE_PATH}assets/xp/error.mp3`).play().catch(() => { });
         alert('Access Denied: Recycle Bin is corrupted.');
     };
 
@@ -538,10 +538,10 @@ Feel free to look around, but don't touch the kernel files.
 
         // Determine Icon
         let iconUrl = '';
-        if (appId === 'ie') iconUrl = '/assets/xp/icons/internet_explorer.ico';
-        else if (appId === 'notepad') iconUrl = '/assets/xp/icons/notepad.ico';
-        else if (appId === 'mycomputer') iconUrl = '/assets/xp/icons/my_computer.ico';
-        else iconUrl = '/assets/xp/icons/application.png'; // Generic App
+        if (appId === 'ie') iconUrl = `${BASE_PATH}assets/xp/icons/internet_explorer.ico`;
+        else if (appId === 'notepad') iconUrl = `${BASE_PATH}assets/xp/icons/notepad.ico`;
+        else if (appId === 'mycomputer') iconUrl = `${BASE_PATH}assets/xp/icons/my_computer.ico`;
+        else iconUrl = `${BASE_PATH}assets/xp/icons/application.png`; // Generic App
 
         taskItem.innerHTML = `<div style="width:16px; height:16px; margin-right:5px; background:url('${iconUrl}') no-repeat center/contain;"></div><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${title}</span>`;
 
@@ -647,7 +647,7 @@ Feel free to look around, but don't touch the kernel files.
                         <button style="font-size:11px; padding:2px 5px;" onclick="window.navigateBrowser('https://blog.taeuk.o-r.kr/')">Home</button>
                     </div>
                     <div style="display:flex; align-items:center; gap:5px; padding:2px; background:white; border:1px solid #7f9db9; margin:0 2px;">
-                        <img src="/assets/xp/icons/internet_explorer.ico" width="16" height="16">
+                        <img src="${BASE_PATH}assets/xp/icons/internet_explorer.ico" width="16" height="16">
                         <span style="font-size:11px; color:#444;">Address:</span>
                         <input id="ie-address" type="text" value="https://blog.taeuk.o-r.kr/" style="flex:1; border:none; outline:none; font-size:11px;" onkeydown="if(event.key==='Enter') window.navigateBrowser(this.value)">
                         <button style="font-size:11px; padding:0 5px;" onclick="window.navigateBrowser(document.getElementById('ie-address').value)">Go</button>
@@ -664,19 +664,19 @@ Feel free to look around, but don't touch the kernel files.
         const content = `
              <div style="padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px;">
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;">
-                    <img src="/assets/xp/icons/folder.ico" width="32" height="32">
+                    <img src="${BASE_PATH}assets/xp/icons/folder.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">Windows</span>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;">
-                    <img src="/assets/xp/icons/folder.ico" width="32" height="32">
+                    <img src="${BASE_PATH}assets/xp/icons/folder.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">Program Files</span>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;">
-                    <img src="/assets/xp/icons/disk_drive.ico" width="32" height="32">
+                    <img src="${BASE_PATH}assets/xp/icons/disk_drive.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">autoexec.bat</span>
                 </div>
                  <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;" onclick="window.openNotepad()">
-                    <img src="/assets/xp/icons/notepad.ico" width="32" height="32">
+                    <img src="${BASE_PATH}assets/xp/icons/notepad.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">ReadMe.txt</span>
                 </div>
             </div>
@@ -691,15 +691,15 @@ Feel free to look around, but don't touch the kernel files.
         const content = `
             <div style="padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px;">
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;" onclick="window.openDriveC()">
-                    <img src="/assets/xp/icons/disk_drive.ico" width="32" height="32">
+                    <img src="${BASE_PATH}assets/xp/icons/disk_drive.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">Local Disk (C:)</span>
                 </div>
                  <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;" onclick="alert('Please insert a disk')">
-                    <img src="/assets/xp/icons/cd_drive.ico" width="32" height="32">
+                    <img src="${BASE_PATH}assets/xp/icons/cd_drive.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">Audio CD (D:)</span>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer;" onclick="alert('Restricted')">
-                    <img src="/assets/xp/icons/control_panel.ico" width="32" height="32">
+                    <img src="${BASE_PATH}assets/xp/icons/control_panel.ico" width="32" height="32">
                     <span style="font-size:11px; margin-top:5px;">Control Panel</span>
                 </div>
             </div>
@@ -722,7 +722,7 @@ Feel free to look around, but don't touch the kernel files.
     // Shutdown Handler
     document.getElementById('shutdown-btn').onclick = (e) => {
         // Play Sound
-        new Audio('/assets/xp/shutdown.mp3').play().catch(() => { });
+        new Audio(`${BASE_PATH}assets/xp/shutdown.mp3`).play().catch(() => { });
 
         // Simple Fade Out
         document.body.style.transition = 'opacity 2s';

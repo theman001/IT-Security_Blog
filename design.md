@@ -101,19 +101,46 @@ Radius: `sm 8px / md 16px / lg 28px` (가장 둥글고 유기적). Motion: `ease
 - macOS 트래픽라이트 스타일 코드블록 상단바 (`.dot.r/.y/.g`)
 - JetBrains Mono 기반 카테고리/태그 필배지
 - 스크롤 반응형 모바일 하단 네비 + 액티브 필 인디케이터
-- 접이식 카테고리 트리 탐색기
 - 캐시 리셋 아이콘 180도 회전 마이크로인터랙션
 - `/hidden` Windows XP 이스터에그 — 디자인 시스템 완전 제외, 기능 그대로
 
+> ~~접이식 카테고리 트리 탐색기~~ — v3에서 폐기. 아래 8절 참조.
+
 ## 6. 페이지 타입별 매크로구조
 
-- **Home**: `main.md` 개인 인트로(글래스 미적용, 순수 타이포, `--measure-reading` 760px로 중앙 정렬) + 최근 게시글 티저 렉(3~5 카드, flat, `main`의 전체 그리드 폭 1200px 유지) — 좁은 읽기 컬럼에서 넓은 카드 그리드로 전환되는 폭 차이는 의도된 것
-- **Categories**: 외곽 컨테이너만 glass(`tree` 파라미터), 트리 행은 flat, 필터 입력창 추가
-- **Post detail**: 리딩 프로그레스 pill(glass-lite) + TOC + flat 본문
-- **Static (About/Architecture)**: 타이포만 토큰화, 글래스 없음
-- **Error**: `renderErrorState()` 공용 컴포넌트로 통일
+- **Home**: 벤토 그리드 대시보드 (8절 참조) — 선형 인트로+리스트 구조를 완전히 대체.
+- **Categories**: force-directed 카테고리 그래프 (8절 참조) — 접이식 트리를 완전히 대체. 외곽 컨테이너는 계속 glass(`tree` 파라미터), 필터 입력창 유지(노드 하이라이트 방식으로 동작 변경).
+- **Post detail**: 리딩 프로그레스 pill(glass-lite) + TOC + flat 본문. `--measure-reading` 760px 유지 — 이 페이지 타입은 8절의 실험 대상에서 제외(가독성 최우선, 사용자 확정 사항).
+- **Static (About/Architecture)**: 타이포만 토큰화, 글래스 없음. 마찬가지로 실험 대상에서 제외.
+- **Error**: `renderErrorState()` 공용 컴포넌트로 통일.
 
 ## 7. 변경 이력
 
 - v1 (Phase 0.1): 초기 작성. 사용자 결정으로 "1개 Theme 확정" 대신 "3개 Theme 전부 구현 + 런타임 전환"으로 스코프 확장.
 - v2 (Phase 1-3): `liquid-glass.ts`/`components.js`/`code-enhance.js` 구현 완료. 신규 구조 토큰 `--measure-reading`(760px) 추가 — `.markdown-body`/`.post-content`가 `main`의 그리드 폭(1200px)과 별개로 이 값을 읽어 읽기 전용 콘텐츠의 measure를 제한한다(그리드 페이지는 그대로 1200px 유지). `hallmark redesign` 멀티페이지 경로로 페이지별 타이포/컴포넌트 폴리시 진행, 이 프로젝트의 design.md가 카탈로그 매크로구조를 완전히 대체.
+- **v3 (방향 전환)**: 사용자 판단 — "리퀴드글라스 재도장만으로는 이전 블로그와 체감 차이가 없다. 콘텐츠 조회 파이프라인(Neon 쿼리 함수, marked/DOMPurify 렌더링)은 그대로 이해·유지하되, 그 외 IA·내비게이션·레이아웃은 완전히 갈아엎는다. 새 UI 기술을 지속적으로 실험하는 '랩'으로 운영." 이에 따라 v1/v2의 "기존 IA 보존" 원칙을 폐기하고 8절을 신설. 상세는 8절.
+
+## 8. Bento Signal Lab — 실험적 구조 (v3)
+
+콘텐츠 조회 함수(`assets/js/api.js`의 `fetchCategories`/`fetchPosts`/`fetchPostsByCategory`/`fetchPostBySlug`)와 렌더링 파이프라인(marked+DOMPurify, Prism)은 **변경하지 않는다** — 이번 전환은 오직 "그 데이터를 어떻게 보여주는가"에 대한 것.
+
+### 8.1 홈 — 벤토 그리드 대시보드
+`pages/home.js`(루트 진입 시). CSS Grid `grid-template-areas`로 비대칭 배치, 카드마다 `.bento-tile`:
+- **Hero**: WebGL2 셰이더 배경(`assets/js/hero-shader.js`, 원시 WebGL, 라이브러리 없음 — 풀스크린 삼각형 1개 + 프래그먼트 셰이더, 팔레트의 `--accent`/`--accent-2`/`--bg`를 유니폼으로 읽어 테마 전환 시 재적용) + 그라디언트 타이틀. `prefers-reduced-motion` 시 셰이더 자체를 마운트하지 않음(정적 CSS 그라디언트로 자연 폴백).
+- **Category Graph 미리보기**: 8.2의 그래프 컴포넌트를 작은 컨테이너에 재사용, "Explore full graph" 링크.
+- **Recent Posts**: 컴팩트 4카드.
+- **Stats**: 총 포스트/카테고리 수(이미 fetch된 데이터에서 클라이언트 집계, 신규 쿼리 없음).
+- **Interview**: `main.md` 전체를 스크롤 가능한 타일 안에 그대로 렌더(콘텐츠 손실 없음, ASCII 아트 포함). main.md 자체의 H1은 히어로 타일과 중복되므로 CSS로 숨김.
+- **Hidden egg 배너**: `/hidden`으로 가는 전체 폭 배너.
+- 900px 이하에서 전 타일 1열 스택(Hallmark 모바일 게이트 52 준수).
+
+### 8.2 카테고리 — Force-directed 그래프
+`assets/js/graph.js`. `fetchCategories()`가 반환하는 동일한 평탄화 카테고리 배열을 그대로 사용 — **단, 그 응답의 `path` 필드는 재귀 CTE 버그로 이미 깨져 있었음(구 트리 UI는 원래 leaf `slug`만 써서 이 버그를 우회하고 있었을 뿐)**. 그래프도 동일하게 `slug` 기반 내비게이션을 쓴다 (`n.path`는 절대 참조하지 말 것 — DB 쿼리 자체는 수정하지 않기로 함, api.js 그대로 유지).
+- 물리 시뮬레이션: `d3-force`(신규 의존성, physics만 — DOM 바인딩은 쓰지 않음).
+- 렌더링: Canvas2D(노드/엣지) + HTML 오버레이(라벨, 크리스프 텍스트) — 직접 구현.
+- **접근성 폴백 필수**: 캔버스는 포인터 전용 장식층. 동일 데이터의 진짜 `<nav><ul><a>` 목록을 시각적으로만 숨김(`clip-path` 방식, `display:none` 아님) 상태로 항상 함께 렌더 — 스크린리더/키보드 사용자의 실제 내비게이션 경로.
+- 필터 입력: 텍스트 매치 노드는 강조, 나머지는 opacity 0.15로 dim(트리의 "숨기기" 대신 그래프에 맞는 "디밍" 방식으로 변경).
+- 노드 클릭 시 `navigateTo(/categories/{slug})` — 기존 `/categories/:slug` 라우트·`home.js`의 category-view 로직 변경 없이 그대로 재사용.
+
+### 8.3 라이브 랩 원칙
+"새 UI 기술이 나오면 반영해보고 실험적으로 운영" — 이 절은 고정된 최종안이 아니라 현재 실험 스냅샷이다. 향후 WebGL 신도 다른 셰이더/기법으로 교체될 수 있고, 그래프 레이아웃도 다른 실험으로 대체될 수 있다. 콘텐츠 조회·post/static/error 페이지의 가독성 우선 원칙(1~7절)은 이 랩 실험과 무관하게 계속 고정 계약으로 유지.
