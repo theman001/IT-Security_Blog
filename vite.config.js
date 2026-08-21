@@ -13,6 +13,6 @@ export default defineConfig({
     // through a remote code-server, and the port-forwarding proxy may reach
     // the dev server over an interface other than loopback.
     host: true,
-    allowedHosts: "dev.taeuk.site"
+    allowedHosts: ["dev.taeuk.site"]
   }
 });
