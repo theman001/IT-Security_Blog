@@ -39,11 +39,10 @@
         padding: 1.2rem 1rem !important;
     }
 
-    /* --- Compact Header --- */
+    /* --- Compact Header ---
+       Sticky + glass now, matching desktop — .glass-full (style.css) supplies
+       the translucent background/blur; this block only compacts spacing. */
     #app > header {
-        position: static;
-        /* Scroll with content */
-        background-color: var(--header-bg);
         border-bottom: 1px solid var(--border-color);
     }
 

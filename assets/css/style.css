@@ -31,6 +31,35 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
+/* Themed scrollbar — palette-driven everywhere (page, code blocks, the
+   interview tile's internal scroll) instead of the OS default gray bar,
+   which read as a jarring seam against an otherwise fully-themed page. */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+*::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent);
+    background-clip: padding-box;
+}
+
 /* Ambient background glow — soft, palette-colored blur sitting behind
    everything so the sticky header's liquid-glass has something to refract
    even at scroll position 0 (previously only visible once page content had
@@ -309,12 +338,37 @@ main {
    eyebrow kickers, no big-number stat tiles, tiles don't all match — some
    are boxed, the post list and easter-egg line aren't boxed at all).
    ========================================================= */
+/* Masthead — deliberately NOT a bounded tile, no card/canvas background at
+   all: plain text sitting directly on the page's own ambient-glow, reading
+   as a dashboard title rather than a hero block. */
+.home-masthead {
+    position: relative;
+    padding: var(--space-7) 0 var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.home-masthead-title {
+    font-size: clamp(2.25rem, 3.4vw + 1rem, 3.4rem);
+    margin: 0 0 0.4em;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.home-masthead-tagline {
+    max-width: 34rem;
+    color: var(--muted);
+    margin: 0;
+    font-size: var(--text-lg);
+}
+
 .bento-grid {
     display: grid;
-    grid-template-columns: 7fr 5fr;
-    grid-template-areas:
-        "hero graph"
-        "interview interview";
+    grid-template-columns: 5fr 7fr;
+    grid-template-areas: "interview graph";
     gap: var(--space-5);
     margin-bottom: var(--space-7);
 }
@@ -327,75 +381,23 @@ main {
     overflow: hidden;
 }
 
-.bento-hero {
-    grid-area: hero;
-    min-height: 340px;
-    display: flex;
-    align-items: flex-end;
-    padding: var(--space-6);
-    border-radius: var(--radius-lg);
-    /* Angled corner — breaks the "everything is a rounded rectangle" tell. */
-    clip-path: polygon(0 0, 100% 0, 100% 85%, 88% 100%, 0 100%);
-}
-
-.bento-hero-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-}
-
-/* Solid scrim between the shader and the text — more robust than a
-   text-shadow (which visibly glitched compositing against the animated
-   canvas on some GPU drivers) and better contrast besides. */
-.bento-hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.15) 65%, transparent);
-    pointer-events: none;
-}
-
-.bento-hero-content {
-    position: relative;
-    z-index: 1;
-}
-
-.bento-hero-title {
-    font-size: var(--text-4xl);
-    margin: 0 0 0.4em;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-}
-
-.bento-hero-tagline {
-    max-width: 32rem;
-    /* Hardcoded, not var(--text-color) — the hero tile is always dark
-       (shader + scrim) regardless of the site-wide light/dark mode. */
-    color: rgba(255, 255, 255, 0.92);
-    margin: 0;
-}
-
 .bento-graph-preview {
     grid-area: graph;
     display: flex;
     flex-direction: column;
     border-radius: var(--space-3);
-    /* Slight tilt + overlap onto the hero tile — a pinned-note feel instead
-       of a same-size grid neighbor. */
-    transform: rotate(0.8deg);
-    margin-left: -28px;
+    /* Slight tilt + overlap onto the interview tile — a pinned-note feel
+       instead of a same-size grid neighbor. */
+    transform: rotate(0.6deg);
+    margin-left: -18px;
     z-index: 2;
 }
 
 .bento-mini-graph {
     position: relative;
     flex: 1;
-    min-height: 220px;
+    min-height: 420px;
+    overflow: hidden;
 }
 
 .bento-tile-link {
@@ -422,7 +424,7 @@ main {
     margin: 0;
 }
 
-/* main.md's own H1 is now redundant — the bento hero tile carries the title. */
+/* main.md's own H1 is now redundant — the masthead carries the title. */
 .bento-interview .home-intro>h1:first-child {
     display: none;
 }
@@ -471,14 +473,12 @@ main {
     .bento-grid {
         grid-template-columns: 1fr;
         grid-template-areas:
-            "hero"
-            "graph"
-            "interview";
+            "interview"
+            "graph";
     }
 
-    .bento-hero {
-        min-height: 240px;
-        clip-path: none;
+    .home-masthead {
+        padding: var(--space-6) 0 var(--space-5);
     }
 
     .bento-graph-preview {
@@ -1450,5 +1450,116 @@ pre.line-numbers {
 
 .post-toc a:hover {
     color: var(--primary-color);
-    text-decoration: underline;
+}
+
+/* =========================================================
+   /hidden — fake Linux terminal (Windows XP easter egg retired).
+   Every command in hidden.js is scripted, not a real shell.
+   ========================================================= */
+body.hidden-route #app > header {
+    display: none;
+}
+
+body.hidden-route main#main-content {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+#linux-terminal {
+    position: relative;
+    min-height: 100vh;
+    background: #0c0e0c;
+    color: #d6d6d6;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-code);
+}
+
+.term-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    background: #1c1e1c;
+    border-bottom: 1px solid #2c2e2c;
+}
+
+.term-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.term-dot-red {
+    background: #ff5f56;
+}
+
+.term-dot-yellow {
+    background: #ffbd2e;
+}
+
+.term-dot-green {
+    background: #27c93f;
+}
+
+.term-titlebar-label {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    color: #8a8f8a;
+}
+
+.term-body {
+    flex: 1;
+    padding: 1.25rem 1.5rem 2rem;
+    overflow-y: auto;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    cursor: text;
+    transition: opacity 0.7s ease;
+}
+
+.term-body.term-fade-out {
+    opacity: 0;
+}
+
+.term-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.term-error {
+    color: #ff6b6b;
+}
+
+.term-dir {
+    color: #6db3ff;
+    font-weight: 600;
+}
+
+.term-file {
+    color: #d6d6d6;
+}
+
+.term-prompt,
+.term-prompt-echo {
+    color: #55dd88;
+    margin-right: 0.5em;
+    flex-shrink: 0;
+}
+
+.term-input-row {
+    display: flex;
+    align-items: center;
+}
+
+.term-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: inherit;
+    font: inherit;
+    caret-color: #55dd88;
 }

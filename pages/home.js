@@ -2,7 +2,6 @@ import { fetchPosts, fetchPostsByCategory, fetchCategories } from '../assets/js/
 import { renderMarkdown, stripMarkdown } from '../assets/js/renderer.js';
 import { renderPostList, renderSubCategoryGrid, renderEmptyState } from '../assets/js/components.js';
 import { BASE_PATH } from '../assets/js/base-path.js';
-import { mountHeroShader } from '../assets/js/hero-shader.js';
 import { renderCategoryGraph } from '../assets/js/graph.js';
 import { navigateTo } from '../assets/js/router.js';
 
@@ -40,23 +39,19 @@ async function renderBentoHome(container) {
 
         const introHtml = mdRes.ok ? renderMarkdown(await mdRes.text()) : '';
         const recentPosts = allPosts.slice(0, 4).map(withExcerpt);
-        const totalPosts = categories.reduce((sum, c) => sum + parseInt(c.post_count || 0, 10), 0);
 
         container.innerHTML = `
+            <section class="home-masthead">
+                <h1 class="home-masthead-title">THEMAN의 블로그</h1>
+                <p class="home-masthead-tagline">재현 안 되는 버그와 재현되는 나의 실수들에 대한 고찰.<br>"...분명 어제는 됐습니다."</p>
+            </section>
             <div class="bento-grid">
-                <div class="bento-tile bento-hero">
-                    <canvas class="bento-hero-canvas"></canvas>
-                    <div class="bento-hero-content">
-                        <h1 class="bento-hero-title">THEMAN의 블로그</h1>
-                        <p class="bento-hero-tagline">보안 · 인프라 · 실험적 기록. 지금까지 ${totalPosts}개의 분석과 ${categories.length}개의 갈래로 뻗어나간, 재현 안 되는 버그와 재현되는 실수들에 대한 고찰.</p>
-                    </div>
+                <div class="bento-interview bento-tile">
+                    <div class="markdown-body home-intro">${introHtml}</div>
                 </div>
                 <div class="bento-tile bento-graph-preview" data-glass-surface="tree">
                     <div class="bento-mini-graph"></div>
                     <a href="/categories" data-link class="bento-tile-link">전체 그래프 열기 →</a>
-                </div>
-                <div class="bento-interview bento-tile">
-                    <div class="markdown-body home-intro">${introHtml}</div>
                 </div>
             </div>
             <section class="home-posts">
@@ -67,9 +62,6 @@ async function renderBentoHome(container) {
                 🕵️ 이 페이지 어딘가에 자잘한 이스터에그가 있다. 버그처럼 보인다면 그건 이스터에그다 <span class="home-egg-arrow">→</span>
             </a>
         `;
-
-        const heroCanvas = container.querySelector('.bento-hero-canvas');
-        currentTeardowns.push(mountHeroShader(heroCanvas));
 
         const miniGraphEl = container.querySelector('.bento-mini-graph');
         const miniGraph = renderCategoryGraph(miniGraphEl, categories, {
