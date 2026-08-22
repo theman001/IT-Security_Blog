@@ -3,20 +3,32 @@ import categories from '../../pages/categories.js';
 import post from '../../pages/post.js';
 import staticPage from '../../pages/static.js';
 import errorPage from '../../pages/error.js';
+import hidden from '../../pages/hidden.js';
 import { renderSkeletonList, renderSkeletonPost } from './components.js';
 import { enhanceCodeBlocks } from './code-enhance.js';
 import { initLiquidGlass } from './liquid-glass.ts';
 import { toAppPath, toRealPath } from './base-path.js';
 
-// Route Definition
+// Route Definition — `view` is the already-imported render function itself,
+// not a path string. This used to store a string and re-fetch each page via
+// `import(match.route.view)` at navigation time; Vite can't statically
+// analyze a dynamic import() with a runtime variable (the "cannot be
+// analyzed" build warning), so in production that call was left as a literal
+// browser-native dynamic import, which resolved the path against the
+// bundle's own URL instead of reusing the module already bundled in above.
+// On this project's Cloudflare Pages deployment that resolved path happened
+// to still serve a years-old pre-Vite copy of the file — silently running
+// completely different code than what's in this repo, with no build error
+// to reveal it. Calling the statically-imported function directly removes
+// any runtime path resolution from the picture.
 const routes = [
-    { path: '/', view: '../../pages/home.js' },
-    { path: '/categories', view: '../../pages/categories.js' },
-    { path: '/categories/:slug', view: '../../pages/home.js' },
-    { path: '/posts/:slug', view: '../../pages/post.js' },
-    { path: '/about', view: '../../pages/static.js' },
-    { path: '/architecture', view: '../../pages/static.js' },
-    { path: '/hidden', view: '../../pages/hidden.js' } // Easter Egg
+    { path: '/', view: home },
+    { path: '/categories', view: categories },
+    { path: '/categories/:slug', view: home },
+    { path: '/posts/:slug', view: post },
+    { path: '/about', view: staticPage },
+    { path: '/architecture', view: staticPage },
+    { path: '/hidden', view: hidden } // Easter Egg
 ];
 
 const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
@@ -65,7 +77,7 @@ export const router = async () => {
 
     if (!match) {
         match = {
-            route: { view: '../../pages/error.js', path: '/error' },
+            route: { view: errorPage, path: '/error' },
             result: [appPath]
         };
     }
@@ -80,11 +92,9 @@ export const router = async () => {
             ? renderSkeletonPost()
             : renderSkeletonList();
 
-        // Dynamic Import
-        const module = await import(match.route.view);
         const params = match.result ? getParams(match) : {};
 
-        await module.default(container, params);
+        await match.route.view(container, params);
 
         // Toggle hidden-route class for mobile nav visibility
         if (appPath === '/hidden') {
