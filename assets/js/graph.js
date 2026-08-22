@@ -83,8 +83,28 @@ export function renderCategoryGraph(container, categories, { onNodeNavigate } = 
     const labelsLayer = container.querySelector('.category-graph-labels');
     const ctx = canvas.getContext('2d');
 
-    const width = container.clientWidth || 640;
-    const height = Math.max(360, container.clientHeight || 420);
+    // Label <span> elements are created once and repositioned in place on
+    // every tick — rebuilding labelsLayer.innerHTML from scratch (destroying
+    // and recreating every node's element) ~60x/sec was the actual cause of
+    // the choppy, stuttering node movement: full DOM churn every frame,
+    // competing with the canvas redraw for the same frame budget.
+    const labelEls = nodes.map(n => {
+        const span = document.createElement('span');
+        span.className = 'graph-node-label';
+        span.textContent = n.name;
+        labelsLayer.appendChild(span);
+        return span;
+    });
+
+    // Not const: measuring clientWidth/Height right after innerHTML can catch
+    // the container mid-layout (e.g. before web fonts finish loading and
+    // reflow the grid row this sits in) — a ResizeObserver below keeps these
+    // in sync with reality instead of baking in a one-time, possibly-stale
+    // size for the canvas's entire lifetime (that's exactly what let the
+    // canvas grow past its own container and block the "explore full graph"
+    // link sitting under it).
+    let width = container.clientWidth || 640;
+    let height = Math.max(360, container.clientHeight || 420);
 
     // A fresh, genuinely different layout every visit — d3-force's own
     // default jitter uses a fixed-seed PRNG (reproducible on purpose), which
@@ -124,13 +144,28 @@ export function renderCategoryGraph(container, categories, { onNodeNavigate } = 
         });
     }
 
+    const centerForce = forceCenter(width / 2, height / 2);
     const simulation = forceSimulation(nodes)
         .force('link', forceLink(links).id(d => d.id).distance(64).strength(0.7))
         .force('charge', forceManyBody().strength(-170))
-        .force('center', forceCenter(width / 2, height / 2))
+        .force('center', centerForce)
         .force('collide', forceCollide(d => radiusFor(d) + 10))
         .force('pointer', pointerRepulsion)
         .on('tick', () => { clampToBounds(); draw(); });
+
+    const resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        const newWidth = entry.contentRect.width || width;
+        const newHeight = Math.max(360, entry.contentRect.height || height);
+        if (newWidth === width && newHeight === height) return;
+        width = newWidth;
+        height = newHeight;
+        centerForce.x(width / 2).y(height / 2);
+        clampToBounds();
+        draw();
+        simulation.alpha(0.15).restart();
+    });
+    resizeObserver.observe(container);
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
@@ -233,10 +268,13 @@ export function renderCategoryGraph(container, categories, { onNodeNavigate } = 
             }
         });
 
-        labelsLayer.innerHTML = nodes.map(n => {
+        nodes.forEach((n, i) => {
+            const span = labelEls[i];
             const dimmed = matchSet && !matchSet.has(n.id);
-            return `<span class="graph-node-label${dimmed ? ' dimmed' : ''}" style="left:${n.x}px; top:${n.y + radiusFor(n) + 6}px;">${n.name}</span>`;
-        }).join('');
+            span.style.left = n.x + 'px';
+            span.style.top = (n.y + radiusFor(n) + 6) + 'px';
+            span.classList.toggle('dimmed', !!dimmed);
+        });
     }
 
     if (prefersReducedMotion) {
@@ -345,6 +383,7 @@ export function renderCategoryGraph(container, categories, { onNodeNavigate } = 
     return {
         teardown() {
             simulation.stop();
+            resizeObserver.disconnect();
             canvas.removeEventListener('mousedown', handleMouseDown);
             canvas.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);

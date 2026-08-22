@@ -35,7 +35,7 @@ export default async function render(container) {
                 <input type="search" id="category-filter" class="category-filter-input"
                        placeholder="Filter categories..." aria-label="Filter categories">
             </div>
-            <div class="category-graph-container glass-full" data-glass-surface="tree"></div>
+            <div class="category-graph-container glass-lite" data-glass-surface="tree"></div>
         `;
 
         const resetBtn = container.querySelector('#reset-cache-btn');
