@@ -264,7 +264,8 @@ main {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    height: 480px;
+    height: calc(100vh - 260px);
+    min-height: 480px;
     overflow: hidden;
 }
 
@@ -328,7 +329,8 @@ main {
 
 @media (max-width: 768px) {
     .category-graph-container {
-        height: 360px;
+        height: calc(100vh - 320px);
+        min-height: 360px;
     }
 }
 
