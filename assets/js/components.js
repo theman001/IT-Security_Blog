@@ -114,38 +114,6 @@ export function renderSkeletonPost() {
     `;
 }
 
-/** Fixed top progress bar reflecting page scroll. Call initReadingProgress()
- *  once the returned markup is in the DOM. */
-export function renderReadingProgress() {
-    return `<div class="reading-progress glass-lite"><div class="reading-progress-bar"></div></div>`;
-}
-
-// The SPA router only swaps #main-content's innerHTML — it never reloads the
-// page — so each post view calling initReadingProgress() must drop the
-// previous route's scroll listener, or they pile up on `window` forever.
-let currentProgressListener = null;
-
-export function initReadingProgress(root = document) {
-    if (currentProgressListener) {
-        window.removeEventListener('scroll', currentProgressListener);
-        currentProgressListener = null;
-    }
-
-    const bar = root.querySelector('.reading-progress-bar');
-    if (!bar) return;
-
-    const update = () => {
-        const scrollTop = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
-        bar.style.width = `${pct}%`;
-    };
-
-    update();
-    currentProgressListener = update;
-    window.addEventListener('scroll', update, { passive: true });
-}
-
 /** Builds a table of contents from h2/h3 headings inside `root` (assigning
  *  ids as needed). Only returns markup when there are 3+ headings — a
  *  short post doesn't need a TOC. */

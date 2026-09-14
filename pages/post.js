@@ -5,8 +5,6 @@ import {
     renderPostTags,
     renderPostNav,
     renderErrorState,
-    renderReadingProgress,
-    initReadingProgress,
     buildTOC,
 } from '../assets/js/components.js';
 
@@ -41,7 +39,6 @@ export default async function render(container, params) {
         : '/categories';
 
     container.innerHTML = `
-        ${renderReadingProgress()}
         <article class="post-content">
             <header class="post-header">
                 ${renderPostMetaBadges(post)}
@@ -64,8 +61,6 @@ export default async function render(container, params) {
             ${renderPostNav({ prev: post.prev, next: post.next, listUrl })}
         </article>
     `;
-
-    initReadingProgress(container);
 
     // TOC needs the (now-rendered) markdown body — insert it right after the header
     const tocHtml = buildTOC(container);
