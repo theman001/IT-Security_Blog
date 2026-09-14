@@ -33,6 +33,23 @@ const routes = [
 
 const pathToRegex = path => new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
+// The SPA only ever swaps #main-content's innerHTML, so document.title never
+// changes on its own — every route (posts, categories, about...) was showing
+// the same static "IT Security Blog" tab title. Derive a per-route title from
+// whatever heading the page just rendered rather than threading a title prop
+// through every page module.
+const SITE_TITLE = 'IT Security Blog';
+function updateDocumentTitle(appPath, container) {
+    if (appPath === '/' || appPath === '/hidden') {
+        document.title = SITE_TITLE;
+        return;
+    }
+    const heading = appPath.startsWith('/posts/')
+        ? container.querySelector('.post-title')?.textContent?.trim()
+        : container.querySelector('h1')?.textContent?.trim();
+    document.title = heading ? `${heading} - ${SITE_TITLE}` : SITE_TITLE;
+}
+
 const getParams = match => {
     const values = match.result.slice(1);
     const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(result => result[1]);
@@ -95,6 +112,13 @@ export const router = async () => {
         const params = match.result ? getParams(match) : {};
 
         await match.route.view(container, params);
+
+        updateDocumentTitle(appPath, container);
+
+        // WCAG 2.4.3: move focus to the new page so keyboard/AT users get
+        // some signal on navigation (title change alone isn't announced).
+        // main-content has tabindex="-1" in index.html for this.
+        container.focus({ preventScroll: true });
 
         // Toggle hidden-route class for mobile nav visibility
         if (appPath === '/hidden') {

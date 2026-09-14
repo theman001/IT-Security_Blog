@@ -135,10 +135,16 @@
         transform: translateY(100%);
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        .mobile-nav {
+            transition: none;
+        }
+    }
+
     /* --- Post Card Optimization --- */
     .post-card {
         margin: 0 0 1.2rem 0 !important;
-        border-radius: 12px !important;
+        border-radius: var(--radius-md) !important;
         padding: 1.2rem !important;
     }
 
@@ -178,7 +184,7 @@
 
     .markdown-body blockquote {
         margin: 2rem 0 !important;
-        border-radius: 0 4px 4px 0 !important;
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
     }
 
     /* Back link floating style or hidden (since bottom nav exists) 
@@ -197,7 +203,7 @@
         padding: 0.8rem;
         background-color: var(--card-bg);
         border: 1px solid var(--border-color);
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         color: var(--text-color);
         text-decoration: none;
         font-weight: 600;
