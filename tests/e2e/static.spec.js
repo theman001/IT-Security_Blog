@@ -203,3 +203,66 @@ test('theme toggle: icon (not text), follows the theme colors, swaps moon/sun', 
   expect(dark.icon).toBe(dark.color);
   expect(light.icon).toBe(light.color);
 });
+
+test('support widget: left of the site name, external link opening a new tab, themed, label only on wide screens', async ({ page, context }) => {
+  await mockPosts(page, normal);
+  await page.goto('/about');
+  const w = page.locator('header a.support-widget');
+  await expect(w).toHaveAttribute('href', 'https://ctee.kr/place/theman');
+  await expect(w).toHaveAttribute('target', '_blank');
+  await expect(w).toHaveAttribute('rel', /noopener/);
+  await expect(w).toHaveAttribute('rel', /noreferrer/);
+  await expect(w).not.toHaveAttribute('data-link', /.*/); // external: never routed by the SPA
+  await expect(w).toHaveAttribute('aria-label', /커피 한 잔 후원하기/);
+  // left of "IT Security Blog"
+  const [wb, nb] = await Promise.all([w.boundingBox(), page.locator('.site-header__name').boundingBox()]);
+  expect(wb.x + wb.width).toBeLessThanOrEqual(nb.x);
+  // wide: icon + text label
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(w.locator('.support-widget__label')).toBeVisible();
+  await expect(w.locator('.support-widget__label')).toHaveText('커피 한 잔 후원하기');
+  // narrow: icon only (label hidden, accessible name stays), still inside the viewport
+  await page.setViewportSize({ width: 390, height: 800 });
+  await expect(w.locator('.support-widget__label')).toBeHidden();
+  const nb2 = await w.boundingBox();
+  expect(nb2.x).toBeGreaterThanOrEqual(0);
+  expect(nb2.width).toBeGreaterThanOrEqual(44);
+  // theme: border/text/icon colors come from the theme tokens (differ light vs dark)
+  const look = () => w.evaluate((el) => { const cs = getComputedStyle(el); return { color: cs.color, border: cs.borderTopColor, icon: getComputedStyle(el.querySelector('svg')).stroke }; });
+  await page.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
+  const light = await look();
+  await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
+  const dark = await look();
+  expect(dark.color).not.toBe(light.color);
+  expect(dark.border).not.toBe(light.border);
+  expect(dark.icon).not.toBe(light.icon);
+  // click opens a new tab (the external request is stubbed)
+  await context.route('https://ctee.kr/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>크티</title>' }));
+  const [popup] = await Promise.all([context.waitForEvent('page'), w.click()]);
+  await popup.waitForLoadState();
+  expect(popup.url()).toBe('https://ctee.kr/place/theman');
+  expect(page.url()).toContain('/about'); // this tab stays on the blog
+});
+
+test('privacy policy mentions the external support link (ctee)', async ({ page }) => {
+  await page.goto('/privacy');
+  await expect(page.locator('#main .article')).toContainText('크티(ctee.kr)');
+  await expect(page.locator('#main .article h2').filter({ hasText: '외부 링크(후원)' })).toHaveCount(1);
+});
+
+test('header controls stay inside the viewport at in-between widths (widget + name + nav + toggle)', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/about');
+  for (const width of [360, 390, 640, 700, 859, 860, 1000, 1099, 1100, 1440]) {
+    await page.setViewportSize({ width, height: 800 });
+    const boxes = await page.locator('.support-widget, .site-header__name, .site-header__nav a, .theme-toggle').evaluateAll((els) =>
+      els.map((el) => { const r = el.getBoundingClientRect(); return { l: Math.round(r.left), r: Math.round(r.right) }; }));
+    for (const b of boxes) {
+      expect(b.l, `left @${width}`).toBeGreaterThanOrEqual(0);
+      expect(b.r, `right @${width}`).toBeLessThanOrEqual(width);
+    }
+    // the nav itself must not be horizontally clipped
+    const clipped = await page.locator('.site-header__nav').evaluate((el) => el.scrollWidth > el.clientWidth + 1);
+    expect(clipped, `nav clipped @${width}`).toBe(false);
+  }
+});

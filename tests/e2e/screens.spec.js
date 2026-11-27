@@ -47,17 +47,17 @@ for (const [vp, size] of Object.entries(VIEWPORTS)) {
   }
 }
 
-test('390px: header shows the site name, all five nav links (incl. Home) and the theme toggle inside the viewport', async ({ page }) => {
+test('390px: header shows the support widget, site name, all five nav links (incl. Home) and the theme toggle inside the viewport', async ({ page }) => {
   await page.setViewportSize(VIEWPORTS[390]);
   await page.goto('/');
   await expect(page.locator('h1')).toBeAttached();
-  const boxes = await page.locator('.site-header__name, .site-header__nav a, .theme-toggle').evaluateAll((els) =>
+  const boxes = await page.locator('.support-widget, .site-header__name, .site-header__nav a, .theme-toggle').evaluateAll((els) =>
     els.map((el) => {
       const r = el.getBoundingClientRect();
       return { left: r.left, right: r.right, w: r.width };
     }),
   );
-  expect(boxes).toHaveLength(7);
+  expect(boxes).toHaveLength(8);
   for (const b of boxes) {
     expect(b.w).toBeGreaterThan(0);
     expect(b.left).toBeGreaterThanOrEqual(0);
