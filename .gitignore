@@ -8,3 +8,6 @@ dist/
 .env.*
 .DS_Store
 .playwright-mcp/
+.venv-tools/
+.impeccable/critique/
+.impeccable/live/
