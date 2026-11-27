@@ -1,7 +1,3 @@
-import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
-import '@fontsource-variable/noto-serif-kr/wght.css';
-import '@fontsource/jetbrains-mono/latin-400.css';
-import '@fontsource/jetbrains-mono/latin-600.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/shell.css';
@@ -22,4 +18,9 @@ route('/categories/*', categoryPage);
 route('/about', about);
 route('*', notFound);
 // Footer after the first render: mounted earlier it sits in the viewport and jumps down (CLS) when content arrives.
-start().finally(() => mountFooter(document.querySelector('body > footer')));
+start().finally(() => {
+  mountFooter(document.querySelector('body > footer'));
+  // Webfonts after the first paint: the page text shows in the fallback face first (font-display: swap),
+  // so ~0.5MB of Korean subsets do not delay LCP.
+  requestAnimationFrame(() => setTimeout(() => import('./styles/fonts.css')));
+});

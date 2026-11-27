@@ -14,8 +14,9 @@ test('fonts are same-origin: no external font hosts in the document or the reque
   await expect(page.locator('h1')).toHaveText(tech.post.title);
   const html = await page.evaluate(() => document.documentElement.outerHTML);
   expect(html).not.toMatch(/fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net|rel="preconnect"/);
-  const names = await page.evaluate(() => [...document.fonts].map((f) => f.family.replace(/["']/g, '')));
-  for (const fam of ['Pretendard Variable', 'Noto Serif KR Variable', 'JetBrains Mono']) expect(names).toContain(fam);
+  // the @font-face CSS is loaded after the first render (src/main.js)
+  const names = () => page.evaluate(() => [...document.fonts].map((f) => f.family.replace(/["']/g, '')));
+  for (const fam of ['Pretendard Variable', 'Noto Serif KR Variable', 'JetBrains Mono']) await expect.poll(names).toContain(fam);
   expect(external).toEqual([]);
 });
 
