@@ -119,3 +119,12 @@ test('getCategoryPosts unknown -> null; known -> category/children/posts', async
   assert.deepEqual(db.calls[0].params, ['tech']);
   for (const c of db.calls) assert.equal(bareBody(c.text), false);
 });
+
+test('listSitemapEntries: slug+date only, fixed ordering, no body', async () => {
+  const { listSitemapEntries } = await import('../../functions/_lib/queries.js');
+  const db = fakeDb([{ slug: 'a', date: '2026-01-01' }]);
+  assert.deepEqual(await listSitemapEntries(db), [{ slug: 'a', date: '2026-01-01' }]);
+  assert.match(db.calls[0].text, /to_char\(created_at, 'YYYY-MM-DD'\)/);
+  assert.match(db.calls[0].text, /ORDER BY created_at DESC, id DESC/);
+  assert.ok(!db.calls[0].text.includes('content_md'));
+});

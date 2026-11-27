@@ -27,3 +27,12 @@ npm run dev                      # http://localhost:5173
 
 - 이 레포에는 `wrangler.toml`을 두지 않는다. 있으면 Pages가 대시보드 설정(환경변수 등)을 읽기 전용으로 바꾼다. 로컬에서 필요한 값은 `package.json` 스크립트의 플래그로 준다.
 - 옛 `public/_redirects`(SPA 폴백 `/* /index.html 200`)는 삭제했다. 이 규칙이 있으면 없는 경로도 200이 된다. 새 구조에서는 Functions가 알려진 경로에만 `index.html`을 주고 나머지는 404를 돌려준다.
+
+## 엣지 동작
+- `/posts/*`: Functions가 글을 조회해 `<title>`, description, canonical, OG/Twitter, JSON-LD를 셸(`/`의 `index.html`)에 주입한다. 없는 글 404, DB 오류 500(`no-store`).
+- 404 정책: 알려진 SPA 경로(`/`, `/about`, `/tech|/trends|/essays`, DB에 있는 `/categories/<섹션 하위>`)만 200. 나머지는 SPA 셸 + HTTP 404 + `noindex`(SPA가 not-found 화면을 그린다). `/api/*` 미등록은 JSON 404. `/assets/*`, `/fonts/*`, `/favicon.ico`는 `public/_routes.json`으로 Functions를 건너뛰고, 없는 파일은 `public/404.html`(404)이 응답한다.
+- 끝 슬래시: `/about/` 는 `/about` 과 같이 200 (canonical은 슬래시 없는 주소).
+- `/sitemap.xml`, `/robots.txt`, `/rss.xml` 은 각자의 Function이 만든다 (파일 라우트가 `[[path]]`보다 우선).
+- 선택 환경변수 (Production/Preview 따로, 다음 배포부터 적용): `SITE_URL`(canonical/sitemap/RSS의 origin. 없으면 요청 origin), `NAVER_SITE_VERIFICATION`(있으면 모든 HTML 셸에 `naver-site-verification` meta 주입).
+- 검증: `npm run test:edge` — 빌드 후 `wrangler pages dev dist --port 8799`를 띄워 실제 DB로 404, 메타 주입, sitemap/rss/robots, 자산 서빙을 확인하고 서버를 종료한다 (`.dev.vars`에 `DATABASE_URL`이 없으면 건너뜀).
+- 캐시 즉시 갱신(Purge Cache) 절차와 SEO 전체 문서는 Task 10에서 정리한다. 임시: 대시보드 Caching > Purge Cache에서 URL 또는 전체 삭제.

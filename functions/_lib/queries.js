@@ -113,3 +113,7 @@ export async function getCategoryPosts(db, path) {
   ]);
   return { category: toCategory(cat), children: children.map(toCategory), posts: posts.map(toSummary) };
 }
+
+// Sitemap: slug + date only (no body), bound-free fixed query.
+export const listSitemapEntries = (db) =>
+  db.query(`SELECT slug, to_char(created_at, 'YYYY-MM-DD') AS date FROM reports ORDER BY created_at DESC, id DESC`, []);
