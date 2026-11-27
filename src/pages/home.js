@@ -17,7 +17,7 @@ const notice = (text) => `<p class="home-notice">${e(text)}</p>`;
 // lead: post | null (none yet) | undefined (request failed)
 const leadHtml = (p) =>
   p
-    ? `<p class="home-label">대표 사유</p>
+    ? `<p class="home-label home-lead__kicker"><span>사유</span><span class="home-lead__def">개념, 구성, 판단, 추리 따위를 행하는 인간의 이성 작용</span></p>
   <h2 class="home-lead__title"><a class="home-lead__link" data-link href="${e(postHref(p.slug))}">${e(p.title)}</a></h2>
   <p class="home-lead__excerpt">${e(p.excerpt)}</p>
   <p class="post-meta"><time datetime="${e(p.date)}">${e(p.date)}</time><span>읽는 시간 ${e(p.readingMinutes)}분</span></p>`

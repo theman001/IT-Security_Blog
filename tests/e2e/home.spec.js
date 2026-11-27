@@ -218,3 +218,28 @@ test('screenshots for review', async ({ page }) => {
     await page.screenshot({ path: `.superpowers/screens/${name}.png`, fullPage: true });
   }
 });
+
+test('lead kicker: "사유" label like the other section labels + smaller foreground-color definition in the definition font', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/');
+  const kicker = page.locator('.home-lead__kicker');
+  await expect(kicker).toContainText('사유');
+  await expect(kicker).not.toContainText('대표');
+  const st = (loc) => loc.evaluate((el) => { const c = getComputedStyle(el); return { size: parseFloat(c.fontSize), color: c.color, family: c.fontFamily, upper: c.textTransform }; });
+  const word = await st(kicker.locator('span').first());
+  const def = await st(page.locator('.home-lead__def'));
+  const techLabel = await st(page.locator('#home-tech'));
+  expect(word.size).toBe(techLabel.size); // same label style as TECH
+  expect(word.color).toBe(techLabel.color);
+  expect(def.size).toBeLessThan(word.size);
+  expect(def.family).toContain('Definition Serif');
+  const fg = await page.evaluate(() => getComputedStyle(document.body).color);
+  expect(def.color).toBe(fg);
+  await expect(page.locator('.home-lead__def')).toHaveText('개념, 구성, 판단, 추리 따위를 행하는 인간의 이성 작용');
+  // dark mode: definition follows the (light) foreground
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'));
+  const darkFg = await page.evaluate(() => getComputedStyle(document.body).color);
+  expect((await st(page.locator('.home-lead__def'))).color).toBe(darkFg);
+  expect(darkFg).not.toBe(fg);
+});
