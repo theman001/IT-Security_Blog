@@ -1,0 +1,5 @@
+/* Self-hosted webfonts (npm packages). Loaded after the first render (see src/main.js). */
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+@import '@fontsource-variable/noto-serif-kr/wght.css';
+@import '@fontsource/jetbrains-mono/latin-400.css';
+@import '@fontsource/jetbrains-mono/latin-600.css';

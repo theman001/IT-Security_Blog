@@ -1,0 +1,234 @@
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-fg);
+  color: var(--color-bg);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+.site-header {
+  border-top: var(--rule-strong);
+  border-bottom: var(--rule);
+}
+.site-header__inner,
+.site-footer__inner,
+#main {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--space-16);
+}
+.site-header__name {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-fg);
+  text-decoration: none;
+}
+/* Cafe24 Syongsyong (OFL 1.1), subset to the label glyphs (src/assets/fonts/Cafe24Syongsyong-NOTICE.txt).
+   The label is display:none below 1100px, so the 16KB file is only fetched on wide screens. */
+@font-face {
+  font-family: "Cafe24 Syongsyong";
+  src: url("../assets/fonts/Cafe24Syongsyong-subset.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+.support-widget {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--space-12);
+  min-width: var(--space-12);
+  padding-inline: var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--color-fg);
+  font-family: var(--font-support);
+  font-size: var(--text-base);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+.support-widget:hover {
+  background: var(--color-surface);
+}
+.support-widget svg {
+  width: var(--text-2xl);
+  height: var(--text-2xl);
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.support-widget__label {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: var(--leading-support);
+  white-space: nowrap;
+}
+@media (min-width: 1100px) {
+  .support-widget {
+    padding-inline: var(--space-4);
+  }
+  .support-widget svg {
+    width: var(--space-8);
+    height: var(--space-8);
+  }
+  .support-widget__label {
+    display: flex;
+  }
+}
+.site-header__nav {
+  display: flex;
+  flex: 1;
+  gap: var(--space-6);
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  justify-content: flex-end;
+}
+.site-header__nav a,
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--space-12);
+  font-family: var(--font-body-tech);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+.site-header__nav a {
+  color: var(--color-fg-muted);
+  text-decoration: none;
+}
+.site-header__nav a:hover,
+.site-header__nav a[aria-current="page"] {
+  color: var(--color-fg);
+}
+.site-header__nav a[aria-current="page"] {
+  text-decoration: underline;
+}
+.theme-toggle {
+  flex: none;
+  justify-content: center;
+  width: var(--space-12);
+  padding: 0;
+  border: var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-fg);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease);
+}
+.theme-toggle:hover {
+  background: var(--color-surface);
+}
+.theme-toggle svg {
+  width: var(--text-xl);
+  height: var(--text-xl);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.theme-toggle[aria-pressed="false"] .theme-toggle__sun,
+.theme-toggle[aria-pressed="true"] .theme-toggle__moon {
+  display: none;
+}
+
+/* compact: widget + name + toggle share the first row, the nav links get their own row (nothing clipped) */
+@media (max-width: 859px) {
+  .site-header__inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-block: var(--space-2);
+  }
+  .support-widget {
+    margin-inline-end: auto; /* name + widget stay left, the toggle goes right */
+  }
+  .site-header__nav {
+    order: 3;
+    flex: 1 0 100%;
+    justify-content: flex-start;
+    gap: var(--space-4);
+  }
+}
+
+/* very narrow phones (360px): five nav links need a tighter gap to stay unclipped */
+@media (max-width: 380px) {
+  .site-header__nav {
+    gap: var(--space-3);
+  }
+}
+
+#main {
+  flex: 1;
+  min-height: var(--main-min-height);
+  padding-block: var(--space-12);
+}
+#main:focus {
+  outline: none;
+}
+
+.site-footer {
+  margin-top: var(--space-16);
+  border-top: var(--rule);
+}
+.site-footer__inner {
+  padding-block: var(--space-8);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+/* Quiet footer links (not link-styled): small muted text, "|" separators drawn by CSS; hover/focus still show interactivity. */
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+.site-footer__links a {
+  padding-block: var(--space-3);
+  color: var(--color-fg-muted);
+  font-size: var(--text-xs);
+  text-decoration: none;
+}
+.site-footer__links a:hover {
+  color: var(--color-fg);
+}
+.site-footer__links a + a::before {
+  content: "";
+  display: inline-block;
+  height: 1em;
+  margin-inline: var(--space-3);
+  border-inline-start: var(--rule);
+  vertical-align: middle;
+}
+.site-footer__copy {
+  margin: var(--space-2) 0 0;
+  color: var(--color-fg);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+}

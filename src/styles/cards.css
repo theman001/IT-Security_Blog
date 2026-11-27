@@ -1,0 +1,88 @@
+/* Post cards, list rows, essay pull quotes. Tokens only. */
+.post-card,
+.post-row {
+  padding-top: var(--space-4);
+  border-top: var(--rule);
+}
+.post-card + .post-card,
+.post-row + .post-row {
+  margin-top: var(--space-6);
+}
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-fg-muted);
+}
+.post-cat {
+  overflow-wrap: anywhere;
+}
+.post-card__title,
+.post-row__title {
+  margin-top: var(--space-1);
+  font-size: var(--text-xl);
+}
+.post-link {
+  display: block;
+  padding-block: var(--space-3);
+  color: var(--color-fg);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.post-link:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+.post-excerpt {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: var(--color-fg-muted);
+  font-size: var(--text-base);
+}
+.post-row__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-fg-muted);
+}
+.post-row__tag {
+  overflow-wrap: anywhere;
+}
+
+/* Essay pull quote: accent bar is for essays only (DESIGN.md) */
+.pull-quote {
+  margin: 0;
+  padding-left: var(--space-6);
+  border-left: var(--space-1) solid var(--color-accent);
+}
+.pull-quote__text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--leading-body-essay);
+  overflow-wrap: anywhere;
+}
+.pull-quote__by {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-fg-muted);
+}
+.pull-quote__by .post-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--space-12);
+  padding-block: 0;
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}

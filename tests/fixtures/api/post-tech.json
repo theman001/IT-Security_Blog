@@ -1,0 +1,43 @@
+{
+  "post": {
+    "id": 1,
+    "title": "Kakao 인증 흐름 분석",
+    "slug": "tech/security/a b&c:한글",
+    "date": "2026-11-20",
+    "section": "tech",
+    "readingMinutes": 7,
+    "excerpt": "요약 문장입니다.",
+    "categoryId": 1,
+    "categoryName": "security",
+    "categoryPath": "tech/security",
+    "tags": [
+      "oauth",
+      "보안"
+    ],
+    "authorType": "admin",
+    "description": "OAuth 토큰 교환 과정을 따라가며 취약점을 짚는다.",
+    "contentMd": "## 개요\n\n{{FILL}}\n\n## 토큰 교환\n\n{{FILL}}\n\n### 코드 예시\n\n```js\nconst token = await exchange(code);\n```\n\n{{FILL}}\n\n## 결론\n\n{{FILL}}\n"
+  },
+  "prev": {
+    "slug": "tech/security/prev one",
+    "title": "이전 글 제목"
+  },
+  "next": {
+    "slug": "tech/security/next&two",
+    "title": "다음 글 제목"
+  },
+  "related": null,
+  "relatedBy": [
+    {
+      "slug": "essays/thoughts/habit",
+      "title": "보안은 습관이다",
+      "excerpt": "연결된 글의 요약입니다.",
+      "date": "2026-11-10",
+      "section": "essays",
+      "id": 9,
+      "readingMinutes": 5,
+      "categoryPath": "essays/thoughts",
+      "tags": []
+    }
+  ]
+}

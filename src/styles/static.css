@@ -1,0 +1,20 @@
+/* About and not-found pages. Tokens only. */
+.static-page h1 {
+  font-size: var(--text-3xl);
+}
+.static-page h2 {
+  font-size: var(--text-xl);
+}
+.nf {
+  max-width: var(--measure-tech);
+}
+.nf > p {
+  margin-top: var(--space-4);
+}
+.nf-recent {
+  margin-top: var(--space-12);
+}
+.nf-recent h2 {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-xl);
+}

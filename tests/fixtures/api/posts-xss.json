@@ -1,0 +1,56 @@
+{
+  "items": [
+    {
+      "id": 900,
+      "title": "<script>alert(1)</script>",
+      "slug": "essays/a b&c:한글/\"quote\"<x>0",
+      "date": "2026-11-26",
+      "section": "essays",
+      "readingMinutes": 4,
+      "excerpt": "\"><img src=x onerror=alert(1)> <b>bold</b>",
+      "categoryId": 1,
+      "categoryName": "<i>cat</i>",
+      "categoryPath": "essays/\"><img src=x onerror=alert(1)>",
+      "tags": [
+        "\"><img src=x onerror=alert(1)>",
+        "<svg onload=alert(1)>"
+      ],
+      "authorType": "admin"
+    },
+    {
+      "id": 901,
+      "title": "<script>alert(1)</script>",
+      "slug": "tech/a b&c:한글/\"quote\"<x>1",
+      "date": "2026-11-26",
+      "section": "tech",
+      "readingMinutes": 4,
+      "excerpt": "\"><img src=x onerror=alert(1)> <b>bold</b>",
+      "categoryId": 1,
+      "categoryName": "<i>cat</i>",
+      "categoryPath": "tech/\"><img src=x onerror=alert(1)>",
+      "tags": [
+        "\"><img src=x onerror=alert(1)>",
+        "<svg onload=alert(1)>"
+      ],
+      "authorType": "admin"
+    },
+    {
+      "id": 902,
+      "title": "<script>alert(1)</script>",
+      "slug": "trends/a b&c:한글/\"quote\"<x>2",
+      "date": "2026-11-26",
+      "section": "trends",
+      "readingMinutes": 4,
+      "excerpt": "\"><img src=x onerror=alert(1)> <b>bold</b>",
+      "categoryId": 1,
+      "categoryName": "<i>cat</i>",
+      "categoryPath": "trends/\"><img src=x onerror=alert(1)>",
+      "tags": [
+        "\"><img src=x onerror=alert(1)>",
+        "<svg onload=alert(1)>"
+      ],
+      "authorType": "admin"
+    }
+  ],
+  "nextCursor": null
+}

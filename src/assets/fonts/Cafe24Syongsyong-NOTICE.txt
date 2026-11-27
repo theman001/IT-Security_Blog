@@ -1,0 +1,15 @@
+Cafe24 Syongsyong (카페24 숑숑), version 2.000
+Copyright (c) Cafe24 Corp. All rights reserved.
+Source: https://fonts.cafe24.com
+
+Licensed under the SIL Open Font License, Version 1.1 (free for personal and commercial use;
+modification and redistribution allowed; the font itself must not be sold on its own).
+Full license text: https://openfontlicense.org/open-font-license-official-text/
+
+Cafe24Syongsyong-subset.woff2 in this directory is a MODIFIED subset of Cafe24Syongsyong-v2.0.ttf
+(glyphs for the header support-widget label "커피 한 잔 후원하기", Basic Latin, and ☕),
+generated with fontTools (pyftsubset). It keeps the original family name and copyright notice.
+
+Regenerate (e.g. after changing the label text; needs `pip install fonttools brotli`):
+  pyftsubset Cafe24Syongsyong-v2.0.ttf --text="<label text>" --unicodes="U+0020-007E" \
+    --flavor=woff2 --layout-features='*' --no-hinting --output-file=Cafe24Syongsyong-subset.woff2

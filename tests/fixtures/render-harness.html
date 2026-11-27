@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>render harness (test only)</title>
+</head>
+<body>
+<article id="root" class="article"></article>
+<script type="module">
+  import '/src/styles/tokens.css';
+  import '/src/styles/base.css';
+  import '/src/styles/article.css';
+  import { renderMarkdown } from '/src/render/markdown.js';
+  import Prism from 'prismjs/components/prism-core.js';
+  import { enhanceCodeBlocks } from '/src/render/code-blocks.js';
+  import { buildToc, observeToc } from '/src/components/toc.js';
+  const root = document.getElementById('root');
+  window.__h = {
+    root,
+    Prism,
+    renderMarkdown,
+    enhanceCodeBlocks,
+    buildToc,
+    observeToc,
+    // render + insert + enhance, the same order the post page uses
+    mount(md) { root.innerHTML = renderMarkdown(md); enhanceCodeBlocks(root); },
+  };
+  window.__ready = true;
+</script>
+</body>
+</html>

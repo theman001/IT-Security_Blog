@@ -1,0 +1,81 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "tech",
+      "path": "tech",
+      "parentId": null,
+      "depth": 1,
+      "postCount": 0,
+      "totalPostCount": 27,
+      "subCategoryCount": 2,
+      "section": "tech"
+    },
+    {
+      "id": 2,
+      "name": "보안",
+      "path": "tech/security",
+      "parentId": 1,
+      "depth": 2,
+      "postCount": 1,
+      "totalPostCount": 27,
+      "subCategoryCount": 2,
+      "section": "tech"
+    },
+    {
+      "id": 3,
+      "name": "리버싱",
+      "path": "tech/security/reversing",
+      "parentId": 2,
+      "depth": 3,
+      "postCount": 25,
+      "totalPostCount": 25,
+      "subCategoryCount": 0,
+      "section": "tech"
+    },
+    {
+      "id": 4,
+      "name": "웹",
+      "path": "tech/security/web",
+      "parentId": 2,
+      "depth": 3,
+      "postCount": 1,
+      "totalPostCount": 1,
+      "subCategoryCount": 0,
+      "section": "tech"
+    },
+    {
+      "id": 5,
+      "name": "인프라",
+      "path": "tech/infra",
+      "parentId": 1,
+      "depth": 2,
+      "postCount": 0,
+      "totalPostCount": 0,
+      "subCategoryCount": 0,
+      "section": "tech"
+    },
+    {
+      "id": 6,
+      "name": "trends",
+      "path": "trends",
+      "parentId": null,
+      "depth": 1,
+      "postCount": 2,
+      "totalPostCount": 2,
+      "subCategoryCount": 0,
+      "section": "trends"
+    },
+    {
+      "id": 7,
+      "name": "essays",
+      "path": "essays",
+      "parentId": null,
+      "depth": 1,
+      "postCount": 0,
+      "totalPostCount": 0,
+      "subCategoryCount": 0,
+      "section": "essays"
+    }
+  ]
+}
