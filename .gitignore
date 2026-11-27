@@ -12,3 +12,5 @@ dist/
 .impeccable/critique/
 .impeccable/live/
 .superpowers/
+test-results/
+playwright-report/
