@@ -15,6 +15,7 @@ npm run dev                      # http://localhost:5173
 - 프론트만 고칠 때는 터미널 2만 쓰고(Functions는 8788에 떠 있어야 `/api` 동작), Functions나 SEO 주입(`/posts/*`)을 확인할 때는 8788을 직접 연다.
 - `functions/` 변경은 wrangler가 자동 재로드한다. `dist/` 는 프론트를 바꿀 때마다 `vite build`가 필요하다(`pages:dev`를 다시 실행).
 - Playwright E2E(`npm test`)는 모든 `/api/*`를 목으로 대체하고 Vite(:5173)만 쓰므로 DB와 `.dev.vars`가 필요 없다. 실제 DB로 엣지를 검증하려면 `npm run test:edge`.
+- `npm run check:bundle`은 항상 `vite build`를 먼저 실행해 새 `dist/`를 검사한다(방금 빌드했다면 `SKIP_BUILD=1 npm run check:bundle`로 빌드 생략).
 
 ## Cloudflare Pages 설정 (대시보드에서 확인할 것)
 | 항목 | 값 |
@@ -34,8 +35,9 @@ npm run dev                      # http://localhost:5173
 
 ## 엣지 동작
 - `/posts/*`: Functions가 글을 조회해 `<title>`, description, canonical, OG/Twitter, JSON-LD를 셸(`/`의 `index.html`)에 주입하고, 글 헤더를 프리렌더하며 API 페이로드를 `#post-data`로 인라인한다(SPA가 첫 요청을 생략). 없는 글 404, DB 오류 500(`no-store`). 라우트 전체 표와 캐시 헤더는 [api.md](api.md#엣지-라우트-비api).
-- `public/_routes.json`: `/assets/*`, `/fonts/*`, `/favicon.ico`는 Functions를 거치지 않고 정적 서빙. `public/_headers`: `/assets/*`에 `Cache-Control: public, max-age=31536000, immutable`(파일명에 해시). 이 경로의 없는 파일은 `public/404.html`(404, noindex)이 응답한다.
-- 404 정책: 알려진 SPA 경로(`/`, `/about`, `/tech|/trends|/essays`, DB에 있는 `/categories/<섹션 하위>`)만 200. 나머지는 SPA 셸 + HTTP 404 + `noindex`(SPA가 not-found 화면을 그린다). `/api/*` 미등록은 JSON 404. `/assets/*`, `/fonts/*`, `/favicon.ico`는 `public/_routes.json`으로 Functions를 건너뛰고, 없는 파일은 `public/404.html`(404)이 응답한다.
+- `public/_routes.json`: `/assets/*`, `/favicon.ico`는 Functions를 거치지 않고 정적 서빙. `public/_headers`: `/assets/*`에 `Cache-Control: public, max-age=31536000, immutable`(파일명에 해시). 이 경로의 없는 파일은 `public/404.html`(404, noindex)이 응답한다.
+- 404 정책: 알려진 SPA 경로(`/`, `/about`, `/tech|/trends|/essays`, DB에 있는 `/categories/<섹션 하위>`)만 200. 나머지는 SPA 셸 + HTTP 404 + `noindex`(SPA가 not-found 화면을 그린다). `/api/*` 미등록은 JSON 404. `/assets/*`, `/favicon.ico`는 `public/_routes.json`으로 Functions를 건너뛰고, 없는 파일은 `public/404.html`(404)이 응답한다.
+- 엣지 캐시: `functions/_lib/cache.js`(Workers Cache API)가 라우트를 감싼다. 200/301 600초, 404 60초, 5xx/405/400/`no-store`는 저장 안 함, GET만. `s-maxage`는 힌트일 뿐 Function 응답을 스스로 캐시하지 않는다. 확인: `curl -sI <url> | grep -i -E 'x-edge-cache|cf-cache-status|age'`를 두 번(MISS -> HIT). `wrangler pages dev`는 Cache API를 에뮬레이트하며 `npm run test:edge`가 이를 검사한다. 성공 응답의 `stale-while-revalidate`는 60초다. 자세한 규칙은 [api.md](api.md#엣지-캐시).
 - 끝 슬래시: `/about/` 는 `/about` 과 같이 200 (canonical은 슬래시 없는 주소).
 - `/sitemap.xml`, `/robots.txt`, `/rss.xml` 은 각자의 Function이 만든다 (파일 라우트가 `[[path]]`보다 우선).
 - 필수(Production): `SITE_URL` (예: `https://<운영 도메인>`) — canonical, sitemap, RSS, OG의 origin이다. 없으면 요청 host를 쓰므로 `*.pages.dev` 별칭과 프리뷰 호스트가 같은 글의 중복 색인 대상이 될 수 있다. Preview는 비워도 되지만 Production/Preview 변수는 따로이고 다음 배포부터 적용된다.

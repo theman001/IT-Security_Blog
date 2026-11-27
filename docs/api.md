@@ -8,7 +8,7 @@
 - **정렬 안정성**: 같은 날짜에 글이 여러 개이므로 모든 정렬에 `id`를 보조 키로 쓴다.
 - **쿼리**: 값은 항상 파라미터 바인딩(`sql.query(text, [params])`). 문자열 연결 금지. 본문(`content_md`)은 상세 조회에서만 SELECT 한다.
 - **섹션**: 슬러그의 **첫 세그먼트**가 섹션이다(`tech` | `trends` | `essays`). 글 URL은 모두 `/posts/<slug>`. 레이아웃은 섹션이 `essays`인지로 정한다.
-- **캐시** (`functions/_lib/http.js`): 성공 `Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400`. 4xx와 `/api` 500은 `public, max-age=0, s-maxage=60`(엣지에서 60초만 보관). HTML/피드의 500은 `no-store`(아래 엣지 라우트).
+- **캐시** (`functions/_lib/http.js`): 성공 `Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=60`. 4xx는 `public, max-age=0, s-maxage=60`, 500은 `no-store`. 이 헤더는 브라우저/다운스트림용 힌트이고, **엣지 캐시는 `s-maxage`가 아니라 `functions/_lib/cache.js`(Workers Cache API)가 만든다**: 아래 "엣지 캐시" 절.
 
 ## 오류 형식
 ```json
@@ -44,7 +44,7 @@ Category = {
 ```
 
 ## `GET /api/posts?section=&category=&limit=20&cursor=`
-최신 글 목록, 본문 제외. `created_at DESC, id DESC`. `limit` 1–50(기본 20). `cursor`는 이전 응답의 `nextCursor`(불투명 문자열, `YYYY-MM-DD`+id를 담음).
+최신 글 목록, 본문 제외. `created_at DESC, id DESC`. `limit` 1–50(기본 20). `cursor`는 이전 응답의 `nextCursor`(불투명 문자열, 날짜 `YYYY-MM-DD`와 id만 담음). 커서에 시각이 없으므로 **`created_at`은 항상 자정(날짜만)이어야** 페이지 경계가 정확하다. sync는 front matter `date`(날짜만)로 `created_at`을 채워야 하며 시각을 넣지 않는다(2026-11-27 운영 DB 확인: `created_at`이 자정이 아닌 행 0개 / 전체 5행, 읽기 전용 조회).
 - `section`: `tech` | `trends` | `essays`. 그 외 값은 400. 슬러그 첫 세그먼트와 정확히 일치하는 글만.
 - `category`: 카테고리 전체 경로(`path`). 그 카테고리와 하위 카테고리의 글. 정확히 일치(부분 일치 없음). 둘 다 주면 AND.
 ```json
@@ -80,11 +80,19 @@ Category = {
 ```
 `<path…>`는 전체 경로와 정확히 일치해야 한다. 없으면 404. (끝의 `/posts`는 라우팅용 접미사다. 카테고리 이름이 `posts`인 경우만 모호하므로 그런 카테고리는 만들지 않는다. 접미사가 없으면 404.)
 
-## 엣지 캐시 무효화
-글이 DB에 반영된 뒤 최대 10분(`s-maxage=600`) 안에 보인다. 즉시 갱신은 Cloudflare Purge Cache. 절차: [seo.md](seo.md#2-캐시-퍼지).
+## 엣지 캐시
+Cloudflare는 Pages Function이 만든 응답을 `Cache-Control: s-maxage`만으로는 캐시하지 않는다(Cache API를 직접 써야 한다). 그래서 `functions/_lib/cache.js`의 `withEdgeCache`가 각 라우트(`/api/posts*`, `/api/categories*`, `/posts/*`, catch-all의 HTML 응답, `/sitemap.xml`, `/rss.xml`, `/robots.txt`)의 `onRequest`를 감싼다.
+- GET만 캐시한다(HEAD 등은 통과, `X-Edge-Cache: BYPASS`). 키는 요청 URL 전체(쿼리 포함). catch-all의 정적 파일 통과(`env.ASSETS`)는 감싸지 않는다.
+- 저장 대상은 200, 301, 404뿐이다. 400, 405, 5xx, `Cache-Control: no-store` 응답은 절대 저장하지 않는다.
+- TTL: 200/301 600초(10분), 404 60초. 저장본에만 `public, max-age=<TTL>`을 붙이고, 클라이언트에는 핸들러가 정한 원래 `Cache-Control`을 돌려준다.
+- 요청에 `Cache-Control: no-cache`/`Pragma: no-cache`(브라우저 강력 새로고침)가 있으면 조회를 건너뛰고 새로 만들어 저장본도 갱신한다(`BYPASS`).
+- 디버깅 헤더 `X-Edge-Cache: HIT|MISS|BYPASS`. Cache API를 쓸 수 없는 환경이면 헤더 없이 그대로 응답한다.
+- 확인: `curl -sI <url> | grep -i -E 'x-edge-cache|cf-cache-status|age'` (두 번 연속 실행: `MISS` 다음 `HIT`). 로컬 `wrangler pages dev`는 Cache API를 에뮬레이트한다. `*.pages.dev`에서도 동작하는지는 확인 필요(동작하지 않으면 항상 `MISS`).
+
+글이 DB에 반영된 뒤 최대 10분 안에 보인다. 즉시 갱신은 Cloudflare Purge Cache(Cache API 항목도 존재와 URL 단위로 지워진다; 커스텀 도메인/Zone 기준, `*.pages.dev`는 확인 필요). 절차: [seo.md](seo.md#2-캐시-퍼지).
 
 ## 엣지 라우트 (비API)
-`public/_routes.json`이 `/assets/*`, `/fonts/*`, `/favicon.ico`를 Functions에서 제외하고(정적 파일 직접 서빙; `/assets/*`는 `_headers`로 `immutable` 1년), 나머지는 Functions가 처리한다. HTML 응답은 모두 `index.html` 셸에 `HTMLRewriter`로 head를 바꿔 넣은 것이다. `NAVER_SITE_VERIFICATION`이 있으면 모든 HTML에 `naver-site-verification` meta가 들어간다. origin은 `SITE_URL`(없으면 요청 host).
+`public/_routes.json`이 `/assets/*`, `/favicon.ico`를 Functions에서 제외하고(정적 파일 직접 서빙; `/assets/*`는 `_headers`로 `immutable` 1년), 나머지는 Functions가 처리한다. HTML 응답은 모두 `index.html` 셸에 `HTMLRewriter`로 head를 바꿔 넣은 것이다. `NAVER_SITE_VERIFICATION`이 있으면 모든 HTML에 `naver-site-verification` meta가 들어간다. origin은 `SITE_URL`(없으면 요청 host).
 
 | 경로 | 응답 |
 |---|---|
@@ -98,6 +106,6 @@ Category = {
 | `/api`, `/api/` 및 미등록 `/api/*` | JSON 404 (`{"error":{"code":"not_found",...}}`) |
 | 없는 정적 파일 (`/assets/x.js`, 확장자가 있는 경로) | 404. Pages가 `index.html`을 200으로 돌려주면(soft 404) 404 셸로 바꾼다. `_routes.json` 제외 경로는 `public/404.html`(noindex) |
 
-- 캐시 헤더: HTML 200 `public, max-age=0, s-maxage=600, stale-while-revalidate=86400`; HTML 404 `public, max-age=0, s-maxage=60`; HTML/피드 500 `no-store`(본문은 셸 + noindex, 피드는 JSON 오류); 301 `public, max-age=0, s-maxage=600`; sitemap/rss/robots `public, max-age=60, s-maxage=600, stale-while-revalidate=86400`.
+- 클라이언트용 캐시 헤더: HTML 200 `public, max-age=0, s-maxage=600, stale-while-revalidate=60`; HTML 404 `public, max-age=0, s-maxage=60`; HTML/피드 500 `no-store`(본문은 셸 + noindex, 피드는 JSON 오류); 301 `public, max-age=0, s-maxage=600`; sitemap/rss/robots `public, max-age=60, s-maxage=600, stale-while-revalidate=60`. 엣지 보관은 위 "엣지 캐시" 절의 Cache API 래퍼가 한다.
 - GET/HEAD 외 메서드는 405 + `Allow: GET, HEAD`(JSON 오류 본문). 단 `/api/posts*`와 `/api/categories*`는 자체 핸들러라 `Allow: GET`(HEAD도 405)이다.
 - DB 오류나 `DATABASE_URL` 누락은 응답에 메시지를 싣지 않고 500만 돌려준다. 로그에는 오류 이름과 코드만 남긴다.

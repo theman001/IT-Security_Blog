@@ -37,7 +37,7 @@ npm run check:bundle  # dist/ 에 DB 접속 정보·드라이버 문자열이 �
 글은 이 레포가 아니라 Blog_Contents 레포의 마크다운이다.
 1. Blog_Contents `contents/<section>/…`에 `.md` 추가·수정·삭제(구조와 front matter: [docs/contents-repo.md](docs/contents-repo.md)).
 2. `main`에 병합하면 GitHub Actions의 sync 스크립트가 Neon의 `reports`/`categories`에 반영한다(파일 삭제는 행 삭제). 이 레포는 다시 빌드·배포하지 않는다.
-3. 엣지 캐시(`s-maxage=600`) 때문에 반영까지 최대 10분. 즉시 보려면 Cloudflare Purge Cache([docs/seo.md](docs/seo.md)).
+3. 엣지 캐시(Workers Cache API 래퍼, TTL 600초) 때문에 반영까지 최대 10분. 즉시 보려면 Cloudflare Purge Cache([docs/seo.md](docs/seo.md)).
 
 ## Docs
 - [docs/api.md](docs/api.md): `/api/*` 계약, 엣지 라우트(`/posts/*`, sitemap, robots, rss), 404/301 정책

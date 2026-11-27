@@ -17,7 +17,7 @@
 2. 소유 확인 후 Sitemaps에 `sitemap.xml`을 제출한다. `rss.xml`은 별도 제출 없이 `<link rel="alternate">`로 노출된다.
 
 ## 2. 캐시 퍼지
-HTML과 API는 `s-maxage=600`(엣지 10분) + `stale-while-revalidate=86400`이라, 글을 sync한 뒤 최대 10분 동안(만료 직후에는 갱신 중 오래된 응답) 옛 내용이 보일 수 있다. 정적 `/assets/*`는 해시 파일명 + `immutable`이라 퍼지할 필요가 없다.
+HTML, API, sitemap/rss/robots는 Workers Cache API 래퍼(`functions/_lib/cache.js`)가 엣지에 10분(404/301 일부는 60초) 보관한다(`s-maxage`만으로는 Function 응답이 캐시되지 않는다). 그래서 글을 sync한 뒤 최대 10분 동안 옛 내용이 보일 수 있다. 브라우저에는 `stale-while-revalidate=60`만 나간다. 동작 규칙은 [api.md](api.md#엣지-캐시). 정적 `/assets/*`는 해시 파일명 + `immutable`이라 퍼지할 필요가 없다.
 
 대시보드(메뉴 이름은 확인 필요): Cloudflare -> 해당 도메인(Zone) -> Caching -> Configuration -> Purge Cache -> **Custom Purge**(URL 목록) 또는 **Purge Everything**. 글 하나를 고쳤다면 `/posts/<slug>`(퍼센트 인코딩된 전체 URL), `/`, 해당 섹션(`/tech` 등), `/sitemap.xml`, `/rss.xml`, `/api/posts?...`가 대상이다. 다 모르겠으면 Purge Everything.
 
@@ -27,7 +27,12 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/<ZONE_ID>/purge_cache" 
   -H "Authorization: Bearer <API_TOKEN>" -H "Content-Type: application/json" \
   --data '{"files":["https://<운영 도메인>/","https://<운영 도메인>/sitemap.xml"]}'   # 전체는 '{"purge_everything":true}'
 ```
-`*.pages.dev` 주소가 위 방법으로 퍼지되는지는 **확인하지 못했다**(확인 필요). 퍼지가 안 되면 최대 10분을 기다린다. 커스텀 도메인은 그 Zone에서 퍼지한다.
+Cache API 항목은 Zone(커스텀 도메인)의 Purge Cache로 지워진다(확인 필요: 대시보드/API 동작은 이 환경에서 검증하지 못했다). `*.pages.dev` 주소가 위 방법으로 퍼지되는지, 애초에 거기서 Cache API가 동작하는지는 **확인하지 못했다**(확인 필요). 퍼지가 안 되면 최대 10분(404는 60초)을 기다린다.
+
+캐시 동작 확인(두 번 연속 실행, 첫 응답 `MISS` 다음 `HIT`; `*.pages.dev`에서 항상 `MISS`면 그 호스트에서는 Cache API가 동작하지 않는 것이다):
+```bash
+curl -sI https://<운영 도메인>/tech | grep -i -E 'x-edge-cache|cf-cache-status|age'
+```
 
 ## 3. 페이지 종류별 엣지 주입
 공통: `<title>`, `meta description`, `link rel=canonical`, `og:*`, `twitter:*`를 셸의 기본값 대신 넣는다(기존 태그는 제거). 모든 값은 이스케이프되며 origin은 `SITE_URL`이다. `og:image`는 없고 `twitter:card`는 `summary`다(링크 미리보기에 이미지 없음).
@@ -42,6 +47,9 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/<ZONE_ID>/purge_cache" 
 | 404 / 500 | 셸 기본값 | 셸 기본값 | - | 없음. `<meta name="robots" content="noindex">` 추가 |
 
 글 페이지는 추가로 글 헤더를 프리렌더하고 API 페이로드를 인라인한다(LCP와 요청 수 개선). JSON-LD의 `<`는 `\u003c`로 이스케이프된다.
+
+## 3-1. SEO 한계
+글 본문은 JSON(`#post-data`)으로 브라우저에 전달되어 클라이언트에서 렌더된다. 첫 HTML에는 글 헤더와 description만 들어 있으므로, JS를 실행하지 않는 크롤러(네이버 일부 포함 가능)는 헤더와 description만 색인할 수 있다. 완화책은 서버 측 본문 프리렌더(후속 작업).
 
 ## 4. llms.txt (선택, 미구현)
 LLM 크롤러용 안내 파일은 아직 없다. 추가하려면 `public/llms.txt`에 사이트 설명과 주요 URL(`/sitemap.xml`, `/rss.xml`, 섹션 3개)을 적으면 된다. 확장자가 있는 경로는 catch-all이 정적 파일로 서빙하므로(HTML이 아니면 그대로 반환) 다른 설정은 필요 없다. 글 목록까지 자동으로 넣으려면 `functions/robots.txt.js`처럼 `functions/llms.txt.js`를 만들어 `listPosts`로 생성한다. 검색 노출에 직접적인 효과는 확인되지 않았으니 필요할 때만 한다.

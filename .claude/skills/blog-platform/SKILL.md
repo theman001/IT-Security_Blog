@@ -13,16 +13,17 @@ Source of truth: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pa
 - Body (`content_md`) is selected only in post detail. List/category/RSS/sitemap queries must not select it (excerpt: `left(content_md, N)` only when `description` is empty).
 - Dates: `to_char(created_at, 'YYYY-MM-DD')` in SQL; never pass `created_at` through JS `Date` (naive timestamp, tz shifts the day).
 - Sort ties: always add `id` as a secondary key. Slugs are full paths, case-sensitive, may contain spaces, `&`, `:`, Korean: encode per segment in URLs, match exactly (no last-segment fallback).
-- Errors: `{error:{code,message}}`, real status codes (400/404/405/500). Never leak SQL, stack, or env values. 405 on `/api/posts*` and `/api/categories*` sends `Allow: GET`, on unrouted `/api`/`/api/<unknown>` (edge catch-all) `Allow: GET, HEAD`; `/api` 500s are cached 60s (`cache:'err'`, known gap); bare `/api` and unknown `/api/*` are JSON 404.
+- Errors: `{error:{code,message}}`, real status codes (400/404/405/500). Never leak SQL, stack, or env values. 405 on `/api/posts*` and `/api/categories*` sends `Allow: GET`, on unrouted `/api`/`/api/<unknown>` (edge catch-all) `Allow: GET, HEAD`; `/api` 500s are `no-store`; bare `/api` and unknown `/api/*` are JSON 404.
 - DB role is SELECT-only. No writes, no schema changes from code.
 
 ## 2. Functions, edge cache
-- Success: `Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400`. Errors: `max-age=0, s-maxage=60`.
+- Success: `Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=60`. Errors: 4xx `max-age=0, s-maxage=60`, 500 `no-store`. These are client hints only: Cloudflare does NOT cache Function output because of `s-maxage`.
+- Edge cache = `functions/_lib/cache.js` `withEdgeCache`/`edgeCached` (Workers Cache API) wrapped at the `onRequest` boundary of `/api/posts*`, `/api/categories*`, `/posts/*`, catch-all HTML (not the `env.ASSETS` pass-through), sitemap, rss, robots. GET only; stores 200/301 (600s) and 404 (60s); never 400/405/5xx/`no-store`. Debug header `X-Edge-Cache: HIT|MISS|BYPASS`. Verify: `curl -sI <url> | grep -i -E 'x-edge-cache|cf-cache-status|age'` twice. Unverified on `*.pages.dev` (Cache API may not run there).
 - Unknown paths must return a real 404 (SPA shell + `noindex`) from the catch-all `functions/[[path]].js`; a missing static file that Pages answers with `index.html` 200 is turned into 404 too. `/categories/<section>` (section root) is a 301 to `/<section>`. HTML/feed 500s are `no-store`, HTML 405 sends `Allow: GET, HEAD`. Soft 404 is a bug. There is no `_redirects`.
 - Edge HTML: `HTMLRewriter` over the `index.html` shell (`functions/_lib/shell.js`). Post pages prerender the header with the shared pure `src/lib/post-header.js` (the only `src/` code `functions/` may import, with its escape/urls/related-card imports) and inline the API payload as `#post-data`. Keep SPA and edge markup in that one module. Section copy in `functions/_lib/sections.js` must equal `src/content/sections.js` (unit-tested).
 - Origin for canonical/sitemap/RSS/OG is env `SITE_URL` (required in Production; else request host -> duplicate indexing). `NAVER_SITE_VERIFICATION` (optional) injects the Naver meta tag.
-- Instant refresh after a publish: Cloudflare Purge Cache (URL or everything), see `docs/seo.md`. Document any change in `docs/`.
-- Static assets: `public/_routes.json` skips Functions for `/assets/*`, `/fonts/*`, `/favicon.ico`; `public/_headers` makes `/assets/*` immutable.
+- Instant refresh after a publish: Cloudflare Purge Cache (URL or everything; works for Cache API entries on a zone/custom domain, unverified on pages.dev), see `docs/seo.md`. Document any change in `docs/`.
+- Static assets: `public/_routes.json` skips Functions for `/assets/*`, `/favicon.ico`; `public/_headers` makes `/assets/*` immutable.
 
 ## 3. Deploy rules (Cloudflare Pages)
 - Work only on `renewal` (or a feature branch off it). NEVER commit or push to `main`; merge to `main` is the user's action (it deploys production).
@@ -34,7 +35,7 @@ Source of truth: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pa
 ## 4. Rendering and XSS
 - Pipeline order: `marked` -> `DOMPurify.sanitize` -> insert -> Prism highlight -> code-block enhance (copy button).
 - Markdown body is the ONLY thing allowed through DOMPurify+innerHTML. EVERY other DB field (title, excerpt, description, tags, category name/path, author, slugs in attributes) goes through `escapeHtml()` or `textContent`.
-- Never put DB values into `href` unencoded, inline handlers, or `<script>`. JSON-LD is built with `JSON.stringify` and `<` escaped as `<`.
+- Never put DB values into `href` unencoded, inline handlers, or `<script>`. JSON-LD is built with `JSON.stringify` and `<` escaped as `\u003c`.
 
 ## 5. Routing (SPA)
 - History API (`pushState`/`popstate`), no hash URLs. Internal links carry `data-link`.

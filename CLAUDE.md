@@ -11,7 +11,7 @@ Docs: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pages setting
 - Data: Neon Serverless Postgres (`reports`, `categories`), markdown stored in DB. DB is read from Functions only, via `neon(env.DATABASE_URL)` with a SELECT-only role (`app_reader`). The browser gets `/api/*` JSON only.
 - Rendering: client-side `marked` -> `DOMPurify` -> `Prism.js`. Fonts (Pretendard, Noto Serif KR, JetBrains Mono) are self-hosted npm packages in `src/styles/fonts.css`, loaded after first render.
 - SEO at the edge: every HTML route goes through Functions + `HTMLRewriter` on the `index.html` shell (title, description, canonical, OG/Twitter; posts also JSON-LD `BlogPosting`, a prerendered post header via shared `src/lib/post-header.js`, and the API payload inlined as `<script id="post-data">`). sitemap/robots/rss generated from the DB. Unknown paths: real 404 (SPA shell + `noindex`); `/categories/<section>` -> 301 `/<section>`. Origin comes from env `SITE_URL`.
-- Publishing = Blog_Contents `main` -> GitHub Actions sync -> Neon (no rebuild of this repo). Edge cache up to 10 min (`s-maxage=600`); purge via Cloudflare Purge Cache for instant refresh (`docs/seo.md`).
+- Publishing = Blog_Contents `main` -> GitHub Actions sync -> Neon (no rebuild of this repo). Edge cache up to 10 min via the Workers Cache API wrapper `functions/_lib/cache.js` (200/301 600s, 404 60s; never 5xx/405/400/no-store; `s-maxage` alone does not cache Function output; debug header `X-Edge-Cache`); purge via Cloudflare Purge Cache for instant refresh (`docs/seo.md`). Success headers carry `stale-while-revalidate=60`.
 
 ## 2. Commands
 ```bash
@@ -23,7 +23,7 @@ npm run test:unit      # node --test tests/unit/*.test.js (no network, no DB)
 npm test               # test:unit + Playwright e2e (tests/e2e, API mocked, starts Vite :5173)
 npm run test:edge      # build + wrangler on :8799 + real DB: 404/meta/sitemap/rss (skips w/o DATABASE_URL)
 npm run lint:tokens    # no hard-coded color/space/radius/font outside tokens.css
-npm run check:bundle   # dist/ must not contain DB URL/driver/role strings
+npm run check:bundle   # runs vite build first (SKIP_BUILD=1 to reuse dist/), then dist/ must not contain DB URL/driver/role strings
 .venv-tools/bin/python script.py   # ad-hoc Playwright (webapp-testing skill)
 ```
 Local secrets: copy `.dev.vars.example` -> `.dev.vars` (gitignored). See `docs/dev.md`.
@@ -37,13 +37,13 @@ functions/         Pages Functions (import from src/ only the pure post-header.j
   [[path]].js                 catch-all: /, /about, sections, /categories/*, assets, 404, bare /api 404
   sitemap.xml.js robots.txt.js rss.xml.js
   _lib/   handlers (API), edge-handlers, queries (SQL), seo (meta/sitemap/RSS), shell (HTMLRewriter),
-          http (JSON + cache headers), slug, cursor, excerpt, sections, db
+          http (JSON + cache headers), cache (Cache API wrapper), slug, cursor, excerpt, sections, db
 src/               main.js, router.js, pages/ (home, section, post, about, not-found), components/, render/ (markdown, code blocks),
                    lib/ (api, escape, theme, urls, post-header), content/ (sections.js, about.md), styles/ (tokens.css + per-area CSS, fonts.css)
 tests/unit/        node --test (handlers, queries, edge, seo, http, slug, cursor, excerpt, escape, urls, post-header, headers, lint, bundle)
 tests/e2e/         Playwright specs (API mocked via tests/fixtures/api/*.json); tests/fixtures/
 scripts/           check-tokens.mjs, check-bundle.mjs, test-edge.mjs (+ lib/)
-public/            _headers (immutable /assets/*), _routes.json (Functions skip /assets, /fonts, /favicon.ico), 404.html
+public/            _headers (immutable /assets/*), _routes.json (Functions skip /assets, /favicon.ico), 404.html
 docs/              api.md, dev.md, seo.md, post-merge-checklist.md, contents-repo.md, PLAN.md, superpowers/specs/
 .claude/skills/    vendored reviewed skills + blog-platform; .claude/SKILLS.lock.md = provenance
 DESIGN.md          design tokens contract (single source for color/space/radius/font)
@@ -78,7 +78,7 @@ Design-system owner is UI UX Pro Max alone. Impeccable reviews; it does not desi
 
 ## 7. Workflow
 brainstorming (one question at a time) -> writing-plans (`docs/PLAN.md`) -> sequential foundation work (Functions API + client, `tokens.css`, layout/router, theme + no-flash script, markdown pipeline) -> parallel page work in git worktrees via subagent-driven-development (home, post, category, static, 404; subagents use tokens only and REPORT needed changes to shared files: tokens, common components, router) -> two-stage review per task (spec compliance, then code quality) -> Impeccable critique + audit -> verification (tests, preview) -> PR to `main` (user merges).
-Status: implementation, edge SEO, tests and docs are done on `renewal` (Lighthouse mobile on preview 2026-11-27: Perf 99-100, A11y 100, BP 96, SEO 100 on all pages except one sample tech post at 92 (generic link text "링크" in the sample markdown, a content issue), per-page table in `docs/seo.md`). Remaining: Impeccable critique/audit run (pending), PR to `main` (controller opens, user merges), then `docs/post-merge-checklist.md` (set `SITE_URL` in Production, Naver/Google registration, remove `sample-*` posts, optional `llms.txt`).
+Status: implementation, edge SEO, tests and docs are done on `renewal` (Lighthouse mobile on preview 2026-11-27: Perf 99-100, A11y 100, BP 96, SEO 100 on all pages except one sample tech post at 92 (generic link text "링크" in the sample markdown, a content issue), per-page table in `docs/seo.md`). Impeccable audit run (19/20, see .claude/SKILLS.lock.md); critique not run. Remaining: PR to `main` (controller opens, user merges), then `docs/post-merge-checklist.md` (set `SITE_URL` in Production, Naver/Google registration, remove `sample-*` posts, optional `llms.txt`).
 
 ## 8. Known data facts (see docs/api.md, docs/contents-repo.md)
 - One `reports` table; sections are the first slug segment: `tech` | `trends` | `essays`. Slugs and category slugs are FULL paths (e.g. `tech/security/reversing/01-kakao-auth`), lowercase-hyphen in the new Blog_Contents structure, still matched case-sensitively/exactly. No `contents` wrapper.
@@ -88,7 +88,7 @@ Status: implementation, edge SEO, tests and docs are done on `renewal` (Lighthou
 - The Blog_Contents sync has already replaced production DB content with new sample posts (`sample-*`); the old live frontend reads the same DB. Do not write to the DB from this repo.
 
 ## 9. Definition of done
-- [ ] No DB credentials in browser bundle or repo
+- [ ] No DB credentials in the working tree or browser bundle. Git history (origin/main and renewal) still contains the old `app_reader` password string until it is rotated (`docs/post-merge-checklist.md` section 7, owner's decision)
 - [ ] All non-markdown fields escaped; XSS tests pass
 - [ ] Publishing works by DB INSERT only
 - [ ] `/posts/*` first HTML has unique title, description, OG, JSON-LD

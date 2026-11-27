@@ -34,13 +34,25 @@ for p in / /tech /essays /nope /categories/tech /sitemap.xml /rss.xml /robots.tx
 - [ ] OG 미리보기: 카카오톡 공유 디버거(주소 확인 필요: https://developers.kakao.com/tool/debugger/sharing), Slack에 링크 붙여넣기, 필요하면 Facebook 공유 디버거. 글 URL로 제목·설명이 보이는지 확인. 현재 `og:image`가 없어 이미지는 나오지 않는다. 이전 미리보기가 캐시돼 있으면 디버거에서 "캐시 초기화"를 한다.
 
 ## 4. 캐시
-- [ ] 옛 내용이 남아 보이면 Cloudflare Purge Cache(전체 또는 URL) ([seo.md](seo.md#2-캐시-퍼지)). 자연 만료는 최대 10분.
+- [ ] 엣지 캐시는 Workers Cache API 래퍼(`functions/_lib/cache.js`)다. `s-maxage`만으로는 Function 응답이 캐시되지 않는다. TTL은 200/301 600초, 404 60초, 5xx/405/400/`no-store`는 저장하지 않는다.
+- [ ] 동작 확인: 같은 URL을 두 번 요청해 첫 응답 `X-Edge-Cache: MISS`, 둘째 `HIT`인지 본다. `curl -sI https://<도메인>/tech | grep -i -E 'x-edge-cache|cf-cache-status|age'` (프리뷰 `*.pages.dev`에서 항상 `MISS`면 그 호스트에서는 Cache API가 동작하지 않는 것이다. 운영 도메인에서 확인 필요).
+- [ ] 옛 내용이 남아 보이면 Cloudflare Purge Cache(전체 또는 URL) ([seo.md](seo.md#2-캐시-퍼지)). Cache API 항목이 Zone 퍼지로 지워지는지는 확인 필요. 자연 만료는 최대 10분.
 
 ## 5. 롤백
 - 가장 빠른 방법: Cloudflare Pages -> 프로젝트 -> Deployments -> 이전의 정상 프로덕션 배포 -> "Rollback to this deployment"(버튼 이름은 확인 필요).
 - 코드로 되돌리기: `git revert -m 1 <병합 커밋 SHA>` 후 PR로 `main`에 반영(다시 배포됨). 환경변수는 롤백되지 않는다.
 - 롤백해도 DB 내용은 그대로다. 옛 프론트가 새 DB 구조(섹션 슬러그, 새 샘플 글)에서 어떻게 보이는지는 별도로 확인한다.
 
-## 6. 알려진 사항 (추적 중인 사소한 코드 공백, 수정하지 않음)
-- `/api/*` 500 응답은 `functions/_lib/http.js`의 기본값(`cache:'err'`) 때문에 엣지에서 60초 캐시될 수 있다(`public, max-age=0, s-maxage=60`). HTML/피드의 500은 `no-store`다. DB 장애 직후 짧게 500이 남을 수 있으며, 필요하면 퍼지한다.
+## 6. 알려진 사항
+- 파비콘은 `index.html`의 `<link rel="icon" href="data:,">`(빈 아이콘)로 `/favicon.ico` 404 소음만 막았다. 실제 파비콘은 디자인 결정이므로 선택 후속 작업이다(`public/`에 파일을 두고 `<link rel="icon">`을 바꾼다).
 - 기술 샘플 글(`sample-android-auth`)의 일반 링크 텍스트 "링크"는 Lighthouse SEO 감점 원인이다(콘텐츠 문제, [seo.md](seo.md) 6절). 샘플 글을 지우면 사라진다.
+
+## 7. 권장(사용자 결정): `app_reader` 비밀번호 교체
+**병합과 새 프로덕션 배포 확인이 끝난 뒤에** 한다(그 전에 교체하면 옛 live 사이트가 깨진다).
+- 이유: `app_reader` 접속 문자열이 옛 `main`의 브라우저 번들(`main:assets/js/api.js`)과 git 히스토리(origin/main, `renewal`의 이전 커밋)에 공개돼 있다. 병합 후 번들은 깨끗하지만 옛 문자열을 가진 사람은 Neon에 직접 접속해 `app_reader`가 읽을 수 있는 것을 조회(SELECT)하고 컴퓨트를 소모시킬 수 있다.
+- 범위: SELECT 전용 계정이다. 앞서 사용자는 **소유자(OWNER) 계정** 비밀번호는 교체하지 않기로 했다. 이것은 별개의 계정이고, 교체 여부는 사용자가 결정한다.
+- [ ] Neon에서 `app_reader` 비밀번호 재설정(Reset password)
+- [ ] 새 접속 문자열을 Cloudflare Pages의 `DATABASE_URL`에 **Production과 Preview 둘 다** 반영하고, 로컬 `.dev.vars`도 갱신
+- [ ] 환경변수는 다음 배포부터 적용되므로 **재배포**
+- [ ] `curl -s "https://<도메인>/api/posts?limit=1"`가 200 JSON인지 다시 확인
+- 비밀번호를 교체하면 히스토리에 남은 옛 문자열은 무효이므로 git 히스토리를 다시 고쳐 쓸 필요가 없다.
