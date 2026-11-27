@@ -170,3 +170,14 @@ test('posts: essay prerender has the related card, progress bar and no lead; esc
   assert.ok(m.includes('<article class="article essay"></article>') && !m.includes('post-lead'));
   assert.ok(!/<(i|s|u)>/.test(m), m);
 });
+
+test('posts: inlines the API payload as JSON with "<" escaped (no </script> breakout)', async () => {
+  const row = { id: 1, title: 'T', slug: 'tech/a', date: '2026-01-02', description: 'd', body_head: null, reading_minutes: 1, category_id: null, tags: [], content_md: 'x</script><img src=x onerror=alert(1)>', category_name: null, category_path: null };
+  const r = await handlePost(mk('/posts/tech/a', { params: { slug: ['tech', 'a'] } }), deps(fakeDb([row], [])));
+  const m = r.rewrite.main;
+  const json = m.match(/<script type="application\/json" id="post-data">(.*)<\/script>$/s)[1];
+  assert.ok(!json.includes('<') && !m.slice(0, m.indexOf('<script')).includes('onerror'));
+  const data = JSON.parse(json);
+  assert.equal(data.post.contentMd, row.content_md);
+  assert.equal(data.post.slug, 'tech/a');
+});

@@ -55,7 +55,8 @@ try {
     check('post <main> has the empty article container', /<article class="article( essay)?"><\/article>/.test(main));
     check('post has canonical', /<link rel="canonical" href="[^"]+"/.test(t));
     check('post title escaped in <title>', t.includes(`<title>${esc(post.title).replace(/"/g, '&quot;').replace(/'/g, '&#39;')} - IT Security Blog</title>`) || t.includes(`<title>${esc(post.title)} - IT Security Blog</title>`));
-    check('post has no raw <script> from data', (t.match(/<script/g) ?? []).length === (nf.t.match(/<script/g) ?? []).length + 1);
+    check('post has no raw <script> from data', (t.match(/<script/g) ?? []).length === (nf.t.match(/<script/g) ?? []).length + 2); // JSON-LD + inlined payload
+    check('inlined post payload is JSON with no raw "<"', (() => { try { const j = /<script type="application\/json" id="post-data">(.*?)<\/script>/s.exec(t)[1]; return !j.includes('<') && JSON.parse(j).post.slug === post.slug; } catch { return false; } })());
     check('single <title>', (t.match(/<title>/g) ?? []).length === 1);
     const sm = await get('/sitemap.xml');
     check('sitemap lists the post url', sm.t.includes(path.replace(/&/g, '&amp;')));

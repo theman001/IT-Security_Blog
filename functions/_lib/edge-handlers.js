@@ -29,13 +29,16 @@ async function guarded(ctx, deps, run, onError) {
 }
 const shell500 = (ctx, deps) => () => renderShell(ctx.env, ctx.request, { status: 500, noindex: true, cache: 'none' }, deps.HTMLRewriter);
 
+// Same payload as /api/posts/<slug>, so the SPA can skip that request. `<` escaped: no </script> breakout.
+const inlineData = (out) => `<script type="application/json" id="post-data">${JSON.stringify(out).replace(/</g, '\\u003c')}</script>`;
+
 export const handlePost = (ctx, deps) =>
   guarded(ctx, deps, async () => {
     const slug = decodeSlug(asParts(ctx.params?.slug));
     if (!slug) return notFound(ctx, deps);
     const out = await getPost(deps.getDb(ctx.env), slug);
     if (!out) return notFound(ctx, deps);
-    return page(ctx, deps, metaTags(out, siteOrigin(ctx.env, ctx.request)), { mainHtml: postLayoutHtml(out.post, { related: out.related }) });
+    return page(ctx, deps, metaTags(out, siteOrigin(ctx.env, ctx.request)), { mainHtml: postLayoutHtml(out.post, { related: out.related }) + inlineData(out) });
   }, shell500(ctx, deps));
 
 // Trailing slashes: `/about/` == `/about` (200, canonical without slash); the SPA router ignores them too.

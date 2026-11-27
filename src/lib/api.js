@@ -37,6 +37,17 @@ export function getPosts(params = {}) {
   const qs = q.toString();
   return get(`/api/posts${qs ? `?${qs}` : ''}`);
 }
-export const getPost = async (slug) => get(`/api/posts/${seg(slug)}`);
+// The edge inlines the /api/posts/<slug> payload in the first HTML (functions/posts/[[slug]].js): use it once, skip the round trip.
+function takeInlinePost(slug) {
+  const el = typeof document === 'undefined' ? null : document.getElementById('post-data');
+  el?.remove();
+  try {
+    const data = el && JSON.parse(el.textContent);
+    return data?.post?.slug === slug ? data : null;
+  } catch {
+    return null;
+  }
+}
+export const getPost = async (slug) => takeInlinePost(slug) ?? get(`/api/posts/${seg(slug)}`);
 export const getCategories = () => get('/api/categories');
 export const getCategoryPosts = async (path) => get(`/api/categories/${seg(path)}/posts`);

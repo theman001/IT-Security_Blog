@@ -52,3 +52,23 @@ test('200 with non-JSON body -> ApiError bad_response', async () => {
   stub(new Response('<html>captive portal</html>', { status: 200 }));
   await assert.rejects(getCategories(), (e) => e instanceof ApiError && e.status === 200 && e.code === 'bad_response' && e.message === 'Invalid response');
 });
+
+test('getPost uses the inlined edge payload once (slug must match), else fetches', async () => {
+  const el = (text) => ({ textContent: text, removed: false, remove() { this.removed = true; } });
+  let node = el(JSON.stringify({ post: { slug: 'tech/a' } }));
+  globalThis.document = { getElementById: (id) => (id === 'post-data' ? node : null) };
+  try {
+    const calls = stub(json({ post: { slug: 'tech/b' } }));
+    assert.equal((await getPost('tech/a')).post.slug, 'tech/a');
+    assert.equal(node.removed, true);
+    assert.equal(calls.length, 0);
+    node = el(JSON.stringify({ post: { slug: 'tech/a' } })); // other slug -> network
+    assert.equal((await getPost('tech/b')).post.slug, 'tech/b');
+    assert.equal(calls.length, 1);
+    node = el('{broken'); // bad JSON -> network
+    await getPost('tech/c');
+    assert.equal(calls.length, 2);
+  } finally {
+    delete globalThis.document;
+  }
+});
