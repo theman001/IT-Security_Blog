@@ -3,6 +3,7 @@
 모든 HTML 경로는 엣지(Pages Functions + `HTMLRewriter`)가 `index.html` 셸의 head를 바꿔 내보낸다. 동작은 `functions/_lib/{seo,shell,edge-handlers}.js`, 라우트별 응답은 [api.md](api.md#엣지-라우트-비api).
 
 ## 1. 검색엔진 등록
+> 주의: 아래 외부 서비스(네이버, Google, Cloudflare)의 메뉴·화면 이름과 경로는 일반 지식으로 적은 것이며 이 환경에서 직접 확인하지 못했다. 서비스 개편으로 달라질 수 있으니 실제 화면에서 확인한다.
 
 ### 네이버 서치어드바이저
 1. Cloudflare Pages -> Settings -> Environment variables에 `NAVER_SITE_VERIFICATION`을 **Production과 Preview 모두** 추가한다. 값은 아래 3단계에서 받는 토큰(`content="..."`의 값만, 따옴표·태그 제외). 다음 배포부터 적용되므로 저장 후 재배포한다.
@@ -18,7 +19,7 @@
 ## 2. 캐시 퍼지
 HTML과 API는 `s-maxage=600`(엣지 10분) + `stale-while-revalidate=86400`이라, 글을 sync한 뒤 최대 10분 동안(만료 직후에는 갱신 중 오래된 응답) 옛 내용이 보일 수 있다. 정적 `/assets/*`는 해시 파일명 + `immutable`이라 퍼지할 필요가 없다.
 
-대시보드: Cloudflare -> 해당 도메인(Zone) -> Caching -> Configuration -> Purge Cache -> **Custom Purge**(URL 목록) 또는 **Purge Everything**. 글 하나를 고쳤다면 `/posts/<slug>`(퍼센트 인코딩된 전체 URL), `/`, 해당 섹션(`/tech` 등), `/sitemap.xml`, `/rss.xml`, `/api/posts?...`가 대상이다. 다 모르겠으면 Purge Everything.
+대시보드(메뉴 이름은 확인 필요): Cloudflare -> 해당 도메인(Zone) -> Caching -> Configuration -> Purge Cache -> **Custom Purge**(URL 목록) 또는 **Purge Everything**. 글 하나를 고쳤다면 `/posts/<slug>`(퍼센트 인코딩된 전체 URL), `/`, 해당 섹션(`/tech` 등), `/sitemap.xml`, `/rss.xml`, `/api/posts?...`가 대상이다. 다 모르겠으면 Purge Everything.
 
 API (placeholder를 직접 채운다. 토큰은 Zone > Cache Purge 권한만, 저장소·로그에 남기지 않는다):
 ```bash
@@ -26,7 +27,7 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/<ZONE_ID>/purge_cache" 
   -H "Authorization: Bearer <API_TOKEN>" -H "Content-Type: application/json" \
   --data '{"files":["https://<운영 도메인>/","https://<운영 도메인>/sitemap.xml"]}'   # 전체는 '{"purge_everything":true}'
 ```
-`*.pages.dev` 주소는 내 Zone이 아니라 퍼지할 수 없으니 10분을 기다린다(커스텀 도메인을 쓰는 경우 그 Zone에서 퍼지).
+`*.pages.dev` 주소가 위 방법으로 퍼지되는지는 **확인하지 못했다**(확인 필요). 퍼지가 안 되면 최대 10분을 기다린다. 커스텀 도메인은 그 Zone에서 퍼지한다.
 
 ## 3. 페이지 종류별 엣지 주입
 공통: `<title>`, `meta description`, `link rel=canonical`, `og:*`, `twitter:*`를 셸의 기본값 대신 넣는다(기존 태그는 제거). 모든 값은 이스케이프되며 origin은 `SITE_URL`이다. `og:image`는 없고 `twitter:card`는 `summary`다(링크 미리보기에 이미지 없음).
@@ -40,7 +41,7 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/<ZONE_ID>/purge_cache" 
 | `/posts/<slug>` | `<글 제목> - IT Security Blog` | 글 `description`, 없으면 본문 앞부분 요약 | article (+`article:published_time`) | `BlogPosting`: headline, datePublished, dateModified(=글 날짜), description, url, mainEntityOfPage, author(Person, 사이트명), keywords(태그), articleSection |
 | 404 / 500 | 셸 기본값 | 셸 기본값 | - | 없음. `<meta name="robots" content="noindex">` 추가 |
 
-글 페이지는 추가로 글 헤더를 프리렌더하고 API 페이로드를 인라인한다(LCP와 요청 수 개선). JSON-LD의 `<`는 `<`로 이스케이프된다.
+글 페이지는 추가로 글 헤더를 프리렌더하고 API 페이로드를 인라인한다(LCP와 요청 수 개선). JSON-LD의 `<`는 `\u003c`로 이스케이프된다.
 
 ## 4. llms.txt (선택, 미구현)
 LLM 크롤러용 안내 파일은 아직 없다. 추가하려면 `public/llms.txt`에 사이트 설명과 주요 URL(`/sitemap.xml`, `/rss.xml`, 섹션 3개)을 적으면 된다. 확장자가 있는 경로는 catch-all이 정적 파일로 서빙하므로(HTML이 아니면 그대로 반환) 다른 설정은 필요 없다. 글 목록까지 자동으로 넣으려면 `functions/robots.txt.js`처럼 `functions/llms.txt.js`를 만들어 `listPosts`로 생성한다. 검색 노출에 직접적인 효과는 확인되지 않았으니 필요할 때만 한다.
@@ -50,19 +51,20 @@ LLM 크롤러용 안내 파일은 아직 없다. 추가하려면 `public/llms.tx
 - 비어 있으면 요청 host를 쓴다. 그러면 `<프로젝트>.pages.dev`, 브랜치 프리뷰, 커스텀 도메인이 같은 글을 각자의 canonical로 내보내 **중복 색인** 위험이 있다. 운영 값을 설정하면 어느 호스트로 접근해도 canonical은 운영 주소를 가리킨다.
 - Preview에는 비워도 된다(프리뷰는 자기 host 기준). 값을 바꾸면 다음 배포부터 적용된다.
 
-## 6. Lighthouse (프리뷰, 2026-11-27, 모바일 기본 설정)
-| 카테고리 | 점수 |
-|---|---|
-| Performance | 99-100 |
-| Accessibility | 100 |
-| Best Practices | 96 |
-| SEO | 92-100 |
+## 6. Lighthouse (프리뷰 `renewal.it-security-blog.pages.dev`, 2026-11-27, 모바일 기본 설정)
+| 페이지 | Perf | A11y | BP | SEO | LCP | CLS |
+|---|---|---|---|---|---|---|
+| `/` | 99 | 100 | 96 | 100 | 1.4s | 0.002 |
+| `/tech` | 100 | 100 | 96 | 100 | 1.0s | 0.003 |
+| `/about` | 100 | 100 | 96 | 100 | 1.2s | 0.003 |
+| 기술 글 `/posts/tech/security/reversing/sample-android-auth` | 100 | 100 | 96 | **92** | 0.8s | 0 |
+| 사유 글 `/posts/essays/sample-why-security-learns-late` | 99 | 100 | 96 | 100 | 1.3s | 0 |
 
-범위는 측정한 페이지(홈, 섹션, 글 등) 사이의 최저-최고다. SEO 92 페이지가 있으므로 재측정 시 감점 항목을 확인한다(프리뷰 호스트 기준 값이라 운영에서는 달라질 수 있다). 목표: Perf >= 90, A11y >= 95, BP >= 95, SEO >= 95.
+목표(Perf >= 90, A11y >= 95, BP >= 95, SEO >= 95)에 못 미치는 곳은 SEO 95 미만인 기술 글 한 페이지뿐이다. 원인: 샘플 마크다운에 링크 텍스트가 일반어 "링크"인 링크가 있어 Lighthouse `link-text` 감사에서 감점됐다. 앱 결함이 아니라 해당 샘플 글의 콘텐츠 문제이며, 글에서 설명적인 링크 텍스트로 바꾸면 해결된다(샘플 글은 어차피 제거 대상, [post-merge-checklist.md](post-merge-checklist.md)). 프리뷰 호스트 기준 값이라 운영에서는 달라질 수 있다.
 
 재측정 (Lighthouse 기본값이 모바일 에뮬레이션 + 스로틀링):
 ```bash
 npx lighthouse "https://<URL>/" --only-categories=performance,accessibility,best-practices,seo \
   --output=html --output-path=./lh-home.html --chrome-flags="--headless=new"
 ```
-URL을 홈, `/tech`, 실제 글(`/posts/...`)로 바꿔 각각 측정한다. 한 번의 점수는 편차가 있으니 3회 정도 보고 중앙값을 쓴다.
+URL을 홈, `/tech`, `/about`, 실제 글(`/posts/...`)로 바꿔 각각 측정한다. 한 번의 점수는 편차가 있으니 3회 정도 보고 중앙값을 쓴다.

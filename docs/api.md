@@ -18,7 +18,7 @@
 |---|---|---|
 | 400 | `bad_request` | 잘못된 `limit`(1–50 밖)/`cursor`/`section`(`tech`·`trends`·`essays` 외)/`category`, 슬러그 디코딩 실패 |
 | 404 | `not_found` | 글·카테고리 없음, 위 외 `/api/...` 경로(예: `/api/nope`), 맨 `/api`, `/api/categories/<경로>`에 `/posts` 접미사가 없는 경우 |
-| 405 | `method_not_allowed` | GET 외 (HEAD 포함). 응답 헤더 `Allow: GET` |
+| 405 | `method_not_allowed` | GET 외 (HEAD 포함). `/api/posts*`, `/api/categories*`는 응답 헤더 `Allow: GET`. 라우트가 없는 `/api`, `/api/<미등록>`은 엣지 catch-all이 처리하므로 GET/HEAD 외 메서드에 405 + `Allow: GET, HEAD` |
 | 500 | `internal` | DB 오류 등. 내부 메시지·접속 정보는 응답에 넣지 않는다 |
 
 ## 타입
@@ -99,5 +99,5 @@ Category = {
 | 없는 정적 파일 (`/assets/x.js`, 확장자가 있는 경로) | 404. Pages가 `index.html`을 200으로 돌려주면(soft 404) 404 셸로 바꾼다. `_routes.json` 제외 경로는 `public/404.html`(noindex) |
 
 - 캐시 헤더: HTML 200 `public, max-age=0, s-maxage=600, stale-while-revalidate=86400`; HTML 404 `public, max-age=0, s-maxage=60`; HTML/피드 500 `no-store`(본문은 셸 + noindex, 피드는 JSON 오류); 301 `public, max-age=0, s-maxage=600`; sitemap/rss/robots `public, max-age=60, s-maxage=600, stale-while-revalidate=86400`.
-- GET/HEAD 외 메서드는 405 + `Allow: GET, HEAD`(JSON 오류 본문).
+- GET/HEAD 외 메서드는 405 + `Allow: GET, HEAD`(JSON 오류 본문). 단 `/api/posts*`와 `/api/categories*`는 자체 핸들러라 `Allow: GET`(HEAD도 405)이다.
 - DB 오류나 `DATABASE_URL` 누락은 응답에 메시지를 싣지 않고 500만 돌려준다. 로그에는 오류 이름과 코드만 남긴다.

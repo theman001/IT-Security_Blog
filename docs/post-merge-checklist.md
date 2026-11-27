@@ -2,6 +2,8 @@
 
 병합은 사용자가 한다. `main`에 병합되면 Cloudflare Pages가 프로덕션을 자동 배포한다. `<도메인>`은 운영 주소(`SITE_URL`).
 
+> 외부 서비스의 화면·메뉴 이름과 URL(Cloudflare 대시보드, 카카오 디버거 등)은 일반 지식으로 적은 것이라 이 환경에서 확인하지 못했다. 서비스 개편으로 달라질 수 있으니 실제 화면에서 확인한다.
+
 > **중요: 콘텐츠 DB는 이미 바뀌어 있다.** Blog_Contents sync가 운영 DB의 내용을 새 샘플 글(`sample-*`)로 교체했다. **옛(live) 프론트도 같은 DB를 읽는다.** 병합 전부터 옛 사이트에는 새 샘플 글이 보일 수 있다. 샘플 글 제거는 Blog_Contents에서 해당 파일을 삭제해 병합하면 sync가 행을 삭제한다. 런칭 전에 지울지 후에 지울지는 사용자가 결정한다. 이 레포에서 DB를 직접 고치지 않는다.
 
 ## 1. 배포 전 환경변수 (Cloudflare Pages -> Settings -> Environment variables)
@@ -29,12 +31,16 @@ for p in / /tech /essays /nope /categories/tech /sitemap.xml /rss.xml /robots.tx
 
 ## 3. 검색·공유
 - [ ] 네이버 서치어드바이저 등록, `sitemap.xml`과 `rss.xml` 제출, Google Search Console도 동일 ([seo.md](seo.md))
-- [ ] OG 미리보기: 카카오톡 공유 디버거(https://developers.kakao.com/tool/debugger/sharing), Slack에 링크 붙여넣기, 필요하면 Facebook 공유 디버거. 글 URL로 제목·설명이 보이는지 확인. 현재 `og:image`가 없어 이미지는 나오지 않는다. 이전 미리보기가 캐시돼 있으면 디버거에서 "캐시 초기화"를 한다.
+- [ ] OG 미리보기: 카카오톡 공유 디버거(주소 확인 필요: https://developers.kakao.com/tool/debugger/sharing), Slack에 링크 붙여넣기, 필요하면 Facebook 공유 디버거. 글 URL로 제목·설명이 보이는지 확인. 현재 `og:image`가 없어 이미지는 나오지 않는다. 이전 미리보기가 캐시돼 있으면 디버거에서 "캐시 초기화"를 한다.
 
 ## 4. 캐시
 - [ ] 옛 내용이 남아 보이면 Cloudflare Purge Cache(전체 또는 URL) ([seo.md](seo.md#2-캐시-퍼지)). 자연 만료는 최대 10분.
 
 ## 5. 롤백
-- 가장 빠른 방법: Cloudflare Pages -> 프로젝트 -> Deployments -> 이전의 정상 프로덕션 배포 -> "Rollback to this deployment".
+- 가장 빠른 방법: Cloudflare Pages -> 프로젝트 -> Deployments -> 이전의 정상 프로덕션 배포 -> "Rollback to this deployment"(버튼 이름은 확인 필요).
 - 코드로 되돌리기: `git revert -m 1 <병합 커밋 SHA>` 후 PR로 `main`에 반영(다시 배포됨). 환경변수는 롤백되지 않는다.
 - 롤백해도 DB 내용은 그대로다. 옛 프론트가 새 DB 구조(섹션 슬러그, 새 샘플 글)에서 어떻게 보이는지는 별도로 확인한다.
+
+## 6. 알려진 사항 (추적 중인 사소한 코드 공백, 수정하지 않음)
+- `/api/*` 500 응답은 `functions/_lib/http.js`의 기본값(`cache:'err'`) 때문에 엣지에서 60초 캐시될 수 있다(`public, max-age=0, s-maxage=60`). HTML/피드의 500은 `no-store`다. DB 장애 직후 짧게 500이 남을 수 있으며, 필요하면 퍼지한다.
+- 기술 샘플 글(`sample-android-auth`)의 일반 링크 텍스트 "링크"는 Lighthouse SEO 감점 원인이다(콘텐츠 문제, [seo.md](seo.md) 6절). 샘플 글을 지우면 사라진다.

@@ -13,7 +13,7 @@ Source of truth: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pa
 - Body (`content_md`) is selected only in post detail. List/category/RSS/sitemap queries must not select it (excerpt: `left(content_md, N)` only when `description` is empty).
 - Dates: `to_char(created_at, 'YYYY-MM-DD')` in SQL; never pass `created_at` through JS `Date` (naive timestamp, tz shifts the day).
 - Sort ties: always add `id` as a secondary key. Slugs are full paths, case-sensitive, may contain spaces, `&`, `:`, Korean: encode per segment in URLs, match exactly (no last-segment fallback).
-- Errors: `{error:{code,message}}`, real status codes (400/404/405/500). Never leak SQL, stack, or env values. `/api` 405 sends `Allow: GET`; bare `/api` and unknown `/api/*` are JSON 404.
+- Errors: `{error:{code,message}}`, real status codes (400/404/405/500). Never leak SQL, stack, or env values. 405 on `/api/posts*` and `/api/categories*` sends `Allow: GET`, on unrouted `/api`/`/api/<unknown>` (edge catch-all) `Allow: GET, HEAD`; `/api` 500s are cached 60s (`cache:'err'`, known gap); bare `/api` and unknown `/api/*` are JSON 404.
 - DB role is SELECT-only. No writes, no schema changes from code.
 
 ## 2. Functions, edge cache
