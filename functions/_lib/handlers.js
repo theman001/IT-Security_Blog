@@ -13,7 +13,7 @@ async function guarded({ request, env, params }, { getDb }, run) {
     return await run(new URL(request.url), asParts(params?.slug ?? params?.path), () => getDb(env));
   } catch (e) {
     console.error('api error', e?.name, e?.code); // never log message (may hold connection info)
-    return fail(500, 'internal', 'Internal error');
+    return fail(500, 'internal', 'Internal error', { cache: 'none' });
   }
 }
 

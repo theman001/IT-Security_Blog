@@ -49,6 +49,7 @@ test('post detail: missing -> 404, bad slug -> 400, db error -> 500 without leak
   const log = tc.mock.method(console, 'error', () => {});
   r = await handlePosts(mk('/api/posts', {}), deps(boom));
   assert.equal(r.status, 500);
+  assert.equal(r.headers.get('cache-control'), 'no-store');
   assert.equal(log.mock.callCount(), 1, 'handler logs the error');
   const t = JSON.stringify(await body(r));
   assert.doesNotMatch(t, /secret|postgres|SELECT/);

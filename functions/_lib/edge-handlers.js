@@ -7,7 +7,7 @@ import { SECTIONS } from './sections.js';
 import { DEFAULT_DESCRIPTION, buildRss, buildSitemap, headTagsHtml, metaTags, pageMeta, siteOrigin } from './seo.js';
 
 const ok = (body, type, status = 200) =>
-  new Response(body, { status, headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=86400' } });
+  new Response(body, { status, headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=60' } });
 const NOT_ALLOWED = () => fail(405, 'method_not_allowed', 'Only GET is supported', { headers: { Allow: 'GET, HEAD' } });
 const INTERNAL = () => fail(500, 'internal', 'Internal error', { cache: 'none' });
 const asParts = (p) => (p == null ? [] : Array.isArray(p) ? p : [p]);
@@ -43,13 +43,16 @@ export const handlePost = (ctx, deps) =>
     return page(ctx, deps, metaTags(out, siteOrigin(ctx.env, ctx.request)), { mainHtml: postLayoutHtml(out.post, { related: out.related }) + inlineData(out) });
   }, shell500(ctx, deps));
 
+// Static-file lookups (served by Pages, never edge-cached by us); `/categories/*` may contain dots.
+export const isAssetPath = (raw) =>
+  raw.startsWith('/assets/') || (!raw.startsWith('/categories/') && /\.[A-Za-z0-9]{1,8}$/.test(raw.slice(raw.lastIndexOf('/') + 1)));
+
 // Trailing slashes: `/about/` == `/about` (200, canonical without slash); the SPA router ignores them too.
 export const handleCatchAll = (ctx, deps) =>
   guarded(ctx, deps, async (url) => {
     const raw = url.pathname;
     if (raw === '/api' || raw.startsWith('/api/')) return fail(404, 'not_found', 'Not found');
-    const lastSeg = raw.slice(raw.lastIndexOf('/') + 1);
-    if (raw.startsWith('/assets/') || (!raw.startsWith('/categories/') && /\.[A-Za-z0-9]{1,8}$/.test(lastSeg))) {
+    if (isAssetPath(raw)) {
       const res = await ctx.env.ASSETS.fetch(ctx.request);
       // Pages falls back to index.html (200) for missing files: that is a soft 404.
       return res.status === 200 && /text\/html/i.test(res.headers.get('content-type') ?? '') ? notFound(ctx, deps) : res;

@@ -1,7 +1,7 @@
 import { escapeAttr } from './seo.js';
 
 const CACHE = {
-  ok: 'public, max-age=0, s-maxage=600, stale-while-revalidate=86400',
+  ok: 'public, max-age=0, s-maxage=600, stale-while-revalidate=60',
   notFound: 'public, max-age=0, s-maxage=60',
   none: 'no-store',
 };

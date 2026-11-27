@@ -63,6 +63,23 @@ try {
     const sm = await get('/sitemap.xml');
     check('sitemap lists the post url', sm.t.includes(path.replace(/&/g, '&amp;')));
   }
+  // Edge cache (Workers Cache API, emulated by wrangler): MISS then HIT; 404 cached too; 405 never stored.
+  const edge = async (p, init) => (await fetch(BASE + p, { redirect: 'manual', ...init })).headers.get('x-edge-cache');
+  const cp = `/tech?edge-check=${Date.now()}`;
+  check('GET /tech first -> X-Edge-Cache: MISS', (await edge(cp)) === 'MISS');
+  const second = await get(cp);
+  check('GET /tech second -> X-Edge-Cache: HIT, original Cache-Control kept', second.r.headers.get('x-edge-cache') === 'HIT' && /s-maxage=600/.test(second.r.headers.get('cache-control') ?? '') && !second.r.headers.has('x-orig-cache-control'), `${second.r.headers.get('x-edge-cache')} ${second.r.headers.get('cache-control')}`);
+  const np = `/nope-${Date.now()}`;
+  check('404 first -> MISS', (await edge(np)) === 'MISS');
+  const nf2 = await get(np);
+  check('404 second -> HIT, still 404 + noindex', nf2.r.headers.get('x-edge-cache') === 'HIT' && nf2.r.status === 404 && nf2.t.includes('name="robots" content="noindex"'), `${nf2.r.headers.get('x-edge-cache')} ${nf2.r.status}`);
+  const ap = `/api/posts?limit=1&edge-check=${Date.now()}`;
+  await edge(ap);
+  check('/api/posts second -> HIT', (await edge(ap)) === 'HIT');
+  check('Cache-Control: no-cache request -> BYPASS', (await edge(cp, { headers: { 'Cache-Control': 'no-cache' } })) === 'BYPASS');
+  check('HEAD -> BYPASS', (await edge(cp, { method: 'HEAD' })) === 'BYPASS');
+  check('405 is never cached/tagged HIT', (await edge('/api/posts', { method: 'POST' })) !== 'HIT');
+  check('/assets/* is not wrapped by the edge cache', (await edge('/assets/' + readdirSync('dist/assets').find((f) => f.endsWith('.js')))) === null);
   const redirect = await get('/categories/tech');
   check('/categories/tech -> 301 /tech', redirect.r.status === 301 && redirect.r.headers.get('location') === '/tech', `${redirect.r.status} ${redirect.r.headers.get('location')}`);
   const post405 = await fetch(BASE + '/about', { method: 'POST' });

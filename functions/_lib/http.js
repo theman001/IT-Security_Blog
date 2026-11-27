@@ -1,5 +1,5 @@
 const CACHE = {
-  ok: 'public, max-age=60, s-maxage=600, stale-while-revalidate=86400',
+  ok: 'public, max-age=60, s-maxage=600, stale-while-revalidate=60',
   err: 'public, max-age=0, s-maxage=60',
   none: 'no-store',
 };

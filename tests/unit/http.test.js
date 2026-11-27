@@ -5,7 +5,7 @@ import { json, fail } from '../../functions/_lib/http.js';
 test('json defaults to ok cache header', () => {
   const r = json({ a: 1 });
   assert.equal(r.status, 200);
-  assert.equal(r.headers.get('Cache-Control'), 'public, max-age=60, s-maxage=600, stale-while-revalidate=86400');
+  assert.equal(r.headers.get('Cache-Control'), 'public, max-age=60, s-maxage=600, stale-while-revalidate=60');
   assert.match(r.headers.get('Content-Type'), /application\/json/);
 });
 

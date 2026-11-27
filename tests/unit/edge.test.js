@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { handlePost, handleCatchAll, handleSitemap, handleRss, handleRobots } from '../../functions/_lib/edge-handlers.js';
+import { isAssetPath, handlePost, handleCatchAll, handleSitemap, handleRss, handleRobots } from '../../functions/_lib/edge-handlers.js';
 import { renderShell } from '../../functions/_lib/shell.js';
 
 // Fake HTMLRewriter: records handlers and applies them to a tiny fake <head>/<main>.
@@ -39,7 +39,7 @@ test('shell fetched from "/" (not /index.html); status/headers set', async () =>
 });
 test('200 shell cache header and default tags replaced', async () => {
   const r = await renderShell(mkEnv(), new Request('http://x/'), { headTags: '<title>t</title>' }, FakeHR);
-  assert.equal(r.headers.get('cache-control'), 'public, max-age=0, s-maxage=600, stale-while-revalidate=86400');
+  assert.equal(r.headers.get('cache-control'), 'public, max-age=0, s-maxage=600, stale-while-revalidate=60');
   assert.ok(r.rewrite.removed.includes('title') && r.rewrite.removed.includes('link[rel="canonical"]'));
   assert.ok(r.rewrite.head.includes('<title>t</title>'));
 });
@@ -197,4 +197,9 @@ test('posts: inlines the API payload as JSON with "<" escaped (no </script> brea
   const data = JSON.parse(json);
   assert.equal(data.post.contentMd, row.content_md);
   assert.equal(data.post.slug, 'tech/a');
+});
+
+test('isAssetPath: files and /assets/* yes; pages and /categories/* with dots no', () => {
+  for (const p of ['/assets/a.js', '/assets/x', '/favicon.ico', '/llms.txt', '/a/b.css']) assert.ok(isAssetPath(p), p);
+  for (const p of ['/', '/tech', '/posts/tech/a', '/categories/tech/v1.2', '/about/']) assert.ok(!isAssetPath(p), p);
 });
