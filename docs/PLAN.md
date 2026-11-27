@@ -78,6 +78,7 @@ playwright.config.js
 - `listCategories(db) -> Category[]` (`path = slug`, `postCount`, `totalPostCount`, `subCategoryCount`, `section`)
 - `getCategoryPosts(db, path) -> {category, children, posts}|null`
 - 엔드포인트: `GET /api/posts?section=&category=&limit=&cursor=`, `GET /api/posts/<slug…>`, `GET /api/categories`, `GET /api/categories/<path…>/posts`. GET 외 405, 잘못된 `limit`(1-50 밖)/`cursor`/`section`(허용 외)은 400.
+- [ ] Step 0: 먼저 `docs/api.md`를 설계 문서 7절대로 갱신한다(section 필터, `readingMinutes`, `related`, `relatedBy`, `section`, `Category.section`). 이 갱신본이 `getPost`/`listPosts` 응답 모양의 기준이다.
 - [ ] Step 1: 가짜 db(`{query: async (text, params) => rows}`로 호출 인자 기록)로 테스트: `listPosts`가 `limit+1`행을 요청해 `nextCursor`를 만들고 마지막 항목이 잘림; 쿼리 텍스트에 `content_md` 단독 SELECT가 없음(`left(content_md`만); 값이 모두 `params`에 있고 텍스트에 사용자 값이 없음; `getPost` 없는 slug는 `null`; `related`가 null인 행은 `related: null`; `tags`가 null이면 `[]`.
 - [ ] Step 2: 실행해 실패 확인. Step 3: 구현(쿼리는 `docs/api.md`와 부록 A의 LAG/LEAD 방식, 날짜 `to_char`, `ORDER BY ... , id`). Step 4: 단위 통과.
 - [ ] Step 5: `npm run pages:dev` 후 실제 DB로 `curl -s localhost:8788/api/categories`, `/api/posts?limit=2`, 존재하지 않는 `/api/posts/x` 가 404 JSON인지 확인(응답에서 비밀값 없음).
@@ -85,10 +86,10 @@ playwright.config.js
 
 ### Task 3: 문서 갱신 + 디자인 토큰
 **Files:** Modify `docs/api.md`; Create `docs/contents-repo.md`, `src/styles/tokens.css`, `src/styles/base.css`, `scripts/check-tokens.mjs`; Modify `package.json`(`lint:tokens`).
-- [ ] Step 1: `docs/api.md`를 설계 문서 7절대로 갱신(section 필터, `readingMinutes`, `related`, `relatedBy`, `section`).
-- [ ] Step 2: `docs/contents-repo.md`: 새 폴더 구조, front matter(`related`), `_category.md`, `sync_to_db.js` 수정안(diff 형태), 이름 규칙(영소문자-하이픈), 옛 파일 삭제 시 DB 삭제 주의. Blog_Contents에는 push하지 않음.
-- [ ] Step 3: `tokens.css`를 `DESIGN.md` 값으로 작성(라이트 `:root`, 다크 `[data-theme="dark"]`와 `prefers-color-scheme` 미지정 시 OS 기준; 두 세트 키 동일). `base.css`: 리셋, 본문/제목 타입, 포커스 링, `prefers-reduced-motion`.
-- [ ] Step 4: `scripts/check-tokens.mjs`: `src/**/*.{css,js,html}`(단 `tokens.css` 제외)에서 `#[0-9a-f]{3,8}`, `rgb(`, `hsl(`, `oklch(`, 숫자 `px` 중 토큰 선언 밖 사용을 찾아 있으면 비정상 종료(허용: `0`, `1px`, `100%`, 미디어쿼리 `px`). 테스트: `tests/unit/check-tokens.test.js`가 위반 문자열 샘플에서 실패, 깨끗한 샘플에서 성공.
+- [ ] Step 1: (`docs/api.md` 갱신은 Task 2 Step 0에서 완료됨.)
+- [ ] Step 2: `docs/contents-repo.md`: 설계 문서 6절 요약과 새 폴더 구조·front matter 규칙(자세한 레포 개편은 별도 세션에서 진행되므로 이 문서는 한 페이지 요약 + 그 세션 PR로의 포인터): 새 폴더 구조, front matter(`related`), `_category.md`, `sync_to_db.js` 수정안(diff 형태), 이름 규칙(영소문자-하이픈), 옛 파일 삭제 시 DB 삭제 주의. Blog_Contents에는 push하지 않음.
+- [ ] Step 3: `tokens.css`를 `DESIGN.md` 값으로 작성(추가 토큰 `--focus-ring: 2px solid var(--color-focus)`와 `--rule: 1px solid var(--color-border)`도 정의하고 DESIGN.md 3절에 한 줄 반영; 라이트 `:root`, 다크 `[data-theme="dark"]`와 `prefers-color-scheme` 미지정 시 OS 기준; 두 세트 키 동일). `base.css`: 리셋, 본문/제목 타입, 포커스 링, `prefers-reduced-motion`.
+- [ ] Step 4: `scripts/check-tokens.mjs`: `src/**/*.{css,js,html}`(단 `tokens.css` 제외)에서 `#[0-9a-f]{3,8}`, `rgb(`, `hsl(`, `oklch(`, 숫자 `px` 중 토큰 선언 밖 사용을 찾아 있으면 비정상 종료(허용: `0`, `100%`, 미디어쿼리 `px`; 그 외 `Npx`는 `tokens.css`에서만). 테스트: `tests/unit/check-tokens.test.js`가 위반 문자열 샘플에서 실패, 깨끗한 샘플에서 성공.
 - [ ] Step 5: `npm run lint:tokens` 와 `npm run test:unit` 통과, 커밋 `feat(design): add tokens, base styles, token lint, docs`.
 
 ### Task 4: 앱 셸(라우터, 레이아웃, 테마, 클라이언트)
@@ -98,7 +99,8 @@ playwright.config.js
 - `api.getPosts(params) / getPost(slug) / getCategories() / getCategoryPosts(path)` — 모두 `fetch('/api/...')`, 비정상 응답은 `{status,code}` 가진 `ApiError` throw, slug는 세그먼트별 `encodeURIComponent`.
 - 라우터: `route(pattern: string, page: Page)`, `navigate(path: string)`, 링크 `a[data-link]` 가로채기, `popstate`는 경로가 바뀐 경우에만 재렌더. `Page = {load(params)->Promise<data>, render(data)->{title:string, html:string}, mount?(root, data), unmount?()}`. 이동 시 이전 페이지 `unmount()`, `document.title = '<title> - IT Security Blog'`(홈은 `IT Security Blog`), 본문 컨테이너(`#main`, `tabindex="-1"`)로 포커스.
 - 테마: `localStorage['theme']`가 `light|dark`면 `<html data-theme>`에 즉시 적용(인라인 스크립트), 없으면 OS 설정. `toggleTheme()`.
-- [ ] Step 1: Playwright 설정(`webServer: npm run build && npx vite preview`, `baseURL`, 모든 `/api/*` 는 테스트에서 `page.route`로 모의). 테스트: 토글 후 새로고침해도 `data-theme` 유지; 첫 페인트 전에 `data-theme`가 이미 설정됨(`page.addInitScript`로 localStorage 설정 후 `document.documentElement.dataset.theme` 를 `DOMContentLoaded` 전에 확인); 내부 링크 클릭이 `pushState`로 이동하고 포커스가 `#main`; 뒤로가기 동작; 해시 앵커 이동 시 재렌더 없음.
+- [ ] Step 0: `npm i -D @playwright/test`, `npx playwright install chromium`, `package.json`의 `test`를 `npm run test:unit && playwright test`로.
+- [ ] Step 1: Playwright 설정(`webServer: npx vite --port 5173 --strictPort`(dev 서버, Task 5 하니스 서빙을 위해), `reuseExistingServer: true`, `baseURL: http://localhost:5173`, 모든 `/api/*` 는 테스트에서 `page.route`로 모의). 테스트: 토글 후 새로고침해도 `data-theme` 유지; 첫 페인트 전에 `data-theme`가 이미 설정됨(`page.addInitScript`로 localStorage 설정 후 `document.documentElement.dataset.theme` 를 `DOMContentLoaded` 전에 확인); 내부 링크 클릭이 `pushState`로 이동하고 포커스가 `#main`; 뒤로가기 동작; 해시 앵커 이동 시 재렌더 없음.
 - [ ] Step 2: 단위 테스트 `escapeHtml('<a href="x">&\'')==='&lt;a href=&quot;x&quot;&gt;&amp;&#39;'`, `escapeHtml(null)===''`. Step 3~4: 구현 후 `npm run test:unit && npx playwright test tests/e2e/shell.spec.js` 통과. 
 - [ ] Step 5: 커밋 `feat(app): add router, shell layout, theme, api client`.
 
@@ -112,7 +114,7 @@ playwright.config.js
 - [ ] Step 2~4: 실패 확인, 구현, 통과. 이미지 `src`는 `asset.taeuk.site`와 상대 경로만 허용하도록 `DOMPurify` 훅에서 http 외부 이미지는 유지하되 `loading="lazy"` 부여.
 - [ ] Step 5: 커밋 `feat(render): add markdown pipeline, code blocks, toc`.
 
-### Task 6: 페이지 (병렬 가능: 6a~6d, git worktree + subagent)
+### Task 6: 페이지 (6a~6d. 실행은 순차: 6a -> 6b -> 6c -> 6d, 서로 파일은 겹치지 않음)
 공통: 각 페이지는 `Page` 계약을 구현하고 모의 응답 E2E를 가진다. 모든 DB 값은 `escapeHtml`. `tests/fixtures/*.json`에 API 응답 샘플(정상, 빈 목록, XSS 문자열, 연결 대상 없음)을 둔다.
 - **6a 홈** `src/pages/home.js`, `src/components/post-card.js`: `GET /api/posts?section=essays&limit=1`(대표 사유) + `GET /api/posts?limit=8`(최근) + 섹션별 `limit=3`. 위계: 마스트헤드, 대표 사유 + 최근 글 열, 섹션 3개(Essays는 인용 형태: `description`을 인용으로). 빈 섹션은 안내 문구. 테스트: 대표 사유가 첫 영역에 있음, 섹션이 비어도 렌더, XSS 제목이 텍스트로만 표시.
 - **6b 글 상세** `src/pages/post.js`, `src/components/{toc,related-card}.js`: 섹션이 `essays`면 사유 레이아웃(좁은 폭, 진행선, 목차 없음, 상단 `related` 카드), 아니면 기술 레이아웃(오른쪽 고정 목차, 하단 `relatedBy` 박스, 이전/목록/다음). 목록 버튼은 slug에서 마지막 세그먼트를 뺀 `/categories/<경로>`(섹션 루트면 `/tech` 등). 테스트: 두 레이아웃 분기, `related: null`이면 카드 없음, 목차 3개 기준, 이전/다음 링크 인코딩 왕복(`a b&c:한글`), 404 응답 시 not-found 페이지.

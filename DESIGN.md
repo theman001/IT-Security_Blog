@@ -59,6 +59,7 @@
 - 선: `--border: 1px solid var(--color-border)`, 강조 선 `--rule-strong: 2px solid var(--color-fg)`(마스트헤드).
 - 모션: `--duration-fast: 120ms`, `--duration-base: 200ms`, `--ease: cubic-bezier(0.2, 0, 0, 1)`. `prefers-reduced-motion: reduce`에서는 모든 transition/animation을 0으로(읽기 진행선 포함).
 - 브레이크포인트(미디어쿼리 값은 변수 불가이므로 문서화): 모바일 `<640px`, 태블릿 `<1024px`, 목차 고정은 `>=1200px`.
+- 공용 선/포커스 토큰: `--rule: 1px solid var(--color-border)`, `--focus-ring: 2px solid var(--color-focus)`.
 - 그림자는 쓰지 않는다(선과 면으로 위계). 터치 대상 최소 44x44px.
 
 ## 4. 컴포넌트 규칙
