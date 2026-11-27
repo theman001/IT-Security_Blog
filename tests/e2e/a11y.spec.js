@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 const activeIs = (page, sel) => page.evaluate((s) => document.activeElement?.matches(s), sel);
 const SITE = 'IT Security Blog';
 
-test('keyboard: Tab order is skip link, support widget, site name, nav links (Home first), theme toggle; Enter on skip link focuses #main', async ({ page }) => {
+test('keyboard: Tab order is skip link, site name, support widget, nav links (Home first), theme toggle; Enter on skip link focuses #main', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.home-lead')).toBeVisible();
   const stops = [];
@@ -20,8 +20,8 @@ test('keyboard: Tab order is skip link, support widget, site name, nav links (Ho
       return a.classList.contains('skip-link') ? 'skip' : a.classList.contains('theme-toggle') ? 'toggle' : a.getAttribute('href');
     }));
   }
-  expect(stops).toEqual(['skip', 'https://ctee.kr/place/theman', '/', '/', '/tech', '/trends', '/essays', '/about', 'toggle']);
-  for (let i = 0; i < 8; i++) await page.keyboard.press('Shift+Tab'); // toggle -> nav -> name -> support widget -> skip link
+  expect(stops).toEqual(['skip', '/', 'https://ctee.kr/place/theman', '/', '/tech', '/trends', '/essays', '/about', 'toggle']);
+  for (let i = 0; i < 8; i++) await page.keyboard.press('Shift+Tab'); // toggle -> nav -> support widget -> name -> skip link
   expect(await activeIs(page, '.skip-link')).toBe(true);
   await page.keyboard.press('Enter');
   expect(await activeIs(page, '#main')).toBe(true);

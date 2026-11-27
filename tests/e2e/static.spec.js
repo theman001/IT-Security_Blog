@@ -204,7 +204,7 @@ test('theme toggle: icon (not text), follows the theme colors, swaps moon/sun', 
   expect(light.icon).toBe(light.color);
 });
 
-test('support widget: left of the site name, external link opening a new tab, themed, label only on wide screens', async ({ page, context }) => {
+test('support widget: right of the site name, external link opening a new tab, themed, label only on wide screens', async ({ page, context }) => {
   await mockPosts(page, normal);
   await page.goto('/about');
   const w = page.locator('header a.support-widget');
@@ -214,13 +214,25 @@ test('support widget: left of the site name, external link opening a new tab, th
   await expect(w).toHaveAttribute('rel', /noreferrer/);
   await expect(w).not.toHaveAttribute('data-link', /.*/); // external: never routed by the SPA
   await expect(w).toHaveAttribute('aria-label', /커피 한 잔 후원하기/);
-  // left of "IT Security Blog"
-  const [wb, nb] = await Promise.all([w.boundingBox(), page.locator('.site-header__name').boundingBox()]);
-  expect(wb.x + wb.width).toBeLessThanOrEqual(nb.x);
-  // wide: icon + text label
+  // right of "IT Security Blog", before the nav
   await page.setViewportSize({ width: 1440, height: 900 });
-  await expect(w.locator('.support-widget__label')).toBeVisible();
-  await expect(w.locator('.support-widget__label')).toHaveText('커피 한 잔 후원하기');
+  const [wb, nb, nav] = await Promise.all([w.boundingBox(), page.locator('.site-header__name').boundingBox(), page.locator('.site-header__nav').boundingBox()]);
+  expect(nb.x + nb.width).toBeLessThanOrEqual(wb.x);
+  expect(wb.x + wb.width).toBeLessThanOrEqual(nav.x + 1);
+  // wide: bigger bold icon + two-line label in Cafe24 Syongsyong
+  const label = w.locator('.support-widget__label');
+  await expect(label).toBeVisible();
+  await expect(label.locator('span')).toHaveText(['커피 한 잔', '후원하기']); // explicit line break
+  const [l1, l2] = await Promise.all([label.locator('span').nth(0).boundingBox(), label.locator('span').nth(1).boundingBox()]);
+  expect(l2.y).toBeGreaterThan(l1.y + l1.height - 2); // second line sits below the first
+  await expect(label).toHaveCSS('font-family', /^"Cafe24 Syongsyong"/);
+  await page.evaluate(() => document.fonts.load('14px "Cafe24 Syongsyong"', '커피 한 잔 후원하기'));
+  expect(await page.evaluate(() => document.fonts.check('14px "Cafe24 Syongsyong"', '커피 한 잔 후원하기'))).toBe(true);
+  const icon = w.locator('svg');
+  const ib = await icon.boundingBox();
+  expect(ib.width).toBeGreaterThanOrEqual(30); // enlarged to match the two text lines
+  expect(parseFloat(await icon.evaluate((el) => getComputedStyle(el).strokeWidth))).toBeGreaterThanOrEqual(2); // bold stroke
+  expect(ib.height).toBeLessThanOrEqual(wb.height);
   // narrow: icon only (label hidden, accessible name stays), still inside the viewport
   await page.setViewportSize({ width: 390, height: 800 });
   await expect(w.locator('.support-widget__label')).toBeHidden();

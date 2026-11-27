@@ -24,6 +24,7 @@
   --font-display: "Noto Serif KR Variable", "Noto Serif KR", "Noto Serif", Georgia, serif;
   --font-body-tech: "Pretendard Variable", Pretendard, system-ui, sans-serif;
   --font-body-essay: var(--font-display);
+  --font-support: "Cafe24 Syongsyong", var(--font-body-tech);
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   --text-xs: 0.75rem;

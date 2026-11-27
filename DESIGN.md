@@ -33,6 +33,7 @@
 | 토큰 | 값 |
 |---|---|
 | `--font-display` | `"Noto Serif KR Variable", "Noto Serif KR", "Noto Serif", Georgia, serif` (제목, 사유 본문, 인용) |
+| `--font-support` | `"Cafe24 Syongsyong", var(--font-body-tech)` (후원 위젯 글자만; 16KB 서브셋, `src/assets/fonts/`, OFL 1.1) |
 | `--font-body-tech` | `"Pretendard Variable", Pretendard, system-ui, sans-serif` (기술·동향 본문, UI) |
 | `--font-body-essay` | `var(--font-display)` |
 | `--font-mono` | `"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace` |
