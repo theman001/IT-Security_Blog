@@ -38,8 +38,11 @@ export function getPosts(params = {}) {
   return get(`/api/posts${qs ? `?${qs}` : ''}`);
 }
 // The edge inlines the /api/posts/<slug> payload in the first HTML (functions/posts/[[slug]].js): use it once, skip the round trip.
+// Captured at boot and only for the first getPost: a post body that contains an element with this id must never be read as a payload.
+let inline = typeof document === 'undefined' ? null : document.getElementById('post-data');
 function takeInlinePost(slug) {
-  const el = typeof document === 'undefined' ? null : document.getElementById('post-data');
+  const el = inline;
+  inline = null;
   el?.remove();
   try {
     const data = el && JSON.parse(el.textContent);

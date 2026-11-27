@@ -308,3 +308,27 @@ test('screenshots for review', async ({ page }) => {
     }
   }
 });
+
+test('SPA navigation never reads a #post-data element that appears after boot as the inline payload', async ({ page }) => {
+  const c = clone(tech, { slug: 'tech/c', title: 'C 제목' }, { prev: null, next: null });
+  const b = clone(tech, { slug: 'tech/b', title: 'B 제목' }, { prev: null, next: { slug: 'tech/c', title: 'C 제목' } });
+  const a = clone(tech, { slug: 'tech/a', title: 'A 제목' }, { prev: null, next: { slug: 'tech/b', title: 'B 제목' } });
+  const calls = await mockPost(page, [a, b, c]);
+  await page.goto(href('tech/a'));
+  await page.locator('a.post-nav__next').click();
+  await expect(page.locator('h1')).toHaveText('B 제목');
+  // The sanitizer drops ids from post bodies, so simulate whatever could put one in the DOM later (script and div alike).
+  await page.evaluate(() => {
+    const payload = JSON.stringify({ post: { slug: 'tech/c', title: 'FROM BODY', contentMd: 'x' } });
+    for (const [tag, type] of [['script', 'application/json'], ['div', null]]) {
+      const el = document.createElement(tag);
+      el.id = 'post-data';
+      if (type) el.type = type;
+      el.textContent = payload;
+      document.getElementById('main').append(el);
+    }
+  });
+  await page.locator('a.post-nav__next').click();
+  await expect(page.locator('h1')).toHaveText('C 제목');
+  expect(calls).toEqual(['/api/posts/tech/a', '/api/posts/tech/b', '/api/posts/tech/c']);
+});

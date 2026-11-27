@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { mockSite } from './mock-api.js';
 
 // Test pages are registered through the router module itself: the dev server serves
 // the same module instance main.js uses, so no test hook ships in the app.
@@ -243,4 +244,26 @@ test('OS theme change is ignored when a stored theme exists', async ({ page }) =
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.waitForTimeout(150);
   await expect(btn).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('footer still mounts (within ~2s) when the page data request never answers', async ({ page }) => {
+  await page.route('**/api/**', () => {}); // never fulfilled
+  await page.goto('/');
+  await expect(page.locator('footer a[href="/rss.xml"]')).toBeVisible({ timeout: 2000 });
+});
+
+test('webfont chunk aborted: no page error; retried once on `online`', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  let aborted = 0;
+  await page.route('**/fonts*.css*', (route) => (aborted++ ? route.continue() : route.abort()));
+  await mockSite(page);
+  await page.goto('/about');
+  await expect(page.locator('footer a[href="/rss.xml"]')).toBeVisible();
+  await expect.poll(() => aborted).toBeGreaterThan(0);
+  await page.waitForTimeout(300);
+  expect(errors).toEqual([]);
+  await page.evaluate(() => dispatchEvent(new Event('online')));
+  await expect.poll(() => page.evaluate(() => [...document.fonts].some((f) => f.family.includes('Pretendard')))).toBe(true);
+  expect(errors).toEqual([]);
 });

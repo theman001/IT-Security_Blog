@@ -18,9 +18,13 @@ route('/categories/*', categoryPage);
 route('/about', about);
 route('*', notFound);
 // Footer after the first render: mounted earlier it sits in the viewport and jumps down (CLS) when content arrives.
-start().finally(() => {
+// A stalled API must not hold it back, so the wait is capped.
+const loadFonts = () => import('./styles/fonts.css');
+Promise.race([start(), new Promise((r) => setTimeout(r, 1500))]).then(() => {
   mountFooter(document.querySelector('body > footer'));
   // Webfonts after the first paint: the page text shows in the fallback face first (font-display: swap),
-  // so ~0.5MB of Korean subsets do not delay LCP.
-  requestAnimationFrame(() => setTimeout(() => import('./styles/fonts.css')));
+  // so ~0.5MB of Korean subsets do not delay LCP. A failed chunk (offline) is retried once when the network returns.
+  requestAnimationFrame(() =>
+    setTimeout(() => loadFonts().catch(() => addEventListener('online', () => loadFonts().catch(() => {}), { once: true }))),
+  );
 });

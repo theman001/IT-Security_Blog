@@ -53,21 +53,36 @@ test('200 with non-JSON body -> ApiError bad_response', async () => {
   await assert.rejects(getCategories(), (e) => e instanceof ApiError && e.status === 200 && e.code === 'bad_response' && e.message === 'Invalid response');
 });
 
-test('getPost uses the inlined edge payload once (slug must match), else fetches', async () => {
+test('getPost uses the inlined edge payload only on the initial navigation (slug must match), never later', async () => {
   const el = (text) => ({ textContent: text, removed: false, remove() { this.removed = true; } });
-  let node = el(JSON.stringify({ post: { slug: 'tech/a' } }));
-  globalThis.document = { getElementById: (id) => (id === 'post-data' ? node : null) };
+  const boot = async (node, doc = { getElementById: (id) => (id === 'post-data' ? node : null) }) => {
+    globalThis.document = doc; // the payload is captured when the module boots
+    return import(`../../src/lib/api.js?boot=${Math.random()}`);
+  };
   try {
-    const calls = stub(json({ post: { slug: 'tech/b' } }));
-    assert.equal((await getPost('tech/a')).post.slug, 'tech/a');
+    let node = el(JSON.stringify({ post: { slug: 'tech/a' } }));
+    let calls = stub(json({ post: { slug: 'tech/b' } }));
+    let api = await boot(node);
+    assert.equal((await api.getPost('tech/a')).post.slug, 'tech/a');
     assert.equal(node.removed, true);
     assert.equal(calls.length, 0);
-    node = el(JSON.stringify({ post: { slug: 'tech/a' } })); // other slug -> network
-    assert.equal((await getPost('tech/b')).post.slug, 'tech/b');
+    // a later navigation: an element with the same id (e.g. from a post body) is never read
+    globalThis.document = { getElementById: () => el(JSON.stringify({ post: { slug: 'tech/c' } })) };
+    assert.equal((await api.getPost('tech/c')).post.slug, 'tech/b');
     assert.equal(calls.length, 1);
-    node = el('{broken'); // bad JSON -> network
-    await getPost('tech/c');
+
+    node = el(JSON.stringify({ post: { slug: 'tech/a' } })); // first navigation to another slug -> network, payload dropped
+    calls = stub(json({ post: { slug: 'tech/b' } }));
+    api = await boot(node);
+    assert.equal((await api.getPost('tech/b')).post.slug, 'tech/b');
+    assert.equal(node.removed, true);
+    assert.equal((await api.getPost('tech/a')).post.slug, 'tech/b'); // not served from the stale payload either
     assert.equal(calls.length, 2);
+
+    api = await boot(el('{broken')); // bad JSON -> network
+    calls = stub(json({ post: { slug: 'tech/c' } }));
+    await api.getPost('tech/c');
+    assert.equal(calls.length, 1);
   } finally {
     delete globalThis.document;
   }
