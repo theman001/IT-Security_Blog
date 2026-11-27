@@ -135,13 +135,33 @@ body {
   font-size: var(--text-sm);
   text-align: center;
 }
-/* Deliberately not link-styled: quiet footer text; hover/focus still show it is interactive. */
-.site-footer__privacy {
-  display: inline-block;
+/* Quiet footer links (not link-styled): small muted text, "|" separators drawn by CSS; hover/focus still show interactivity. */
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+.site-footer__links a {
   padding-block: var(--space-3);
   color: var(--color-fg-muted);
+  font-size: var(--text-xs);
   text-decoration: none;
 }
-.site-footer__privacy:hover {
+.site-footer__links a:hover {
   color: var(--color-fg);
+}
+.site-footer__links a + a::before {
+  content: "";
+  display: inline-block;
+  height: 1em;
+  margin-inline: var(--space-3);
+  border-inline-start: var(--rule);
+  vertical-align: middle;
+}
+.site-footer__copy {
+  margin: var(--space-2) 0 0;
+  color: var(--color-fg);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
 }

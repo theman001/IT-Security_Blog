@@ -134,19 +134,35 @@ test('/privacy renders the policy inside .article with title 개인정보처리�
   expect(await page.title()).toBe(`개인정보처리방침 - ${SITE}`);
 });
 
-test('footer: privacy link (not link-styled) leads to /privacy; no RSS link in the footer', async ({ page }) => {
+test('footer: About | 문의하기 | 개인정보처리방침 (small) over a bold larger ⓒtheman; no RSS link', async ({ page }) => {
   await mockPosts(page, normal);
   await page.goto('/about');
-  const link = page.locator('footer a.site-footer__privacy');
-  await expect(link).toHaveText('개인정보처리방침');
-  await expect(link).toHaveCSS('text-decoration-line', 'none');
+  const links = page.locator('footer .site-footer__links a');
+  await expect(links).toHaveText(['About', '문의하기', '개인정보처리방침']);
+  await expect(links).toHaveCount(3);
   await expect(page.locator('footer a[href="/rss.xml"]')).toHaveCount(0);
-  // centered in the footer
-  const [fb, lb] = await Promise.all([page.locator('footer .site-footer__inner').boundingBox(), link.boundingBox()]);
-  expect(Math.abs(fb.x + fb.width / 2 - (lb.x + lb.width / 2))).toBeLessThan(4);
-  await link.click();
+  for (const a of await links.all()) await expect(a).toHaveCSS('text-decoration-line', 'none'); // not link-styled
+  const copy = page.locator('footer .site-footer__copy');
+  await expect(copy).toHaveText('ⓒtheman');
+  const sz = (l) => l.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+  expect(await sz(copy)).toBeGreaterThan(await sz(links.first()));
+  await expect(copy).toHaveCSS('font-weight', '700');
+  // two centered rows: links above the copyright line
+  const [fb, nb, cb] = await Promise.all([page.locator('footer .site-footer__inner').boundingBox(), page.locator('footer .site-footer__links').boundingBox(), copy.boundingBox()]);
+  expect(cb.y).toBeGreaterThan(nb.y + nb.height - 1);
+  for (const b of [nb, cb]) expect(Math.abs(fb.x + fb.width / 2 - (b.x + b.width / 2))).toBeLessThan(4);
+  // "|" separators between the links (CSS pseudo-elements), none before the first
+  const seps = await links.evaluateAll((els) => els.map((el) => getComputedStyle(el, '::before').content));
+  expect(seps).toEqual(['none', '""', '""']);
+  await links.nth(2).click();
   await expect(page).toHaveURL('/privacy');
   await expect(page.locator('#main .article h1')).toHaveText('개인정보처리방침');
+  await page.locator('footer a[href="/contact"]').click();
+  await expect(page).toHaveURL('/contact');
+  await expect(page.locator('#main .article h1')).toHaveText('문의하기');
+  expect(await page.title()).toBe(`문의하기 - ${SITE}`);
+  await page.locator('footer a[href="/about"]').click();
+  await expect(page).toHaveURL('/about');
 });
 
 test('header: Home link is first, left of Tech, and current on the home page only', async ({ page }) => {

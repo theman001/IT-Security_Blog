@@ -34,7 +34,7 @@ Env vars (Cloudflare Production and Preview are separate lists; apply from the n
 functions/         Pages Functions (import from src/ only the pure post-header.js chain: escape, urls, related-card)
   api/posts, api/categories   JSON API (catch-all [[slug]]/[[path]])
   posts/[[slug]].js           post HTML: meta + JSON-LD + prerendered header + inline payload; 404 if missing
-  [[path]].js                 catch-all: /, /about, /privacy, sections, /categories/*, assets, 404, bare /api 404
+  [[path]].js                 catch-all: /, /about, /privacy, /contact (placeholder, noindex), sections, /categories/*, assets, 404, bare /api 404
   sitemap.xml.js robots.txt.js rss.xml.js
   _lib/   handlers (API), edge-handlers, queries (SQL), seo (meta/sitemap/RSS), shell (HTMLRewriter),
           http (JSON + cache headers), cache (Cache API wrapper), slug, cursor, excerpt, sections, db

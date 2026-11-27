@@ -13,7 +13,7 @@ const INTERNAL = () => fail(500, 'internal', 'Internal error', { cache: 'none' }
 const asParts = (p) => (p == null ? [] : Array.isArray(p) ? p : [p]);
 const notFound = (ctx, deps) => renderShell(ctx.env, ctx.request, { status: 404, noindex: true }, deps.HTMLRewriter);
 const page = (ctx, deps, meta, extra) =>
-  renderShell(ctx.env, ctx.request, { headTags: headTagsHtml(meta), mainHtml: extra?.mainHtml }, deps.HTMLRewriter);
+  renderShell(ctx.env, ctx.request, { headTags: headTagsHtml(meta), mainHtml: extra?.mainHtml, noindex: extra?.noindex }, deps.HTMLRewriter);
 
 // GET/HEAD only; any thrown error -> opaque 500 (HTML shell for pages, JSON for feeds), never the message.
 async function guarded(ctx, deps, run, onError) {
@@ -62,6 +62,8 @@ export const handleCatchAll = (ctx, deps) =>
     if (path === '/') return page(ctx, deps, pageMeta({ title: '', description: DEFAULT_DESCRIPTION, path }, origin));
     if (path === '/about') return page(ctx, deps, pageMeta({ title: 'About', description: 'IT Security Blog와 운영자에 대한 소개.', path }, origin));
     if (path === '/privacy') return page(ctx, deps, pageMeta({ title: '개인정보처리방침', description: 'IT Security Blog의 개인정보처리방침.', path }, origin));
+    // Placeholder page until a contact address exists: served (200) but noindex and not in the sitemap.
+    if (path === '/contact') return page(ctx, deps, pageMeta({ title: '문의하기', description: 'IT Security Blog 문의 안내.', path }, origin), { noindex: true });
     const key = path.slice(1);
     if (Object.hasOwn(SECTIONS, key)) return page(ctx, deps, pageMeta({ title: SECTIONS[key].title, description: SECTIONS[key].description, path }, origin));
     if (path.startsWith('/categories/')) {
