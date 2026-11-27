@@ -51,6 +51,7 @@
 | `--text-3xl` | `2.25rem` | 글 제목 |
 | `--text-4xl` | `3rem` | 홈 대표 사유 제목 |
 줄간격: `--leading-tight: 1.25`(제목), `--leading-body-tech: 1.75`, `--leading-body-essay: 1.9`, `--leading-code: 1.6`. 굵기: `--weight-regular: 400`, `--weight-medium: 500`, `--weight-bold: 700`. 자간: 제목만 `--tracking-title: -0.01em`, 라벨 `--tracking-label: 0.08em`(대문자 라벨).
+줄바꿈: 본문 기본값은 `word-break: keep-all; overflow-wrap: break-word`(한글은 어절 단위로 줄바꿈, 긴 URL·토큰만 강제 줄바꿈).
 
 ## 3. 간격 · 폭 · 반경 · 모션
 - 간격(4px 기반): `--space-1: 0.25rem`, `--space-2: 0.5rem`, `--space-3: 0.75rem`, `--space-4: 1rem`, `--space-6: 1.5rem`, `--space-8: 2rem`, `--space-12: 3rem`, `--space-16: 4rem`, `--space-24: 6rem`.
@@ -72,7 +73,7 @@
 - **코드 블록**: `--code-*` 토큰, `--radius-md`, 상단 바(언어 라벨 + 복사 버튼), 가로 스크롤(줄바꿈 없음), 데스크톱에서 `--measure-tech`보다 최대 `--space-12` 넓게. 인라인 코드는 `--color-surface` 배경, `--radius-sm`.
 - **표**: 세로선 없음, 머리글 아래/표 위아래 `--border`, 짝수 행 배경 없음. 좁은 화면은 래퍼 가로 스크롤.
 - **인용(기술·동향)**: 조용한 콜아웃. `--color-surface` 배경, `--color-fg-muted` 글자, 선 없음(accent 선은 사유 인용 전용).
-- **링크**: 본문 링크는 accent + 밑줄, 호버 시 밑줄 두께 증가. 포커스는 `outline: 2px solid var(--color-focus); outline-offset: 2px`(제거 금지).
+- **링크**: 본문 링크는 accent + 밑줄, 호버 시 밑줄 두께 증가. 포커스는 `outline: 2px solid var(--color-focus); outline-offset: var(--space-1)`(제거 금지).
 - **빈 상태/오류**: 한 문장 안내 + 홈 또는 최근 글 링크. 아이콘 일러스트 없음.
 
 ## 5. 금지 패턴

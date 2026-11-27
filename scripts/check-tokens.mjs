@@ -1,8 +1,9 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { checkSource } from './lib/check-tokens.js';
 
-const root = new URL('..', import.meta.url).pathname;
+const root = fileURLToPath(new URL('..', import.meta.url));
 const skip = join(root, 'src/styles/tokens.css');
 const walk = (d) =>
   readdirSync(d).flatMap((n) => {

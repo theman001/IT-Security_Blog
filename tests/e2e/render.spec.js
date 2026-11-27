@@ -147,6 +147,44 @@ test('copy button does not throw when the clipboard API is unavailable', async (
   expect(errors).toEqual([]);
 });
 
+const noClipboard = (page) => page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true }));
+
+test('legacy copy fallback: execCommand false -> no "Copied!", focus returns to the button', async ({ page }) => {
+  await mount(page, '```js\nx\n```');
+  await noClipboard(page);
+  await page.evaluate(() => { document.execCommand = () => false; });
+  const btn = page.locator('.code-block__copy');
+  await btn.click();
+  await page.waitForTimeout(100);
+  await expect(btn).toHaveText('Copy');
+  await expect(btn).toBeFocused();
+});
+
+test('legacy copy fallback: execCommand true -> "Copied!" and focus returns to the button', async ({ page }) => {
+  await mount(page, '```js\nx\n```');
+  await noClipboard(page);
+  await page.evaluate(() => { document.execCommand = () => true; });
+  const btn = page.locator('.code-block__copy');
+  await btn.click();
+  await expect(btn).toHaveText('Copied!');
+  await expect(btn).toBeFocused();
+});
+
+test('language lookup ignores inherited Object properties (```constructor stays plain text)', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e));
+  await mount(page, '```constructor\nplain\n```\n\n```toString\nplain\n```');
+  await expect(page.locator('#root .code-block')).toHaveCount(2);
+  await expect(page.locator('#root .code-block code .token')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('copy button announces state changes politely; Prism auto-highlighting is off', async ({ page }) => {
+  await mount(page, '```js\nx\n```');
+  await expect(page.locator('.code-block__copy')).toHaveAttribute('aria-live', 'polite');
+  expect(await page.evaluate(() => window.__h.Prism.manual)).toBe(true);
+});
+
 const toc = (page, md) =>
   page.evaluate((m) => {
     window.__h.mount(m);

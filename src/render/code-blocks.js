@@ -15,23 +15,30 @@ import 'prismjs/components/prism-sql.js';
 import 'prismjs/components/prism-yaml.js';
 import 'prismjs/components/prism-powershell.js';
 
+// Highlight only on request. Prism's load-time auto-highlight (rAF / DOMContentLoaded) reads `manual` when it
+// fires, and the whole module graph below evaluates synchronously before that, so this is early enough.
+Prism.manual = true;
+
 const COPIED_MS = 1800;
 
 function copyText(text) {
   if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
-  // legacy fallback; may fail silently on insecure origins
+  // legacy fallback; execCommand reports failure (e.g. insecure origins) via its return value
+  const prev = document.activeElement;
   const ta = document.createElement('textarea');
   ta.value = text;
   ta.setAttribute('readonly', '');
   ta.style.position = 'fixed';
   document.body.append(ta);
   ta.select();
+  let ok = false;
   try {
-    document.execCommand('copy');
+    ok = document.execCommand('copy');
   } finally {
     ta.remove();
+    prev?.focus?.({ preventScroll: true }); // select() moved focus to the textarea
   }
-  return Promise.resolve();
+  return ok ? Promise.resolve() : Promise.reject(new Error('copy failed'));
 }
 
 /** Wrap each `pre > code` in `.code-block` (language label + copy button) and Prism-highlight it. Idempotent. */
@@ -41,7 +48,7 @@ export function enhanceCodeBlocks(root) {
     if (pre.parentElement?.classList.contains('code-block')) return;
 
     const lang = /(?:^|\s)language-([\w-]+)/.exec(code.className)?.[1] ?? '';
-    if (lang && Prism.languages[lang]) Prism.highlightElement(code); // unknown -> plain text
+    if (lang && Object.hasOwn(Prism.languages, lang)) Prism.highlightElement(code); // unknown -> plain text
 
     const wrap = document.createElement('div');
     wrap.className = 'code-block';
@@ -54,6 +61,7 @@ export function enhanceCodeBlocks(root) {
     btn.type = 'button';
     btn.className = 'code-block__copy';
     btn.textContent = 'Copy';
+    btn.setAttribute('aria-live', 'polite'); // screen readers announce "Copied!" without a layout change
 
     let timer;
     btn.addEventListener('click', async () => {

@@ -16,6 +16,8 @@ const bad = [
   'a{color:oklab(0.5 0 0)}',
   "el.style.color = '#abc';",
   "const c = \"#112233\";",
+  'a{color:#fade}', // hex-looking word, but a real declaration value
+  "el.style.background = '#add';",
 ];
 const clean = [
   'a { color: var(--color-fg); }',
@@ -28,6 +30,14 @@ const clean = [
   '<a href="#add">x</a>',
   '/* color: #fff; margin: 12px */ a { margin: 0 }',
   'a { fill: url(#grad); }',
+  "document.querySelector('#add')",
+  'document.querySelectorAll("#fade")',
+  "el.closest('#bad')",
+  "document.getElementById('#fade')",
+  '<button data-target="#fade">x</button>',
+  '<button aria-controls="#bad" aria-describedby="#add">x</button>',
+  "btn.setAttribute('data-target', '#fade');",
+  "const o = { 'aria-controls': '#bad' };",
 ];
 
 for (const s of bad) {

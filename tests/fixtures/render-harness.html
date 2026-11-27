@@ -11,11 +11,13 @@
   import '/src/styles/base.css';
   import '/src/styles/article.css';
   import { renderMarkdown } from '/src/render/markdown.js';
+  import Prism from 'prismjs/components/prism-core.js';
   import { enhanceCodeBlocks } from '/src/render/code-blocks.js';
   import { buildToc, observeToc } from '/src/components/toc.js';
   const root = document.getElementById('root');
   window.__h = {
     root,
+    Prism,
     renderMarkdown,
     enhanceCodeBlocks,
     buildToc,
