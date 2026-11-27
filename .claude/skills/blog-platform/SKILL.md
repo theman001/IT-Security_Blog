@@ -5,7 +5,7 @@ description: Project rules for the IT Security Blog renewal (Vite vanilla JS SPA
 
 # blog-platform — fixed project rules
 
-Source of truth: `docs/api.md` (API contract), `docs/dev.md` (local dev, Pages settings), `DESIGN.md` (tokens, once created), `CLAUDE.md` (workflow).
+Source of truth: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pages settings), `docs/seo.md` (SEO, cache purge), `DESIGN.md` (tokens), `CLAUDE.md` (workflow).
 
 ## 1. API and Neon queries
 - DB access ONLY in `functions/` via `neon(env.DATABASE_URL)`; the browser gets `/api/*` JSON only. Never import `@neondatabase/serverless` or read DB env in `src/`.
@@ -13,19 +13,22 @@ Source of truth: `docs/api.md` (API contract), `docs/dev.md` (local dev, Pages s
 - Body (`content_md`) is selected only in post detail. List/category/RSS/sitemap queries must not select it (excerpt: `left(content_md, N)` only when `description` is empty).
 - Dates: `to_char(created_at, 'YYYY-MM-DD')` in SQL; never pass `created_at` through JS `Date` (naive timestamp, tz shifts the day).
 - Sort ties: always add `id` as a secondary key. Slugs are full paths, case-sensitive, may contain spaces, `&`, `:`, Korean: encode per segment in URLs, match exactly (no last-segment fallback).
-- Errors: `{error:{code,message}}`, real status codes (400/404/405/500). Never leak SQL, stack, or env values.
+- Errors: `{error:{code,message}}`, real status codes (400/404/405/500). Never leak SQL, stack, or env values. `/api` 405 sends `Allow: GET`; bare `/api` and unknown `/api/*` are JSON 404.
 - DB role is SELECT-only. No writes, no schema changes from code.
 
 ## 2. Functions, edge cache
 - Success: `Cache-Control: public, max-age=60, s-maxage=600, stale-while-revalidate=86400`. Errors: `max-age=0, s-maxage=60`.
-- Unknown paths must return a real 404 (Pages serves `index.html` for unknown paths by default; handle it in a catch-all Function). Soft 404 is a bug.
-- Instant refresh after a publish: Cloudflare Purge Cache (URL or everything). Document any change in `docs/`.
+- Unknown paths must return a real 404 (SPA shell + `noindex`) from the catch-all `functions/[[path]].js`; a missing static file that Pages answers with `index.html` 200 is turned into 404 too. `/categories/<section>` (section root) is a 301 to `/<section>`. HTML/feed 500s are `no-store`, HTML 405 sends `Allow: GET, HEAD`. Soft 404 is a bug. There is no `_redirects`.
+- Edge HTML: `HTMLRewriter` over the `index.html` shell (`functions/_lib/shell.js`). Post pages prerender the header with the shared pure `src/lib/post-header.js` (the only `src/` code `functions/` may import, with its escape/urls/related-card imports) and inline the API payload as `#post-data`. Keep SPA and edge markup in that one module. Section copy in `functions/_lib/sections.js` must equal `src/content/sections.js` (unit-tested).
+- Origin for canonical/sitemap/RSS/OG is env `SITE_URL` (required in Production; else request host -> duplicate indexing). `NAVER_SITE_VERIFICATION` (optional) injects the Naver meta tag.
+- Instant refresh after a publish: Cloudflare Purge Cache (URL or everything), see `docs/seo.md`. Document any change in `docs/`.
+- Static assets: `public/_routes.json` skips Functions for `/assets/*`, `/fonts/*`, `/favicon.ico`; `public/_headers` makes `/assets/*` immutable.
 
 ## 3. Deploy rules (Cloudflare Pages)
 - Work only on `renewal` (or a feature branch off it). NEVER commit or push to `main`; merge to `main` is the user's action (it deploys production).
 - Flow: push branch -> preview URL `https://renewal.it-security-blog.pages.dev` -> PR -> user merges.
 - A push/preview is a build: `npm ci && npm run build` must pass from a clean install (keep `package-lock.json` in sync).
-- Env vars (dashboard, Production AND Preview): `DATABASE_URL` (app_reader). Local: `.dev.vars` (gitignored). Env var changes only apply to the next deployment. No `wrangler.toml` (it locks dashboard vars).
+- Env vars (dashboard, Production AND Preview): `DATABASE_URL` (app_reader), `SITE_URL`, optional `NAVER_SITE_VERIFICATION`, `NODE_VERSION=22`. Local: `.dev.vars` (gitignored). Env var changes only apply to the next deployment. No `wrangler.toml` (it locks dashboard vars).
 - Secrets never go in code, commits, logs, or docs. `.dev.vars.example` has no values.
 
 ## 4. Rendering and XSS
@@ -39,11 +42,13 @@ Source of truth: `docs/api.md` (API contract), `docs/dev.md` (local dev, Pages s
 - On navigation: update `document.title`, move focus to main content (`tabindex="-1"`), and clean up the previous page (listeners, timers, animation frames, observers).
 
 ## 6. Design tokens
-- Only CSS variables from `DESIGN.md`/`tokens.css`. No hard-coded colors, spacing, radii, or font families. Dark/light key sets stay symmetric. Korean body text uses the chosen Korean webfont.
+- Only CSS variables from `DESIGN.md`/`tokens.css` (`npm run lint:tokens`). No hard-coded colors, spacing, radii, or font families. Dark/light key sets stay symmetric.
+- Fonts are self-hosted npm packages (`src/styles/fonts.css`: Pretendard, Noto Serif KR, JetBrains Mono), imported dynamically after first render in `src/main.js`. No Google Fonts / external font CDN.
 
 ## 7. Skill roles (do not overlap)
 - Design system owner: ui-ux-pro-max ONLY. Never use `--persist` (it would create `design-system/`); results are recorded in `DESIGN.md`.
 - impeccable: review only (`critique`, `audit`, `polish`, `distill`). NEVER run `init`/`document`/`shape`/`craft`-type generators that create or rewrite `DESIGN.md`. Hooks are disabled (`.impeccable/config.json`); telemetry off; `PRODUCT.md` may be created (user-approved). Ignore its "no PRODUCT.md -> init" nudges beyond that single file.
-- webapp-testing: ad-hoc browser checks via `.venv-tools/bin/python` (Python Playwright). The committed test suite in `tests/` uses Node `@playwright/test`.
+- webapp-testing: ad-hoc browser checks via `.venv-tools/bin/python` (Python Playwright). The committed suites are `tests/unit` (`npm run test:unit`) and `tests/e2e` (Node `@playwright/test`, API mocked); `npm run test:edge` hits a real DB and `npm run check:bundle` guards the client bundle.
+- claude-seo: not installed unless the user installs it.
 - find-skills: search/suggest only; every install follows the review procedure in `CLAUDE.md` + `.claude/SKILLS.lock.md`. No `npx skills add -g -y`.
 - superpowers: its "merge locally" / "push to base" options are NOT allowed here; finish branches via PR only.

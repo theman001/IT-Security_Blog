@@ -2,34 +2,49 @@
 
 Repo: `theman001/IT-Security_Blog`. Work branch: `renewal`. The user merges `renewal` -> `main` via PR.
 Detailed rules live in the `blog-platform` skill (`.claude/skills/blog-platform/SKILL.md`); read it before any work.
-Docs: `docs/api.md` (API contract), `docs/dev.md` (local dev, Pages settings), `docs/PLAN.md` and `DESIGN.md` (after Phase 3).
+Docs: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pages settings), `docs/seo.md` (Naver/Google, cache purge, Lighthouse), `docs/post-merge-checklist.md`, `docs/contents-repo.md` (Blog_Contents), `docs/PLAN.md`, `DESIGN.md` (tokens).
 
 ## 1. Overview and architecture
 - Frontend: Vanilla JS (ES modules), HTML5, CSS variables, Vite. NO React/Next/frameworks or framework-specific skills.
 - Routing: History API (`pushState`) SPA. No hash URLs.
 - Host: Cloudflare Pages + Pages Functions (`/functions`). Production = `main` (auto-deploys on push).
 - Data: Neon Serverless Postgres (`reports`, `categories`), markdown stored in DB. DB is read from Functions only, via `neon(env.DATABASE_URL)` with a SELECT-only role (`app_reader`). The browser gets `/api/*` JSON only.
-- Rendering: client-side `marked` -> `DOMPurify` -> `Prism.js`.
-- SEO at the edge: `/posts/*` is rewritten by Functions (`HTMLRewriter`: title, description, canonical, OG/Twitter, JSON-LD `BlogPosting`, optionally prerendered body). sitemap/robots/rss generated from the DB. Unknown paths return a real 404.
-- Publishing = DB INSERT only (no rebuild). Edge cache 5-10 min (`s-maxage=600`); purge via Cloudflare Purge Cache for instant refresh.
+- Rendering: client-side `marked` -> `DOMPurify` -> `Prism.js`. Fonts (Pretendard, Noto Serif KR, JetBrains Mono) are self-hosted npm packages in `src/styles/fonts.css`, loaded after first render.
+- SEO at the edge: every HTML route goes through Functions + `HTMLRewriter` on the `index.html` shell (title, description, canonical, OG/Twitter; posts also JSON-LD `BlogPosting`, a prerendered post header via shared `src/lib/post-header.js`, and the API payload inlined as `<script id="post-data">`). sitemap/robots/rss generated from the DB. Unknown paths: real 404 (SPA shell + `noindex`); `/categories/<section>` -> 301 `/<section>`. Origin comes from env `SITE_URL`.
+- Publishing = Blog_Contents `main` -> GitHub Actions sync -> Neon (no rebuild of this repo). Edge cache up to 10 min (`s-maxage=600`); purge via Cloudflare Purge Cache for instant refresh (`docs/seo.md`).
 
 ## 2. Commands
 ```bash
 npm ci                 # clean install (must pass; Cloudflare runs it)
-npm run dev            # Vite :5173, proxies /api to :8788
+npm run dev            # Vite :5173, proxies /api to :8788 (needs pages:dev running)
 npm run pages:dev      # vite build + wrangler pages dev dist -> :8788 (Functions + DB)
 npm run build          # -> dist/
-npm test               # Playwright suite in tests/ (Phase 6)
+npm run test:unit      # node --test tests/unit/*.test.js (no network, no DB)
+npm test               # test:unit + Playwright e2e (tests/e2e, API mocked, starts Vite :5173)
+npm run test:edge      # build + wrangler on :8799 + real DB: 404/meta/sitemap/rss (skips w/o DATABASE_URL)
+npm run lint:tokens    # no hard-coded color/space/radius/font outside tokens.css
+npm run check:bundle   # dist/ must not contain DB URL/driver/role strings
 .venv-tools/bin/python script.py   # ad-hoc Playwright (webapp-testing skill)
 ```
 Local secrets: copy `.dev.vars.example` -> `.dev.vars` (gitignored). See `docs/dev.md`.
+Env vars (Cloudflare Production and Preview are separate lists; apply from the next deployment): `DATABASE_URL` (required, `app_reader`), `SITE_URL` (required in Production, e.g. `https://<domain>`; canonical/sitemap/RSS/OG origin, falls back to request host), `NAVER_SITE_VERIFICATION` (optional, injects the Naver meta tag), `NODE_VERSION=22` (build).
 
 ## 3. Directory layout
 ```
-functions/         Pages Functions: api/*, posts catch-all (meta injection), sitemap/robots/rss, 404 handling
-src/               frontend: main.js, router, pages/, components/, render/ (markdown pipeline), styles/tokens.css
-tests/             Playwright tests (+ route mocks for XSS tests)
-docs/              api.md, dev.md, PLAN.md
+functions/         Pages Functions (import from src/ only the pure post-header.js chain: escape, urls, related-card)
+  api/posts, api/categories   JSON API (catch-all [[slug]]/[[path]])
+  posts/[[slug]].js           post HTML: meta + JSON-LD + prerendered header + inline payload; 404 if missing
+  [[path]].js                 catch-all: /, /about, sections, /categories/*, assets, 404, bare /api 404
+  sitemap.xml.js robots.txt.js rss.xml.js
+  _lib/   handlers (API), edge-handlers, queries (SQL), seo (meta/sitemap/RSS), shell (HTMLRewriter),
+          http (JSON + cache headers), slug, cursor, excerpt, sections, db
+src/               main.js, router.js, pages/ (home, section, post, about, not-found), components/, render/ (markdown, code blocks),
+                   lib/ (api, escape, theme, urls, post-header), content/ (sections.js, about.md), styles/ (tokens.css + per-area CSS, fonts.css)
+tests/unit/        node --test (handlers, queries, edge, seo, http, slug, cursor, excerpt, escape, urls, post-header, headers, lint, bundle)
+tests/e2e/         Playwright specs (API mocked via tests/fixtures/api/*.json); tests/fixtures/
+scripts/           check-tokens.mjs, check-bundle.mjs, test-edge.mjs (+ lib/)
+public/            _headers (immutable /assets/*), _routes.json (Functions skip /assets, /fonts, /favicon.ico), 404.html
+docs/              api.md, dev.md, seo.md, post-merge-checklist.md, contents-repo.md, PLAN.md, superpowers/specs/
 .claude/skills/    vendored reviewed skills + blog-platform; .claude/SKILLS.lock.md = provenance
 DESIGN.md          design tokens contract (single source for color/space/radius/font)
 ```
@@ -52,7 +67,7 @@ DESIGN.md          design tokens contract (single source for color/space/radius/
 | ui-ux-pro-max | nextlevelbuilder | the ONLY owner of design-system generation; record results in `DESIGN.md`; never `--persist` |
 | impeccable | pbakaus | REVIEW ONLY: critique, audit, polish, distill. Never `init`/`document`-style commands that write `DESIGN.md`. Hooks off, telemetry off. May create `PRODUCT.md` |
 | webapp-testing | anthropics/skills | Playwright rendering/behavior checks (Python venv `.venv-tools/`) |
-| claude-seo | AgriciDaniel | SEO diagnosis + priority plan (installed in Phase 5; implementation is ours) |
+| claude-seo | AgriciDaniel | SEO diagnosis + priority plan. NOT installed unless the user installs it via `/plugin` (reviewed SHA in SKILLS.lock.md); implementation is ours |
 | superpowers | obra | brainstorming -> writing-plans -> subagent-driven-development -> review orchestration; finish branches via PR only, never local merge to `main` |
 | blog-platform | this repo | project rules (API, SQL, cache, deploy, XSS, routing, tokens) |
 
@@ -63,12 +78,14 @@ Design-system owner is UI UX Pro Max alone. Impeccable reviews; it does not desi
 
 ## 7. Workflow
 brainstorming (one question at a time) -> writing-plans (`docs/PLAN.md`) -> sequential foundation work (Functions API + client, `tokens.css`, layout/router, theme + no-flash script, markdown pipeline) -> parallel page work in git worktrees via subagent-driven-development (home, post, category, static, 404; subagents use tokens only and REPORT needed changes to shared files: tokens, common components, router) -> two-stage review per task (spec compliance, then code quality) -> Impeccable critique + audit -> verification (tests, preview) -> PR to `main` (user merges).
-Phases: 0 repo/history/base (done), 1 skills (done), 2 CLAUDE.md/README, 3 design direction (`DESIGN.md`, `docs/PLAN.md`), 4 implementation, 5 SEO (+claude-seo, Naver verification tag slot, sitemap/RSS submission guide, llms.txt optional, cache purge docs), 6 verification, 7 PR/rollback/post-merge checklist.
+Status: implementation, edge SEO, tests and docs are done on `renewal` (Lighthouse mobile on preview 2026-11-27: Perf 99-100, A11y 100, BP 96, SEO 92-100, see `docs/seo.md`). Remaining: Impeccable critique/audit run (pending), PR to `main` (controller opens, user merges), then `docs/post-merge-checklist.md` (set `SITE_URL` in Production, Naver/Google registration, remove `sample-*` posts, optional `llms.txt`).
 
-## 8. Known data facts (verified 2026-11-27, see docs/api.md)
-- 29 posts, 11 categories; slugs and category slugs are FULL paths (case-sensitive; spaces, `&`, `:`, Korean). No `contents` wrapper.
-- `tags` is `text[]`; `author_type` is always `admin`; `created_at` is a naive timestamp, date-only (00:00).
-- Some titles contain `<`, `>`, `&`: escaping is required.
+## 8. Known data facts (see docs/api.md, docs/contents-repo.md)
+- One `reports` table; sections are the first slug segment: `tech` | `trends` | `essays`. Slugs and category slugs are FULL paths (e.g. `tech/security/reversing/01-kakao-auth`), lowercase-hyphen in the new Blog_Contents structure, still matched case-sensitively/exactly. No `contents` wrapper.
+- `reports.related_slug` (nullable text): an essay links to the post that prompted it; the API returns `related` (target) and `relatedBy` (posts pointing here). A missing target must render fine.
+- `tags` is `text[]`; `author_type` is `admin`; `created_at` is a naive date-only timestamp -> `to_char(created_at,'YYYY-MM-DD')`. `categories` has no order/description column (sorted by slug; section copy lives in `src/content/sections.js`, mirrored in `functions/_lib/sections.js`, a unit test keeps them equal).
+- Titles may contain `<`, `>`, `&`: escaping is required.
+- The Blog_Contents sync has already replaced production DB content with new sample posts (`sample-*`); the old live frontend reads the same DB. Do not write to the DB from this repo.
 
 ## 9. Definition of done
 - [ ] No DB credentials in browser bundle or repo

@@ -1,6 +1,6 @@
 # Blog_Contents 개편 요약 (설계 문서 6절)
 
-> 한 페이지 요약이다. 실제 Blog_Contents 레포 개편은 **별도 세션/PR**에서 진행하며, 아직 완료되지 않았다. 이 레포에서 Blog_Contents로 push하지 않는다.
+> 한 페이지 요약이다. Blog_Contents 개편과 sync(GitHub Actions)는 적용되어 운영 DB에는 새 구조의 샘플 글(`sample-*`)이 들어 있다. 이 레포에서 Blog_Contents로 push하지 않는다. 병합 후 절차: [post-merge-checklist.md](post-merge-checklist.md).
 
 ## 1. 새 폴더 구조
 ```
@@ -28,6 +28,6 @@ contents/
 3. 파일 삭제 시 DB 삭제 동작은 기존 그대로 유지한다(미러 동기화).
 
 ## 4. 주의
-- **Blog_Contents `main`에 병합하면 운영 DB가 바뀐다.** 옛(live) 블로그도 같은 DB를 읽으므로 병합 즉시 옛 블로그에도 영향이 간다.
+- **Blog_Contents `main`에 병합하면 운영 DB가 바뀐다**(샘플 글 제거도 파일 삭제 후 병합). 옛(live) 블로그도 같은 DB를 읽으므로 병합 즉시 옛 블로그에도 영향이 간다.
 - 첫 sync에서 새 구조에 없는 **옛 파일(기존 29개 글과 카테고리)은 DB에서 삭제·교체**된다. 병합 전에 새 구조로 옮긴 파일 목록과 slug 변경을 확인하고, 필요하면 DB 백업을 먼저 한다.
 - 개편 작업은 별도 세션에서 Blog_Contents의 브랜치/PR로 진행한다.
