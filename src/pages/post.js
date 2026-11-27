@@ -5,6 +5,7 @@ import { escapeHtml as e } from '../lib/escape.js';
 import { categoryHref, postHref } from '../lib/urls.js';
 import { buildToc, observeToc } from '../components/toc.js';
 import { relatedByHtml, relatedCardHtml } from '../components/related-card.js';
+import { mountNotFound, notFoundView } from './not-found.js';
 
 const TOC_MIN = 3;
 const TOC_LABEL = '이 글의 목차';
@@ -49,13 +50,7 @@ export default {
   },
 
   render(data) {
-    // minimal 404; Task 6d provides the full not-found page
-    if (data.notFound) {
-      return {
-        title: '글을 찾을 수 없습니다',
-        html: '<h1>글을 찾을 수 없습니다</h1><p>주소가 바뀌었거나 삭제된 글입니다.</p><p><a href="/" data-link>홈으로</a></p>',
-      };
-    }
+    if (data.notFound) return notFoundView();
     const { post, related, relatedBy } = data;
     const essay = post.slug.split('/')[0] === 'essays';
     const meta = `<p class="post-meta"><time datetime="${e(post.date)}">${e(post.date)}</time><span>${e(post.readingMinutes)}분</span></p>`;
@@ -82,7 +77,10 @@ ${navHtml(data, post.slug, essay)}
   },
 
   mount(root, data) {
-    if (data.notFound) return;
+    if (data.notFound) {
+      cleanups.push(mountNotFound(root));
+      return;
+    }
     const article = root.querySelector('.article');
     data.enhanceCodeBlocks(article);
 

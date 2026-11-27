@@ -174,9 +174,9 @@ test('essay shows 다음 사유 navigation when next exists', async ({ page }) =
 test('404 from the API renders the not-found message and title', async ({ page }) => {
   await mockPost(page, []);
   await page.goto('/posts/tech/none');
-  await expect(page.locator('h1')).toHaveText('글을 찾을 수 없습니다');
+  await expect(page.locator('h1')).toHaveText('페이지를 찾을 수 없습니다');
   await expect(page.locator('#main a[data-link][href="/"]')).toBeVisible();
-  expect(await page.title()).toBe('글을 찾을 수 없습니다 - IT Security Blog');
+  expect(await page.title()).toBe('페이지를 찾을 수 없습니다 - IT Security Blog');
 });
 
 test('other API errors reach the router error state', async ({ page }) => {

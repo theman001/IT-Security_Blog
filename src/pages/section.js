@@ -8,6 +8,7 @@ import { escapeHtml as e } from '../lib/escape.js';
 import { categoryHref } from '../lib/urls.js';
 import { postRowHtml } from '../components/post-card.js';
 import { SECTIONS } from '../content/sections.js';
+import { mountNotFound, notFoundView } from './not-found.js';
 
 const LIMIT = 20;
 // 64em = the list.css 1024px breakpoint at the default font size (lint forbids px in JS strings)
@@ -45,8 +46,6 @@ function treeNode(c, kidsOf, cur) {
   return `<li><details${open ? ' open' : ''}><summary>${a}</summary><ul>${kids.map((k) => treeNode(k, kidsOf, cur)).join('')}</ul></details></li>`;
 }
 
-const notFound = () => ({ title: '찾을 수 없습니다', html: '<h1>찾을 수 없습니다</h1><p>찾을 수 없습니다.</p><p><a href="/" data-link>홈으로</a></p>' }); // 6d replaces with the real page
-
 export function makeListPage(fixed) {
   let cleanup = null;
   return {
@@ -67,7 +66,7 @@ export function makeListPage(fixed) {
       return { cat, byPath, cats: cats.items, posts };
     },
     render(data) {
-      if (data.notFound) return notFound();
+      if (data.notFound) return notFoundView();
       const { cat, byPath, cats, posts } = data;
       const sec = SECTIONS[cat.path.split('/')[0]];
       const isSection = cat.depth === 1;
@@ -95,7 +94,10 @@ export function makeListPage(fixed) {
       return { title, html };
     },
     mount(root, data) {
-      if (data.notFound) return;
+      if (data.notFound) {
+        cleanup = mountNotFound(root);
+        return;
+      }
       const ac = new AbortController();
       const { signal } = ac;
       // desktop: the tree is a permanent sidebar (open); below that it is a collapsed disclosure

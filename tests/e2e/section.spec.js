@@ -188,16 +188,16 @@ test('section root row missing but deeper categories exist: header, crumb, chips
   await expect(page.locator('.cat-tree > li > details > summary a')).toContainText('Tech');
   await expect(page.locator('.cat-tree a[aria-current="page"]')).toHaveText(/리버싱/);
   await page.goto('/categories/tech/nope');
-  await expect(page.locator('#main')).toContainText('찾을 수 없습니다');
+  await expect(page.locator('#main')).toContainText('페이지를 찾을 수 없습니다');
 });
 
-test('unknown category or section -> 찾을 수 없습니다 with title', async ({ page }) => {
+test('unknown category or section -> 페이지를 찾을 수 없습니다 with title', async ({ page }) => {
   await mockList(page, deep, deepPosts);
   for (const url of ['/categories/tech/nope', '/categories/other/x', '/categories/tech/security/reversing/deeper']) {
     await page.goto(url);
-    await expect(page.locator('#main')).toContainText('찾을 수 없습니다');
-    expect(await page.title()).toBe('찾을 수 없습니다 - IT Security Blog');
-    await expect(page.locator('.post-row')).toHaveCount(0);
+    await expect(page.locator('#main')).toContainText('페이지를 찾을 수 없습니다');
+    expect(await page.title()).toBe('페이지를 찾을 수 없습니다 - IT Security Blog');
+    await expect(page.locator('.list-rows')).toHaveCount(0);
   }
 });
 
