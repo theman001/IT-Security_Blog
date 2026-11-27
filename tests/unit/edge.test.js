@@ -54,15 +54,12 @@ test('NAVER_SITE_VERIFICATION: escaped when set, absent when unset/empty', async
   assert.ok(nf.rewrite.head.includes('naver-site-verification')); // every shell response
 });
 test('catch-all: known pages 200, unknown 404 + noindex', async () => {
-  for (const p of ['/', '/about', '/about/', '/privacy', '/privacy/', '/tech', '/trends', '/essays']) {
+  for (const p of ['/', '/about', '/about/', '/privacy', '/privacy/', '/contact', '/tech', '/trends', '/essays']) {
     const r = await handleCatchAll(mk(p), deps(fakeDb()));
     assert.equal(r.status, 200, p);
     assert.ok(!noindex(r), p);
     assert.ok(r.rewrite.head.includes('<link rel="canonical"'), p);
   }
-  const c = await handleCatchAll(mk('/contact'), deps(fakeDb())); // placeholder: 200 but noindex, and not in the sitemap
-  assert.equal(c.status, 200);
-  assert.ok(noindex(c));
   const t = await handleCatchAll(mk('/tech/'), deps(fakeDb()));
   assert.ok(t.rewrite.head.includes('href="http://x/tech"'));
   assert.ok(t.rewrite.head.includes('<title>기술 - IT Security Blog</title>'));
@@ -166,9 +163,9 @@ test('sitemap: static + deep categories + posts, application/xml', async () => {
   assert.equal(r.headers.get('content-type'), 'application/xml; charset=utf-8');
   assert.match(r.headers.get('cache-control'), /s-maxage=600/);
   const x = await r.text();
-  for (const loc of ['https://e.com/', 'https://e.com/about', 'https://e.com/privacy', 'https://e.com/tech', 'https://e.com/trends', 'https://e.com/essays',
+  for (const loc of ['https://e.com/', 'https://e.com/about', 'https://e.com/privacy', 'https://e.com/contact', 'https://e.com/tech', 'https://e.com/trends', 'https://e.com/essays',
     'https://e.com/categories/tech/a%20b', 'https://e.com/posts/tech/a%20b%26c']) assert.ok(x.includes(`<loc>${loc}</loc>`), loc);
-  assert.ok(!x.includes('Security') && !x.includes('/categories/tech<') && !x.includes('/contact'));
+  assert.ok(!x.includes('Security') && !x.includes('/categories/tech<'));
   assert.ok(x.includes('<lastmod>2026-01-02</lastmod>'));
 });
 test('rss + robots', async () => {

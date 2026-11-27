@@ -17,4 +17,4 @@
 - 도입 시 쿠키 동의(해당 지역 규정), 성능 영향(외부 스크립트), CSP, `docs/seo.md`의 Lighthouse 재측정을 함께 한다.
 
 ## 3. 기타
-- 파비콘(`index.html`은 `data:,`로 404만 막는 상태), `llms.txt`, 서버 측 글 본문 프리렌더(`docs/seo.md` 한계 항목), 문의처: `/contact`(footer "문의하기")는 지금 "준비 중" 안내만 있는 임시 페이지(`src/content/contact.md`, `noindex`, sitemap 제외). 문의처(메일/폼)가 정해지면 내용을 채우고 `noindex` 제거(`functions/_lib/edge-handlers.js`), sitemap 추가, About/개인정보처리방침의 "곧 추가됩니다" 문구도 갱신한다.
+- 파비콘(`index.html`은 `data:,`로 404만 막는 상태), `llms.txt`, 서버 측 글 본문 프리렌더(`docs/seo.md` 한계 항목), 문의처: `/contact`(footer "문의하기")는 지금 "준비 중" 안내만 있는 페이지(`src/content/contact.md`). 색인(noindex 해제)과 sitemap 포함은 이미 켜 둔 상태라, 내용이 얇은 동안은 검색 품질에 불리할 수 있으니 문의처(메일/폼)가 정해지면 빨리 `contact.md`를 채우고, About/개인정보처리방침의 "곧 추가됩니다" 문구도 갱신한다.
