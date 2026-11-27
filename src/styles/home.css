@@ -16,6 +16,20 @@
   text-transform: uppercase;
   color: var(--color-accent);
 }
+.home-lead__kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-3);
+}
+.home-lead__def {
+  font-family: var(--font-definition);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--color-fg);
+}
 .home-notice {
   padding-block: var(--space-4);
   color: var(--color-fg-muted);

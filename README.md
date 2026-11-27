@@ -42,6 +42,7 @@ npm run check:bundle  # dist/ 에 DB 접속 정보·드라이버 문자열이 �
 ## Fonts / credits
 - Pretendard, Noto Serif KR, JetBrains Mono: self-hosted from npm packages (OFL).
 - 후원 버튼 글자: 이 페이지에는 카페24(주)이 제공한 "카페24 숑숑"(SIL OFL 1.1, https://fonts.cafe24.com)이 적용되어 있습니다. 16KB 서브셋이며 고지/재생성 방법은 `src/assets/fonts/Cafe24Syongsyong-NOTICE.txt`.
+- 홈 "사유" 정의 문구: "이롭게 바탕체"(이롭게, SIL OFL 1.1, https://font.iropke.com/batang)의 9KB 서브셋입니다. 고지/재생성 방법은 `src/assets/fonts/IropkeBatang-NOTICE.txt`.
 
 ## Docs
 - [docs/api.md](docs/api.md): `/api/*` 계약, 엣지 라우트(`/posts/*`, sitemap, robots, rss), 404/301 정책

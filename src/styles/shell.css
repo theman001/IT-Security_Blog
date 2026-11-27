@@ -43,6 +43,14 @@ body {
   color: var(--color-fg);
   text-decoration: none;
 }
+/* Iropke Batang (OFL 1.1), subset to the home definition line (src/assets/fonts/IropkeBatang-NOTICE.txt).
+   Only fetched on pages that use --font-definition. */
+@font-face {
+  font-family: "Definition Serif";
+  src: url("../assets/fonts/IropkeBatang-subset.woff2") format("woff2");
+  font-weight: var(--weight-medium);
+  font-display: swap;
+}
 /* Cafe24 Syongsyong (OFL 1.1), subset to the label glyphs (src/assets/fonts/Cafe24Syongsyong-NOTICE.txt).
    The label is display:none below 1100px, so the 16KB file is only fetched on wide screens. */
 @font-face {

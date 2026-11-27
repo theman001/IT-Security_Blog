@@ -208,7 +208,7 @@ test('support widget: right of the site name, external link opening a new tab, t
   await mockPosts(page, normal);
   await page.goto('/about');
   const w = page.locator('header a.support-widget');
-  await expect(w).toHaveAttribute('href', 'https://ctee.kr/place/theman');
+  await expect(w).toHaveAttribute('href', 'https://litt.ly/theman');
   await expect(w).toHaveAttribute('target', '_blank');
   await expect(w).toHaveAttribute('rel', /noopener/);
   await expect(w).toHaveAttribute('rel', /noreferrer/);
@@ -251,16 +251,16 @@ test('support widget: right of the site name, external link opening a new tab, t
   expect(dark.border).not.toBe(light.border);
   expect(dark.icon).not.toBe(light.icon);
   // click opens a new tab (the external request is stubbed)
-  await context.route('https://ctee.kr/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>크티</title>' }));
+  await context.route('https://litt.ly/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>리틀리</title>' }));
   const [popup] = await Promise.all([context.waitForEvent('page'), w.click()]);
   await popup.waitForLoadState();
-  expect(popup.url()).toBe('https://ctee.kr/place/theman');
+  expect(popup.url()).toBe('https://litt.ly/theman');
   expect(page.url()).toContain('/about'); // this tab stays on the blog
 });
 
-test('privacy policy mentions the external support link (ctee)', async ({ page }) => {
+test('privacy policy mentions the external support link (litt.ly)', async ({ page }) => {
   await page.goto('/privacy');
-  await expect(page.locator('#main .article')).toContainText('크티(ctee.kr)');
+  await expect(page.locator('#main .article')).toContainText('리틀리(litt.ly)');
   await expect(page.locator('#main .article h2').filter({ hasText: '외부 링크(후원)' })).toHaveCount(1);
 });
 

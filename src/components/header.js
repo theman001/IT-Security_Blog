@@ -12,9 +12,9 @@ const SECTIONS = [
 // Moon while the theme is light (click = go dark), sun while dark; CSS picks one from aria-pressed. Strokes use currentColor, so the icon follows the theme tokens.
 const ICONS = `<svg class="theme-toggle__moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg><svg class="theme-toggle__sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
 
-// Support widget, right of the site name (external link to the creator's ctee page, opens in a new tab). Coffee-cup icon; the two-line text label shows on wide screens only (CSS).
-const SUPPORT_URL = 'https://ctee.kr/place/theman';
-const SUPPORT = `<a class="support-widget" href="${SUPPORT_URL}" target="_blank" rel="noopener noreferrer" aria-label="커피 한 잔 후원하기 (크티, 새 탭에서 열림)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 2.5v2M12 2.5v2"/></svg><span class="support-widget__label"><span>커피 한 잔</span><span>후원하기</span></span></a>`;
+// Support widget, right of the site name (external link to the creator's litt.ly page, opens in a new tab). Coffee-cup icon; the two-line text label shows on wide screens only (CSS).
+const SUPPORT_URL = 'https://litt.ly/theman';
+const SUPPORT = `<a class="support-widget" href="${SUPPORT_URL}" target="_blank" rel="noopener noreferrer" aria-label="커피 한 잔 후원하기 (리틀리, 새 탭에서 열림)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 2.5v2M12 2.5v2"/></svg><span class="support-widget__label"><span>커피 한 잔</span><span>후원하기</span></span></a>`;
 
 // /tech/..., /posts/tech/... -> 'tech'; the home page has no segment ('')
 const sectionOf = (pathname) => {

@@ -1,0 +1,16 @@
+Iropke Batang (이롭게 바탕체) Medium
+Copyright (c) 2016, Iropke (이롭게) with Reserved Font Name '이롭게 바탕체', 'iropke batang'.
+Source: https://font.iropke.com/batang  (https://github.com/iropke/font-iropke-batang)
+
+Licensed under the SIL Open Font License, Version 1.1 (free for personal and commercial use;
+modification and redistribution allowed; the font itself must not be sold on its own).
+Full license text: https://openfontlicense.org/open-font-license-official-text/
+
+IropkeBatang-subset.woff2 in this directory is a MODIFIED subset of IropkeBatangM.woff
+(glyphs for the home page definition line "개념, 구성, 판단, 추리 따위를 행하는 인간의 이성 작용" and Basic Latin).
+Because the Reserved Font Name must not be used by modified versions, the internal font names were changed
+to "Definition Serif" (the file name only says where it came from). The CSS family alias is "Definition Serif".
+
+Regenerate (after changing the text; needs fonttools + brotli; rename name IDs 1,3,4,6 afterwards with fontTools):
+  pyftsubset IropkeBatangM.woff --text="<text>" --unicodes="U+0020-007E" --flavor=woff2 \
+    --layout-features='*' --no-hinting --name-IDs='*' --output-file=IropkeBatang-subset.woff2

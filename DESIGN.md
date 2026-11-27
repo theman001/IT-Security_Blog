@@ -34,6 +34,7 @@
 |---|---|
 | `--font-display` | `"Noto Serif KR Variable", "Noto Serif KR", "Noto Serif", Georgia, serif` (제목, 사유 본문, 인용) |
 | `--font-support` | `"Cafe24 Syongsyong", var(--font-body-tech)` (후원 위젯 글자만; 16KB 서브셋, `src/assets/fonts/`, OFL 1.1) |
+| `--font-definition` | `"Definition Serif", var(--font-display)` (홈 "사유" 사전적 정의 한 줄만; 이롭게 바탕체 서브셋 9KB, `src/assets/fonts/`, OFL 1.1; 원본의 예약 글꼴 이름 때문에 내부 이름을 바꿈, NOTICE 참고) |
 | `--font-body-tech` | `"Pretendard Variable", Pretendard, system-ui, sans-serif` (기술·동향 본문, UI) |
 | `--font-body-essay` | `var(--font-display)` |
 | `--font-mono` | `"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace` |
@@ -50,7 +51,7 @@
 | `--text-xl` | `1.375rem` | 소제목(h3) |
 | `--text-2xl` | `1.75rem` | h2, 카드 제목 |
 | `--text-3xl` | `2.25rem` | 글 제목 |
-| `--text-4xl` | `3rem` | 홈 대표 사유 제목 |
+| `--text-4xl` | `3rem` | 홈 대표 사유 제목(위 라벨은 "사유" + 사전적 정의 한 줄) |
 줄간격: `--leading-tight: 1.25`(제목), `--leading-support: 1.125`(후원 버튼 두 줄 라벨), `--leading-body-tech: 1.75`, `--leading-body-essay: 1.9`, `--leading-code: 1.6`. 굵기: `--weight-regular: 400`, `--weight-medium: 500`, `--weight-bold: 700`. 자간: 제목만 `--tracking-title: -0.01em`, 라벨 `--tracking-label: 0.08em`(대문자 라벨).
 줄바꿈: 본문 기본값은 `word-break: keep-all; overflow-wrap: break-word`(한글은 어절 단위로 줄바꿈, 긴 URL·토큰만 강제 줄바꿈).
 
