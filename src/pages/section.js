@@ -16,6 +16,7 @@ const label = (c) => SECTIONS[c.path]?.label ?? c.name; // section roots show Te
 const link = (c, text, cur, cls = '') =>
   `<a${cls ? ` class="${cls}"` : ''} data-link href="${e(categoryHref(c.path))}"${c.path === cur ? ' aria-current="page"' : ''}>${text}</a>`;
 
+const parentPath = (c) => c.path.slice(0, Math.max(0, c.path.lastIndexOf('/')));
 const rowsHtml = (items) => items.map(postRowHtml).join('');
 
 function crumbsHtml(cat, byPath) {
@@ -53,7 +54,14 @@ export function makeListPage(fixed) {
       const path = fixed ?? params['*'];
       if (!SECTIONS[path.split('/')[0]]) return { notFound: true };
       const [cats, posts] = await Promise.all([getCategories(), getPosts({ category: path, limit: LIMIT })]);
-      const byPath = new Map(cats.items.map((c) => [c.path, c]));
+      const list = cats.items;
+      const key = path.split('/')[0];
+      // A section with no DB row (no folder yet) still exists: synthesize its root so header, crumb, tree and empty state work.
+      if (!list.some((c) => c.path === key)) {
+        const kids = list.filter((c) => parentPath(c) === key);
+        list.unshift({ id: null, name: SECTIONS[key].title, path: key, parentId: null, depth: 1, postCount: 0, totalPostCount: kids.reduce((n, c) => n + c.totalPostCount, 0), subCategoryCount: kids.length, section: key });
+      }
+      const byPath = new Map(list.map((c) => [c.path, c]));
       const cat = byPath.get(path);
       if (!cat) return { notFound: true };
       return { cat, byPath, cats: cats.items, posts };
@@ -63,7 +71,7 @@ export function makeListPage(fixed) {
       const { cat, byPath, cats, posts } = data;
       const sec = SECTIONS[cat.path.split('/')[0]];
       const isSection = cat.depth === 1;
-      const kidsOf = (p) => cats.filter((c) => c.parentId === p.id);
+      const kidsOf = (p) => cats.filter((c) => parentPath(c) === p.path); // by path: a synthesized root has no id
       const root = byPath.get(cat.path.split('/')[0]);
       const inSection = cats.filter((c) => c.path === root?.path || c.path.startsWith(`${root?.path}/`));
       const tree = root && Math.max(...inSection.map((c) => c.depth)) >= 3;

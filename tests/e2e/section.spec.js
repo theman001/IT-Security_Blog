@@ -164,6 +164,33 @@ test('empty category: one sentence with a home link', async ({ page }) => {
   await expect(page.locator('.list-empty')).toHaveText('아직 글이 없습니다. 홈으로');
 });
 
+test('section without a DB row still renders its static header and empty state', async ({ page }) => {
+  await mockList(page, deep.filter((c) => c.path !== 'essays'), deepPosts);
+  await page.goto('/essays');
+  await expect(page.locator('h1')).toHaveText('사유');
+  await expect(page.locator('.list-desc')).not.toBeEmpty();
+  await expect(page.locator('.list-count')).toHaveText('0개의 글');
+  await expect(page.locator('.list-empty')).toHaveText('아직 글이 없습니다. 홈으로');
+  expect(await page.title()).toBe('사유 - IT Security Blog');
+});
+
+test('section root row missing but deeper categories exist: header, crumb, chips and tree survive', async ({ page }) => {
+  await mockList(page, deep.filter((c) => c.path !== 'tech'), deepPosts);
+  await page.goto('/tech');
+  await expect(page.locator('h1')).toHaveText('기술');
+  await expect(page.locator('.list-count')).toHaveText('27개의 글');
+  await expect(page.locator('.chips .chip')).toHaveText(['전체', '보안(27)', '인프라(0)']);
+  await expect(page.locator('.post-row')).toHaveCount(20);
+  await page.goto('/categories/tech/security/reversing');
+  await expect(page.locator('.crumbs li')).toHaveText(['Tech', '보안', '리버싱']);
+  await expect(page.locator('.crumbs a').first()).toHaveAttribute('href', '/tech');
+  await expect(page.locator('.cat-tree')).toBeVisible();
+  await expect(page.locator('.cat-tree > li > details > summary a')).toContainText('Tech');
+  await expect(page.locator('.cat-tree a[aria-current="page"]')).toHaveText(/리버싱/);
+  await page.goto('/categories/tech/nope');
+  await expect(page.locator('#main')).toContainText('찾을 수 없습니다');
+});
+
 test('unknown category or section -> 찾을 수 없습니다 with title', async ({ page }) => {
   await mockList(page, deep, deepPosts);
   for (const url of ['/categories/tech/nope', '/categories/other/x', '/categories/tech/security/reversing/deeper']) {
