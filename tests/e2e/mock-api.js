@@ -19,3 +19,32 @@ export async function mockPosts(page, items, { fail = [] } = {}) {
   });
   return calls;
 }
+
+const FILL = Array.from({ length: 14 }, (_, i) => `본문 문단 ${i + 1}번입니다. 읽기 흐름과 스크롤 길이를 만들기 위한 충분히 긴 문장이 이어진다.`).join('\n\n');
+
+/** A post-detail fixture (`GET /api/posts/<slug>` body). `{{FILL}}` in contentMd becomes a tall block of paragraphs. */
+export function postFixture(name) {
+  const r = JSON.parse(readFileSync(new URL(`../fixtures/api/${name}.json`, import.meta.url), 'utf8'));
+  r.post.contentMd = r.post.contentMd.replaceAll('{{FILL}}', FILL);
+  return r;
+}
+
+/**
+ * Mock GET /api/posts/<slug>. `responses` = post-detail bodies keyed by decoded slug (post.slug).
+ * Unknown slug -> 404 in the API's error shape; slug starting with `boom` -> 500.
+ * Returns the raw (still encoded) request pathnames.
+ */
+export async function mockPost(page, responses) {
+  const bySlug = new Map(responses.map((r) => [r.post.slug, r]));
+  const calls = [];
+  await page.route('**/api/posts/**', (route) => {
+    const { pathname } = new URL(route.request().url());
+    calls.push(pathname);
+    const slug = pathname.slice('/api/posts/'.length).split('/').map(decodeURIComponent).join('/');
+    const hit = bySlug.get(slug);
+    if (slug.startsWith('boom')) return route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":{"code":"internal","message":"x"}}' });
+    if (!hit) return route.fulfill({ status: 404, contentType: 'application/json', body: '{"error":{"code":"not_found","message":"Post not found"}}' });
+    return route.fulfill({ contentType: 'application/json', body: JSON.stringify(hit) });
+  });
+  return calls;
+}

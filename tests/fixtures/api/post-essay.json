@@ -1,0 +1,33 @@
+{
+  "post": {
+    "id": 1,
+    "title": "보안은 습관이다",
+    "slug": "essays/thoughts/habit",
+    "date": "2026-11-20",
+    "section": "essays",
+    "readingMinutes": 7,
+    "excerpt": "요약 문장입니다.",
+    "categoryId": 1,
+    "categoryName": "thoughts",
+    "categoryPath": "essays/thoughts",
+    "tags": [
+      "사유"
+    ],
+    "authorType": "admin",
+    "description": "사유 설명",
+    "contentMd": "## 첫째 생각\n\n{{FILL}}\n\n## 둘째 생각\n\n{{FILL}}\n\n## 셋째 생각\n\n> 도구보다 먼저 바뀌어야 하는 것은 우리가 위험을 바라보는 방식이다.\n\n{{FILL}}\n"
+  },
+  "prev": null,
+  "next": {
+    "slug": "tech/security/a b&c:한글",
+    "title": "Kakao 인증 흐름 분석"
+  },
+  "related": {
+    "slug": "tech/security/a b&c:한글",
+    "title": "Kakao 인증 흐름 분석",
+    "excerpt": "연결된 글의 요약입니다.",
+    "date": "2026-11-10",
+    "section": "tech"
+  },
+  "relatedBy": []
+}
