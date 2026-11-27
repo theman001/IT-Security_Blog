@@ -78,10 +78,22 @@ test('catch-all: /assets and file extensions pass through; html fallback is a 40
   assert.equal(r.status, 404);
   assert.ok(noindex(r));
 });
-test('catch-all: /api/* unknown -> JSON 404', async () => {
-  const r = await handleCatchAll(mk('/api/nope'), deps(fakeDb()));
-  assert.equal(r.status, 404);
-  assert.equal((await r.json()).error.code, 'not_found');
+test('catch-all: /api, /api/ and /api/* unknown -> JSON 404', async () => {
+  for (const p of ['/api', '/api/', '/api/nope']) {
+    const r = await handleCatchAll(mk(p), deps(fakeDb()));
+    assert.equal(r.status, 404, p);
+    assert.equal((await r.json()).error.code, 'not_found', p);
+  }
+  assert.equal((await handleCatchAll(mk('/apiary'), deps(fakeDb()))).status, 404); // still the HTML 404 shell
+});
+test('categories: a section root redirects 301 to the section list (no duplicate page, no DB hit)', async () => {
+  for (const [p, to] of [['/categories/tech', '/tech'], ['/categories/essays/', '/essays'], ['/categories/trends', '/trends']]) {
+    const r = await handleCatchAll(mk(p), throwing);
+    assert.equal(r.status, 301, p);
+    assert.equal(r.headers.get('location'), to, p);
+    assert.match(r.headers.get('cache-control'), /s-maxage=/);
+  }
+  assert.equal((await handleCatchAll(mk('/categories/tech/web'), deps(fakeDb([])))).status, 404); // deeper ones are not redirected
 });
 test('categories: existing section-rooted 200 (name as title), missing/non-section 404', async () => {
   const db = fakeDb([{ slug: 'tech/web', name: 'Web <x>' }, { slug: 'Security/Hack', name: 'Old' }]);
@@ -126,16 +138,21 @@ test('DB failure -> 500 shell, noindex, no-store, no leaked message', async () =
     for (const h of [handleSitemap, handleRss]) {
       const f = await h(mk('/x'), throwing);
       assert.equal(f.status, 500);
+      assert.equal(f.headers.get('cache-control'), 'no-store');
       assert.ok(!JSON.stringify(await f.json()).includes('secret'));
     }
     // shell itself unavailable -> JSON 500
     const broken = { ASSETS: { fetch: async () => new Response('', { status: 500 }) } };
-    assert.equal((await handlePost(mk('/posts/x', { params: { slug: ['x'] }, env: broken }), throwing)).status, 500);
+    const last = await handlePost(mk('/posts/x', { params: { slug: ['x'] }, env: broken }), throwing);
+    assert.equal(last.status, 500);
+    assert.equal(last.headers.get('cache-control'), 'no-store'); // guarded's final fallback
   } finally { console.error = log; }
 });
 test('non-GET -> 405 everywhere', async () => {
   for (const h of [handlePost, handleCatchAll, handleSitemap, handleRss, handleRobots]) {
-    assert.equal((await h(mk('/x', { method: 'POST' }), deps(fakeDb()))).status, 405);
+    const r = await h(mk('/x', { method: 'POST' }), deps(fakeDb()));
+    assert.equal(r.status, 405);
+    assert.equal(r.headers.get('allow'), 'GET, HEAD');
   }
 });
 test('sitemap: static + deep categories + posts, application/xml', async () => {

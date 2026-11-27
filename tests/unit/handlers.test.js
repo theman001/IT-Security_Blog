@@ -17,6 +17,7 @@ test('non-GET -> 405 JSON error', async () => {
   for (const h of [handlePosts, handleCategories]) {
     const r = await h(mk('/api/x', { method: 'POST' }), deps(fakeDb()));
     assert.equal(r.status, 405);
+    assert.equal(r.headers.get('allow'), 'GET');
     assert.equal((await body(r)).error.code, 'method_not_allowed');
   }
 });

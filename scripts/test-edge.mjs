@@ -25,7 +25,9 @@ for (const s of ['SIGINT', 'SIGTERM']) process.on(s, () => { stop(); process.exi
 let failed = 0;
 const check = (name, ok, extra = '') => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${ok ? '' : ' ' + extra}`); if (!ok) failed++; };
 const get = async (p) => { const r = await fetch(BASE + p, { redirect: 'manual' }); return { r, t: await r.text() }; };
-const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// h1 (post-header.js) escapes & < > " '; <title> (seo.js escapeText) only & < >
+const escText = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const escHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 try {
   for (let i = 0; ; i++) {
@@ -34,7 +36,7 @@ try {
     await new Promise((r) => setTimeout(r, 500));
   }
 
-  for (const p of ['/nope', '/deep/unknown/path', '/posts/does-not-exist', '/posts/', '/posts', '/categories/tech/does-not-exist', '/assets/nope.js', '/api/nope']) {
+  for (const p of ['/nope', '/deep/unknown/path', '/posts/does-not-exist', '/posts/', '/posts', '/categories/tech/does-not-exist', '/assets/nope.js', '/api', '/api/', '/api/nope']) {
     const { r } = await get(p);
     check(`${p} -> 404`, r.status === 404, String(r.status));
   }
@@ -51,16 +53,20 @@ try {
     check('post has og:title', t.includes('property="og:title"'));
     check('post has JSON-LD', t.includes('application/ld+json'));
     const main = t.slice(t.indexOf('<main'), t.indexOf('</main>'));
-    check('post <main> has the prerendered <h1> with the title', main.includes(`<h1 class="post-title">${esc(post.title).replace(/"/g, '&quot;').replace(/'/g, '&#39;')}</h1>`) || main.includes(`<h1 class="post-title">${esc(post.title)}</h1>`), main.slice(0, 200));
+    check('post <main> has the prerendered <h1> with the title', main.includes(`<h1 class="post-title">${escHtml(post.title)}</h1>`), main.slice(0, 200));
     check('post <main> has the empty article container', /<article class="article( essay)?"><\/article>/.test(main));
     check('post has canonical', /<link rel="canonical" href="[^"]+"/.test(t));
-    check('post title escaped in <title>', t.includes(`<title>${esc(post.title).replace(/"/g, '&quot;').replace(/'/g, '&#39;')} - IT Security Blog</title>`) || t.includes(`<title>${esc(post.title)} - IT Security Blog</title>`));
+    check('post title escaped in <title>', t.includes(`<title>${escText(post.title)} - IT Security Blog</title>`));
     check('post has no raw <script> from data', (t.match(/<script/g) ?? []).length === (nf.t.match(/<script/g) ?? []).length + 2); // JSON-LD + inlined payload
     check('inlined post payload is JSON with no raw "<"', (() => { try { const j = /<script type="application\/json" id="post-data">(.*?)<\/script>/s.exec(t)[1]; return !j.includes('<') && JSON.parse(j).post.slug === post.slug; } catch { return false; } })());
     check('single <title>', (t.match(/<title>/g) ?? []).length === 1);
     const sm = await get('/sitemap.xml');
     check('sitemap lists the post url', sm.t.includes(path.replace(/&/g, '&amp;')));
   }
+  const redirect = await get('/categories/tech');
+  check('/categories/tech -> 301 /tech', redirect.r.status === 301 && redirect.r.headers.get('location') === '/tech', `${redirect.r.status} ${redirect.r.headers.get('location')}`);
+  const post405 = await fetch(BASE + '/about', { method: 'POST' });
+  check('POST /about -> 405 with Allow: GET, HEAD', post405.status === 405 && post405.headers.get('allow') === 'GET, HEAD', `${post405.status} ${post405.headers.get('allow')}`);
   for (const p of ['/', '/about', '/about/', '/tech', '/trends', '/essays']) check(`${p} -> 200`, (await get(p)).r.status === 200);
 
   const sm = await get('/sitemap.xml');
@@ -80,9 +86,11 @@ try {
   const js = readdirSync('dist/assets').find((f) => f.endsWith('.js'));
   const a = await get('/assets/' + js);
   check(`/assets/${js} -> 200 js (not shell)`, a.r.status === 200 && /javascript/.test(a.r.headers.get('content-type')) && !a.t.includes('<html'));
+  check('/assets/* served with immutable Cache-Control', /immutable/.test(a.r.headers.get('cache-control') ?? ''), String(a.r.headers.get('cache-control')));
   const leaked = readdirSync('dist/assets').filter((f) => f.endsWith('.js')).some((f) => /postgres(ql)?:\/\//.test(readFileSync('dist/assets/' + f, 'utf8')));
   check('dist JS has no postgresql://', !leaked);
   check('dist/_routes.json present', existsSync('dist/_routes.json'));
+  check('dist/_headers has the immutable /assets/* rule', existsSync('dist/_headers') && /^\/assets\/\*\n\s+Cache-Control: .*immutable/m.test(readFileSync('dist/_headers', 'utf8')));
 } catch (e) {
   console.error('test:edge error:', e.message);
   failed++;

@@ -8,6 +8,8 @@ import { DEFAULT_DESCRIPTION, buildRss, buildSitemap, headTagsHtml, metaTags, pa
 
 const ok = (body, type, status = 200) =>
   new Response(body, { status, headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=86400' } });
+const NOT_ALLOWED = () => fail(405, 'method_not_allowed', 'Only GET is supported', { headers: { Allow: 'GET, HEAD' } });
+const INTERNAL = () => fail(500, 'internal', 'Internal error', { cache: 'none' });
 const asParts = (p) => (p == null ? [] : Array.isArray(p) ? p : [p]);
 const notFound = (ctx, deps) => renderShell(ctx.env, ctx.request, { status: 404, noindex: true }, deps.HTMLRewriter);
 const page = (ctx, deps, meta, extra) =>
@@ -15,7 +17,7 @@ const page = (ctx, deps, meta, extra) =>
 
 // GET/HEAD only; any thrown error -> opaque 500 (HTML shell for pages, JSON for feeds), never the message.
 async function guarded(ctx, deps, run, onError) {
-  if (!['GET', 'HEAD'].includes(ctx.request.method)) return fail(405, 'method_not_allowed', 'Only GET is supported');
+  if (!['GET', 'HEAD'].includes(ctx.request.method)) return NOT_ALLOWED();
   try {
     return await run(new URL(ctx.request.url));
   } catch (e) {
@@ -23,7 +25,7 @@ async function guarded(ctx, deps, run, onError) {
     try {
       return await onError();
     } catch {
-      return fail(500, 'internal', 'Internal error');
+      return INTERNAL();
     }
   }
 }
@@ -45,7 +47,7 @@ export const handlePost = (ctx, deps) =>
 export const handleCatchAll = (ctx, deps) =>
   guarded(ctx, deps, async (url) => {
     const raw = url.pathname;
-    if (raw.startsWith('/api/')) return fail(404, 'not_found', 'Not found');
+    if (raw === '/api' || raw.startsWith('/api/')) return fail(404, 'not_found', 'Not found');
     const lastSeg = raw.slice(raw.lastIndexOf('/') + 1);
     if (raw.startsWith('/assets/') || (!raw.startsWith('/categories/') && /\.[A-Za-z0-9]{1,8}$/.test(lastSeg))) {
       const res = await ctx.env.ASSETS.fetch(ctx.request);
@@ -61,6 +63,8 @@ export const handleCatchAll = (ctx, deps) =>
     if (path.startsWith('/categories/')) {
       const cat = decodeSlug(path.slice('/categories/'.length).split('/'));
       if (!cat || !Object.hasOwn(SECTIONS, cat.split('/')[0])) return notFound(ctx, deps); // the SPA only lists section-rooted categories
+      // The section root is the section list page: one URL per page (permanent, so the duplicate leaves the index).
+      if (Object.hasOwn(SECTIONS, cat)) return new Response(null, { status: 301, headers: { Location: `/${cat}`, 'Cache-Control': 'public, max-age=0, s-maxage=600' } });
       const hit = (await listCategories(deps.getDb(ctx.env))).find((c) => c.path === cat);
       if (!hit) return notFound(ctx, deps);
       return page(ctx, deps, pageMeta({ title: hit.name, description: DEFAULT_DESCRIPTION, path: `/categories/${cat}` }, origin));
@@ -80,15 +84,15 @@ export const handleSitemap = (ctx, deps) =>
       ...posts.map((p) => ({ path: `/posts/${p.slug}`, date: p.date })),
     ];
     return ok(buildSitemap(entries, siteOrigin(ctx.env, ctx.request)), 'application/xml; charset=utf-8');
-  }, async () => fail(500, 'internal', 'Internal error'));
+  }, async () => INTERNAL());
 
 export const handleRss = (ctx, deps) =>
   guarded(ctx, deps, async () => {
     const { items } = await listPosts(deps.getDb(ctx.env), { limit: 20 });
     return ok(buildRss(items, siteOrigin(ctx.env, ctx.request)), 'application/rss+xml; charset=utf-8');
-  }, async () => fail(500, 'internal', 'Internal error'));
+  }, async () => INTERNAL());
 
 export const handleRobots = (ctx) => {
-  if (!['GET', 'HEAD'].includes(ctx.request.method)) return fail(405, 'method_not_allowed', 'Only GET is supported');
+  if (!['GET', 'HEAD'].includes(ctx.request.method)) return NOT_ALLOWED();
   return ok(`User-agent: *\nAllow: /\n\nSitemap: ${siteOrigin(ctx.env, ctx.request)}/sitemap.xml\n`, 'text/plain; charset=utf-8');
 };

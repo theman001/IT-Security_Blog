@@ -16,3 +16,9 @@ test('fail returns error body and err cache', async () => {
   assert.match(r.headers.get('Cache-Control'), /s-maxage=60/);
   assert.match(r.headers.get('Cache-Control'), /max-age=0/);
 });
+
+test("fail/json accept cache 'none' (no-store) and extra headers", () => {
+  assert.equal(fail(500, 'internal', 'x', { cache: 'none' }).headers.get('Cache-Control'), 'no-store');
+  assert.equal(fail(405, 'm', 'x', { headers: { Allow: 'GET, HEAD' } }).headers.get('Allow'), 'GET, HEAD');
+  assert.equal(json({}, { cache: 'none' }).headers.get('Cache-Control'), 'no-store');
+});

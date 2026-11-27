@@ -8,7 +8,7 @@ const asParts = (p) => (p == null ? [] : Array.isArray(p) ? p : [p]);
 
 // Shared wrapper: GET only; any thrown error (incl. DB / missing env) -> opaque 500.
 async function guarded({ request, env, params }, { getDb }, run) {
-  if (request.method !== 'GET') return fail(405, 'method_not_allowed', 'Only GET is supported');
+  if (request.method !== 'GET') return fail(405, 'method_not_allowed', 'Only GET is supported', { headers: { Allow: 'GET' } });
   try {
     return await run(new URL(request.url), asParts(params?.slug ?? params?.path), () => getDb(env));
   } catch (e) {
