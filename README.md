@@ -1,5 +1,5 @@
 # IT-Security Blog
-
+ 
 IT 보안과 개발 지식을 공유하기 위해 구축된 **싱글 페이지 애플리케이션(SPA) 블로그**입니다.
 가벼운 Vanilla JavaScript와 Neon DB를 활용하여 빠른 성능과 직관적인 사용자 경험을 제공합니다.
 
