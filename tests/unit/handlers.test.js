@@ -1,0 +1,80 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { handlePosts, handleCategories } from '../../functions/_lib/handlers.js';
+import { encodeCursor } from '../../functions/_lib/cursor.js';
+
+const mk = (path, { method = 'GET', params = {} } = {}) => ({
+  request: new Request('http://x' + path, { method }), env: {}, params,
+});
+const fakeDb = (rows = []) => {
+  const calls = [];
+  return { calls, query: async (text, params) => (calls.push({ text, params }), rows) };
+};
+const deps = (db) => ({ getDb: () => db });
+const body = async (r) => r.json();
+
+test('non-GET -> 405 JSON error', async () => {
+  for (const h of [handlePosts, handleCategories]) {
+    const r = await h(mk('/api/x', { method: 'POST' }), deps(fakeDb()));
+    assert.equal(r.status, 405);
+    assert.equal((await body(r)).error.code, 'method_not_allowed');
+  }
+});
+test('bad limit / section / cursor / category -> 400 and never touch the db', async () => {
+  const bad = ['limit=0', 'limit=51', 'limit=abc', 'limit=1.5', 'limit=-1', 'section=other', 'section=', 'cursor=###',
+    'cursor=' + encodeCursor({ date: 'x', id: 1 }), 'category=a//b', 'category=..'];
+  for (const q of bad) {
+    const db = fakeDb();
+    const r = await handlePosts(mk('/api/posts?' + q), deps(db));
+    assert.equal(r.status, 400, q);
+    assert.equal(db.calls.length, 0, q);
+    assert.equal((await body(r)).error.code, 'bad_request');
+  }
+});
+test('valid list query -> 200 with ok cache header', async () => {
+  const db = fakeDb([]);
+  const r = await handlePosts(mk('/api/posts?section=essays&limit=50'), deps(db));
+  assert.equal(r.status, 200);
+  assert.deepEqual(await body(r), { items: [], nextCursor: null });
+  assert.match(r.headers.get('cache-control'), /s-maxage=600/);
+});
+test('post detail: missing -> 404, bad slug -> 400, db error -> 500 without leaking', async () => {
+  let r = await handlePosts(mk('/api/posts/x', { params: { slug: ['x'] } }), deps(fakeDb([])));
+  assert.equal(r.status, 404);
+  assert.equal((await body(r)).error.code, 'not_found');
+  r = await handlePosts(mk('/api/posts/..', { params: { slug: ['..'] } }), deps(fakeDb([])));
+  assert.equal(r.status, 400);
+  const boom = { query: async () => { throw new Error('postgres://u:secret@host/db SELECT 1'); } };
+  r = await handlePosts(mk('/api/posts', {}), deps(boom));
+  assert.equal(r.status, 500);
+  const t = JSON.stringify(await body(r));
+  assert.doesNotMatch(t, /secret|postgres|SELECT/);
+  assert.equal(JSON.parse(t).error.code, 'internal');
+});
+test('getDb throwing (missing env) -> 500 internal', async () => {
+  const r = await handlePosts(mk('/api/posts'), { getDb: () => { throw new Error('DATABASE_URL missing'); } });
+  assert.equal(r.status, 500);
+});
+test('slug params are decoded and passed exactly', async () => {
+  const db = fakeDb([]);
+  await handlePosts(mk('/', { params: { slug: ['tech', 'a%20b', '%ED%95%9C'] } }), deps(db));
+  assert.deepEqual(db.calls[0].params, ['tech/a b/한']);
+});
+test('categories: no params -> list; suffix required/stripped', async () => {
+  let db = fakeDb([]);
+  let r = await handleCategories(mk('/api/categories'), deps(db));
+  assert.equal(r.status, 200);
+  assert.deepEqual(await body(r), { items: [] });
+  db = fakeDb([]);
+  r = await handleCategories(mk('/', { params: { path: ['tech', 'a%20b', 'posts'] } }), deps(db));
+  assert.equal(r.status, 404);
+  assert.deepEqual(db.calls[0].params, ['tech/a b']);
+  db = fakeDb([]);
+  r = await handleCategories(mk('/', { params: { path: ['tech', 'a'] } }), deps(db));
+  assert.equal(r.status, 404);
+  assert.equal(db.calls.length, 0);
+  r = await handleCategories(mk('/', { params: { path: ['posts'] } }), deps(fakeDb([])));
+  assert.equal(r.status, 400);
+  r = await handleCategories(mk('/', { params: { path: ['..', 'posts'] } }), deps(fakeDb([])));
+  assert.equal(r.status, 400);
+});

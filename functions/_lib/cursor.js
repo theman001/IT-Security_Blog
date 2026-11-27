@@ -8,7 +8,10 @@ export function decodeCursor(s) {
   try {
     const bin = atob(String(s).replace(/-/g, '+').replace(/_/g, '/'));
     const o = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))));
-    return o && typeof o.date === 'string' && Number.isInteger(o.id) ? { date: o.date, id: o.id } : null;
+    const ok = o && typeof o.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.date) &&
+      new Date(o.date + 'T00:00:00Z').toISOString().slice(0, 10) === o.date && // rejects 2026-02-30
+      Number.isInteger(o.id) && o.id >= 0 && o.id <= 2147483647; // fits Postgres int4
+    return ok ? { date: o.date, id: o.id } : null;
   } catch {
     return null;
   }

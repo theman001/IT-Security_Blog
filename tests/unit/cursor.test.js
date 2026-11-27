@@ -12,3 +12,15 @@ test('cursor rejects garbage', () => {
   assert.equal(decodeCursor(Buffer.from('{"date":1,"id":"x"}').toString('base64url')), null);
   assert.equal(decodeCursor(Buffer.from('nope').toString('base64url')), null);
 });
+
+const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+test('cursor rejects non-date strings and impossible dates', () => {
+  assert.equal(decodeCursor(b64({ date: 'x', id: 1 })), null);
+  assert.equal(decodeCursor(b64({ date: "2026-01-01'; DROP", id: 1 })), null);
+  assert.equal(decodeCursor(b64({ date: '2026-13-45', id: 1 })), null);
+  assert.equal(decodeCursor(b64({ date: '2026-02-30', id: 1 })), null);
+});
+test('cursor rejects ids outside int4', () => {
+  assert.equal(decodeCursor(b64({ date: '2026-01-01', id: 2 ** 31 })), null);
+  assert.equal(decodeCursor(b64({ date: '2026-01-01', id: -1 })), null);
+});

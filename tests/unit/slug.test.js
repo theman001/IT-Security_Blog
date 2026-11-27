@@ -29,3 +29,14 @@ test('sectionOf returns first segment', () => {
   assert.equal(sectionOf('tech/a/b'), 'tech');
   assert.equal(sectionOf('tech'), 'tech');
 });
+
+test('decodeSlug rejects control characters (raw and encoded)', () => {
+  assert.equal(decodeSlug(['tech', 'a%00b']), null);
+  assert.equal(decodeSlug(['tech', 'a%0Ab']), null);
+  assert.equal(decodeSlug(['tech', 'a\u0001b']), null);
+});
+test('decodeSlug rejects non-string elements', () => {
+  assert.equal(decodeSlug(['tech', 1]), null);
+  assert.equal(decodeSlug([null]), null);
+  assert.equal(decodeSlug([['a']]), null);
+});
