@@ -51,7 +51,7 @@
 | `--text-2xl` | `1.75rem` | h2, 카드 제목 |
 | `--text-3xl` | `2.25rem` | 글 제목 |
 | `--text-4xl` | `3rem` | 홈 대표 사유 제목 |
-줄간격: `--leading-tight: 1.25`(제목), `--leading-body-tech: 1.75`, `--leading-body-essay: 1.9`, `--leading-code: 1.6`. 굵기: `--weight-regular: 400`, `--weight-medium: 500`, `--weight-bold: 700`. 자간: 제목만 `--tracking-title: -0.01em`, 라벨 `--tracking-label: 0.08em`(대문자 라벨).
+줄간격: `--leading-tight: 1.25`(제목), `--leading-support: 1.125`(후원 버튼 두 줄 라벨), `--leading-body-tech: 1.75`, `--leading-body-essay: 1.9`, `--leading-code: 1.6`. 굵기: `--weight-regular: 400`, `--weight-medium: 500`, `--weight-bold: 700`. 자간: 제목만 `--tracking-title: -0.01em`, 라벨 `--tracking-label: 0.08em`(대문자 라벨).
 줄바꿈: 본문 기본값은 `word-break: keep-all; overflow-wrap: break-word`(한글은 어절 단위로 줄바꿈, 긴 URL·토큰만 강제 줄바꿈).
 
 ## 3. 간격 · 폭 · 반경 · 모션

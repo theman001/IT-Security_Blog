@@ -224,7 +224,9 @@ test('support widget: right of the site name, external link opening a new tab, t
   await expect(label).toBeVisible();
   await expect(label.locator('span')).toHaveText(['커피 한 잔', '후원하기']); // explicit line break
   const [l1, l2] = await Promise.all([label.locator('span').nth(0).boundingBox(), label.locator('span').nth(1).boundingBox()]);
-  expect(l2.y).toBeGreaterThan(l1.y + l1.height - 2); // second line sits below the first
+  expect(l2.y).toBeGreaterThanOrEqual(l1.y + l1.height - 0.5); // second line sits below the first, no overlap
+  const fs = await label.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+  expect(Math.abs(l2.y - l1.y - fs * 1.125)).toBeLessThan(0.75); // line pitch = 1.125em (2px tighter than the 1.25 it was at 16px)
   await expect(label).toHaveCSS('font-family', /^"Cafe24 Syongsyong"/);
   await page.evaluate(() => document.fonts.load('14px "Cafe24 Syongsyong"', '커피 한 잔 후원하기'));
   expect(await page.evaluate(() => document.fonts.check('14px "Cafe24 Syongsyong"', '커피 한 잔 후원하기'))).toBe(true);

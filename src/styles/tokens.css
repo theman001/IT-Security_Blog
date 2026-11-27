@@ -40,6 +40,7 @@
   --leading-body-tech: 1.75;
   --leading-body-essay: 1.9;
   --leading-code: 1.6;
+  --leading-support: 1.125; /* 후원 버튼 두 줄 라벨: 16px 기준 줄 높이 18px (--leading-tight보다 2px 촘촘) */
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-bold: 700;
