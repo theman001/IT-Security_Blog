@@ -61,6 +61,7 @@ export const handleCatchAll = (ctx, deps) =>
     const origin = siteOrigin(ctx.env, ctx.request);
     if (path === '/') return page(ctx, deps, pageMeta({ title: '', description: DEFAULT_DESCRIPTION, path }, origin));
     if (path === '/about') return page(ctx, deps, pageMeta({ title: 'About', description: 'IT Security Blog와 운영자에 대한 소개.', path }, origin));
+    if (path === '/privacy') return page(ctx, deps, pageMeta({ title: '개인정보처리방침', description: 'IT Security Blog의 개인정보처리방침.', path }, origin));
     const key = path.slice(1);
     if (Object.hasOwn(SECTIONS, key)) return page(ctx, deps, pageMeta({ title: SECTIONS[key].title, description: SECTIONS[key].description, path }, origin));
     if (path.startsWith('/categories/')) {
@@ -80,7 +81,7 @@ export const handleSitemap = (ctx, deps) =>
     const db = deps.getDb(ctx.env);
     const [cats, posts] = await Promise.all([listCategories(db), listSitemapEntries(db)]);
     const entries = [
-      { path: '/' }, { path: '/about' },
+      { path: '/' }, { path: '/about' }, { path: '/privacy' },
       ...Object.keys(SECTIONS).map((k) => ({ path: `/${k}` })),
       // deeper section-rooted categories only (what the SPA can render); roots are the sections above
       ...cats.filter((c) => c.path.includes('/') && Object.hasOwn(SECTIONS, c.path.split('/')[0])).map((c) => ({ path: `/categories/${c.path}` })),

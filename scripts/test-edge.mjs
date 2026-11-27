@@ -84,7 +84,7 @@ try {
   check('/categories/tech -> 301 /tech', redirect.r.status === 301 && redirect.r.headers.get('location') === '/tech', `${redirect.r.status} ${redirect.r.headers.get('location')}`);
   const post405 = await fetch(BASE + '/about', { method: 'POST' });
   check('POST /about -> 405 with Allow: GET, HEAD', post405.status === 405 && post405.headers.get('allow') === 'GET, HEAD', `${post405.status} ${post405.headers.get('allow')}`);
-  for (const p of ['/', '/about', '/about/', '/tech', '/trends', '/essays']) check(`${p} -> 200`, (await get(p)).r.status === 200);
+  for (const p of ['/', '/about', '/about/', '/privacy', '/tech', '/trends', '/essays']) check(`${p} -> 200`, (await get(p)).r.status === 200);
 
   const sm = await get('/sitemap.xml');
   check('/sitemap.xml 200 application/xml', sm.r.status === 200 && sm.r.headers.get('content-type').startsWith('application/xml'));

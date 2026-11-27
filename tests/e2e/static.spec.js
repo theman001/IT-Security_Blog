@@ -126,3 +126,64 @@ test('screenshots for review', async ({ page }) => {
     }
   }
 });
+
+test('/privacy renders the policy inside .article with title 개인정보처리방침', async ({ page }) => {
+  await page.goto('/privacy');
+  await expect(page.locator('#main .article h1')).toHaveText('개인정보처리방침');
+  await expect(page.locator('#main .article h2').first()).toBeVisible();
+  expect(await page.title()).toBe(`개인정보처리방침 - ${SITE}`);
+});
+
+test('footer: privacy link (not link-styled) leads to /privacy; no RSS link in the footer', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/about');
+  const link = page.locator('footer a.site-footer__privacy');
+  await expect(link).toHaveText('개인정보처리방침');
+  await expect(link).toHaveCSS('text-decoration-line', 'none');
+  await expect(page.locator('footer a[href="/rss.xml"]')).toHaveCount(0);
+  // centered in the footer
+  const [fb, lb] = await Promise.all([page.locator('footer .site-footer__inner').boundingBox(), link.boundingBox()]);
+  expect(Math.abs(fb.x + fb.width / 2 - (lb.x + lb.width / 2))).toBeLessThan(4);
+  await link.click();
+  await expect(page).toHaveURL('/privacy');
+  await expect(page.locator('#main .article h1')).toHaveText('개인정보처리방침');
+});
+
+test('header: Home link is first, left of Tech, and current on the home page only', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/');
+  const links = page.locator('.site-header__nav a');
+  await expect(links).toHaveText(['Home', 'Tech', 'Trends', 'Essays', 'About']);
+  await expect(links.first()).toHaveAttribute('href', '/');
+  await expect(links.first()).toHaveAttribute('aria-current', 'page');
+  await page.goto('/about');
+  await expect(links.first()).not.toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('.site-header__nav a[href="/about"]')).toHaveAttribute('aria-current', 'page');
+});
+
+test('theme toggle: icon (not text), follows the theme colors, swaps moon/sun', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/about');
+  const btn = page.getByRole('button', { name: '다크 모드' });
+  await expect(btn).toHaveText('');
+  const look = () => btn.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    const vis = (sel) => getComputedStyle(el.querySelector(sel)).display !== 'none';
+    return { color: cs.color, bg: cs.backgroundColor, border: cs.borderTopColor, moon: vis('.theme-toggle__moon'), sun: vis('.theme-toggle__sun'), icon: getComputedStyle(el.querySelector('svg:not([style*="none"])')).stroke };
+  });
+  await page.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
+  const light = await look();
+  await btn.click(); // -> dark
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.mouse.move(0, 0); // un-hover so the resting (transparent) background is measured
+  await expect.poll(async () => (await look()).bg).toMatch(/\/ 0\)$|rgba\(0, 0, 0, 0\)/);
+  const dark = await look();
+  expect(light).toMatchObject({ moon: true, sun: false });
+  expect(light.bg).toMatch(/\/ 0\)$|rgba\(0, 0, 0, 0\)/);
+  expect(dark).toMatchObject({ moon: false, sun: true });
+  // the button recolors with the theme: text/icon/border differ between light and dark
+  expect(dark.color).not.toBe(light.color);
+  expect(dark.border).not.toBe(light.border);
+  expect(dark.icon).toBe(dark.color);
+  expect(light.icon).toBe(light.color);
+});

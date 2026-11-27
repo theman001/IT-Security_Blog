@@ -97,9 +97,9 @@ Cloudflare는 Pages Function이 만든 응답을 `Cache-Control: s-maxage`만으
 | 경로 | 응답 |
 |---|---|
 | `/posts/<slug…>` (`functions/posts/[[slug]].js`) | 글이 있으면 200: title, description, canonical, OG/Twitter, JSON-LD `BlogPosting` + 글 헤더 프리렌더(`src/lib/post-header.js`, SPA와 공유) + 같은 내용의 `/api/posts/<slug>` 페이로드를 `<script type="application/json" id="post-data">`로 인라인(`<`는 `\u003c`로 이스케이프). 슬러그가 잘못됐거나 글이 없으면 404 |
-| `/`, `/about`, `/tech`, `/trends`, `/essays`, DB에 있는 `/categories/<섹션>/<하위…>` | 200, 해당 페이지 메타(JSON-LD 없음). 끝 슬래시는 무시(`/about/` = `/about`) |
+| `/`, `/about`, `/privacy`, `/tech`, `/trends`, `/essays`, DB에 있는 `/categories/<섹션>/<하위…>` | 200, 해당 페이지 메타(JSON-LD 없음). 끝 슬래시는 무시(`/about/` = `/about`) |
 | `/categories/<섹션>` (섹션 루트) | **301** `Location: /<섹션>` (URL 하나당 페이지 하나). 섹션 목록과 같은 화면이므로 sitemap에도 `/<섹션>`만 들어간다 |
-| `/sitemap.xml` | `application/xml`. `/`, `/about`, 섹션 3개, 섹션 하위 카테고리, 모든 글(`<lastmod>`=글 날짜) |
+| `/sitemap.xml` | `application/xml`. `/`, `/about`, `/privacy`, 섹션 3개, 섹션 하위 카테고리, 모든 글(`<lastmod>`=글 날짜) |
 | `/rss.xml` | `application/rss+xml`. 최신 20개(제목, 링크, 요약) |
 | `/robots.txt` | `User-agent: *`, `Allow: /`, `Sitemap: <origin>/sitemap.xml` |
 | 그 외 모든 경로 (`/nope`, `/posts/없는글`, `/posts`, `/tech/없는카테고리`) | **404** + SPA 셸 + `<meta name="robots" content="noindex">` (SPA가 not-found 화면을 그린다) |

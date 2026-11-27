@@ -45,6 +45,7 @@ npm run check:bundle  # dist/ 에 DB 접속 정보·드라이버 문자열이 �
 - [docs/seo.md](docs/seo.md): 네이버/구글 등록, 캐시 퍼지, 메타 주입, Lighthouse
 - [docs/post-merge-checklist.md](docs/post-merge-checklist.md): 병합 후 체크리스트와 롤백
 - [docs/contents-repo.md](docs/contents-repo.md): Blog_Contents 구조 요약
+- [docs/backlog.md](docs/backlog.md): 추후 일감(후원 위젯, 방문자 통계/광고, 파비콘 등)
 - [DESIGN.md](DESIGN.md): 디자인 토큰 계약. [docs/PLAN.md](docs/PLAN.md): 구현 계획. 설계 문서: `docs/superpowers/specs/`
 
 ## Working with Claude Code

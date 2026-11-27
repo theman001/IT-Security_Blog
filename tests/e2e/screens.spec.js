@@ -47,7 +47,7 @@ for (const [vp, size] of Object.entries(VIEWPORTS)) {
   }
 }
 
-test('390px: header shows the site name, all four nav links and the theme toggle inside the viewport', async ({ page }) => {
+test('390px: header shows the site name, all five nav links (incl. Home) and the theme toggle inside the viewport', async ({ page }) => {
   await page.setViewportSize(VIEWPORTS[390]);
   await page.goto('/');
   await expect(page.locator('h1')).toBeAttached();
@@ -57,7 +57,7 @@ test('390px: header shows the site name, all four nav links and the theme toggle
       return { left: r.left, right: r.right, w: r.width };
     }),
   );
-  expect(boxes).toHaveLength(6);
+  expect(boxes).toHaveLength(7);
   for (const b of boxes) {
     expect(b.w).toBeGreaterThan(0);
     expect(b.left).toBeGreaterThanOrEqual(0);

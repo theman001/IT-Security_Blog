@@ -54,7 +54,7 @@ test('NAVER_SITE_VERIFICATION: escaped when set, absent when unset/empty', async
   assert.ok(nf.rewrite.head.includes('naver-site-verification')); // every shell response
 });
 test('catch-all: known pages 200, unknown 404 + noindex', async () => {
-  for (const p of ['/', '/about', '/about/', '/tech', '/trends', '/essays']) {
+  for (const p of ['/', '/about', '/about/', '/privacy', '/privacy/', '/tech', '/trends', '/essays']) {
     const r = await handleCatchAll(mk(p), deps(fakeDb()));
     assert.equal(r.status, 200, p);
     assert.ok(!noindex(r), p);
@@ -163,7 +163,7 @@ test('sitemap: static + deep categories + posts, application/xml', async () => {
   assert.equal(r.headers.get('content-type'), 'application/xml; charset=utf-8');
   assert.match(r.headers.get('cache-control'), /s-maxage=600/);
   const x = await r.text();
-  for (const loc of ['https://e.com/', 'https://e.com/about', 'https://e.com/tech', 'https://e.com/trends', 'https://e.com/essays',
+  for (const loc of ['https://e.com/', 'https://e.com/about', 'https://e.com/privacy', 'https://e.com/tech', 'https://e.com/trends', 'https://e.com/essays',
     'https://e.com/categories/tech/a%20b', 'https://e.com/posts/tech/a%20b%26c']) assert.ok(x.includes(`<loc>${loc}</loc>`), loc);
   assert.ok(!x.includes('Security') && !x.includes('/categories/tech<'));
   assert.ok(x.includes('<lastmod>2026-01-02</lastmod>'));

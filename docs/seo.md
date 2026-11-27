@@ -41,6 +41,7 @@ curl -sI https://<운영 도메인>/tech | grep -i -E 'x-edge-cache|cf-cache-sta
 |---|---|---|---|---|
 | `/` | `IT Security Blog` | 사이트 기본 설명 | website | 없음 |
 | `/about` | `About - IT Security Blog` | 소개 문구 | website | 없음 |
+| `/privacy` | `개인정보처리방침 - IT Security Blog` | 방침 소개 문구 | website | 없음 |
 | `/tech` `/trends` `/essays` | `<섹션 제목> - IT Security Blog` | 섹션 설명(`functions/_lib/sections.js`) | website | 없음 |
 | `/categories/<섹션>/<하위>` | `<카테고리명> - IT Security Blog` | 사이트 기본 설명 | website | 없음 |
 | `/posts/<slug>` | `<글 제목> - IT Security Blog` | 글 `description`, 없으면 본문 앞부분 요약 | article (+`article:published_time`) | `BlogPosting`: headline, datePublished, dateModified(=글 날짜), description, url, mainEntityOfPage, author(Person, 사이트명), keywords(태그), articleSection |

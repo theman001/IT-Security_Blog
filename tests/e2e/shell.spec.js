@@ -92,14 +92,15 @@ test('header links navigate and mark aria-current', async ({ page }) => {
   });
   await expect(page).toHaveTitle('IT Security Blog');
   const nav = page.locator('header nav');
-  await expect(nav.locator('[aria-current]')).toHaveCount(0);
+  await expect(nav.locator('[aria-current="page"]')).toHaveText('Home'); // the home page marks Home only
+  await expect(nav.locator('[aria-current]')).toHaveCount(1);
   await nav.getByRole('link', { name: 'About' }).click();
   await expect(page).toHaveURL(/\/about$/);
   await expect(nav.locator('[aria-current="page"]')).toHaveText('About');
   await nav.getByRole('link', { name: 'Tech' }).click();
   await expect(nav.locator('[aria-current="page"]')).toHaveText('Tech');
   await expect(nav.locator('[aria-current]')).toHaveCount(1);
-  expect(await nav.getByRole('link').allTextContents()).toEqual(['Tech', 'Trends', 'Essays', 'About']);
+  expect(await nav.getByRole('link').allTextContents()).toEqual(['Home', 'Tech', 'Trends', 'Essays', 'About']);
   await page.goBack();
   await expect(nav.locator('[aria-current="page"]')).toHaveText('About');
 });
@@ -176,11 +177,11 @@ test('unknown path shows 404; registered not-found page replaces it', async ({ p
   await expect(page.locator('#main h1')).toHaveText('custom 404');
 });
 
-test('shell landmarks: skip link, main, footer RSS', async ({ page }) => {
+test('shell landmarks: skip link, main, footer privacy link', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('a.skip-link')).toHaveAttribute('href', '#main');
   await expect(page.locator('main#main')).toHaveAttribute('tabindex', '-1');
-  await expect(page.locator('footer a[href="/rss.xml"]')).toBeVisible();
+  await expect(page.locator('footer a[href="/privacy"]')).toBeVisible();
 });
 
 test('clicking a link to the current path does not push history; scrolls to top and focuses #main', async ({ page }) => {
@@ -249,7 +250,7 @@ test('OS theme change is ignored when a stored theme exists', async ({ page }) =
 test('footer still mounts (within ~2s) when the page data request never answers', async ({ page }) => {
   await page.route('**/api/**', () => {}); // never fulfilled
   await page.goto('/');
-  await expect(page.locator('footer a[href="/rss.xml"]')).toBeVisible({ timeout: 2000 });
+  await expect(page.locator('footer a[href="/privacy"]')).toBeVisible({ timeout: 2000 });
 });
 
 test('webfont chunk aborted: no page error; retried once on `online`', async ({ page }) => {
@@ -259,7 +260,7 @@ test('webfont chunk aborted: no page error; retried once on `online`', async ({ 
   await page.route('**/fonts*.css*', (route) => (aborted++ ? route.continue() : route.abort()));
   await mockSite(page);
   await page.goto('/about');
-  await expect(page.locator('footer a[href="/rss.xml"]')).toBeVisible();
+  await expect(page.locator('footer a[href="/privacy"]')).toBeVisible();
   await expect.poll(() => aborted).toBeGreaterThan(0);
   await page.waitForTimeout(300);
   expect(errors).toEqual([]);

@@ -75,16 +75,31 @@ body {
 }
 .theme-toggle {
   flex: none;
-  padding-inline: var(--space-4);
+  justify-content: center;
+  width: var(--space-12);
+  padding: 0;
   border: var(--border);
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--color-fg);
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease);
 }
-.theme-toggle[aria-pressed="true"] {
-  background: var(--color-fg);
-  color: var(--color-bg);
+.theme-toggle:hover {
+  background: var(--color-surface);
+}
+.theme-toggle svg {
+  width: var(--text-xl);
+  height: var(--text-xl);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.theme-toggle[aria-pressed="false"] .theme-toggle__sun,
+.theme-toggle[aria-pressed="true"] .theme-toggle__moon {
+  display: none;
 }
 
 /* narrow: name + toggle share the first row, the four links get their own row (nothing clipped) */
@@ -118,4 +133,15 @@ body {
 .site-footer__inner {
   padding-block: var(--space-8);
   font-size: var(--text-sm);
+  text-align: center;
+}
+/* Deliberately not link-styled: quiet footer text; hover/focus still show it is interactive. */
+.site-footer__privacy {
+  display: inline-block;
+  padding-block: var(--space-3);
+  color: var(--color-fg-muted);
+  text-decoration: none;
+}
+.site-footer__privacy:hover {
+  color: var(--color-fg);
 }
