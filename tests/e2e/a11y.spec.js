@@ -20,7 +20,7 @@ test('keyboard: Tab order is skip link, site name, support widget, nav links (Ho
       return a.classList.contains('skip-link') ? 'skip' : a.classList.contains('theme-toggle') ? 'toggle' : a.getAttribute('href');
     }));
   }
-  expect(stops).toEqual(['skip', '/', 'https://ctee.kr/place/theman', '/', '/tech', '/trends', '/essays', '/about', 'toggle']);
+  expect(stops).toEqual(['skip', '/', 'https://litt.ly/theman', '/', '/tech', '/trends', '/essays', '/about', 'toggle']);
   for (let i = 0; i < 8; i++) await page.keyboard.press('Shift+Tab'); // toggle -> nav -> support widget -> name -> skip link
   expect(await activeIs(page, '.skip-link')).toBe(true);
   await page.keyboard.press('Enter');
