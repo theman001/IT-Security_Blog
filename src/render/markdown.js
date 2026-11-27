@@ -2,6 +2,12 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
 const FAILED = '<p>Markdown rendering failed.</p>';
+// The html profile still passes content-injection vectors: global <style>, style= overlays,
+// off-site <form>/<input> phishing, name= DOM clobbering, srcset/poster/media bypassing the
+// https-only image rule. Markdown has no use for any of them.
+const FORBID_TAGS = ['style', 'form', 'input', 'button', 'textarea', 'select', 'option',
+  'video', 'audio', 'source', 'picture', 'track'];
+const FORBID_ATTR = ['style', 'name', 'srcset', 'poster'];
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
 /**
@@ -12,6 +18,8 @@ export function renderMarkdown(md) {
   try {
     const clean = DOMPurify.sanitize(marked.parse(md, { gfm: true, breaks: false }), {
       USE_PROFILES: { html: true },
+      FORBID_TAGS,
+      FORBID_ATTR,
     });
     const tpl = document.createElement('template'); // inert: nothing loads or runs
     tpl.innerHTML = clean;

