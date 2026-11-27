@@ -94,7 +94,7 @@ test('categories: existing section-rooted 200 (name as title), missing/non-secti
     assert.ok(noindex(r), p);
   }
 });
-test('posts: found -> 200 with meta + escaped preview; missing/bad slug -> 404', async () => {
+test('posts: found -> 200 with meta + escaped prerendered post header; missing/bad slug -> 404', async () => {
   const row = { id: 1, title: '<b>T</b>', slug: 'tech/a b', date: '2026-01-02', description: 'd', body_head: null, reading_minutes: 1, category_id: null, tags: [], content_md: 'x', category_name: null, category_path: null };
   const db = fakeDb([row], []);
   const r = await handlePost(mk('/posts/tech/a%20b', { params: { slug: ['tech', 'a%20b'] } }), deps(db));
@@ -102,7 +102,9 @@ test('posts: found -> 200 with meta + escaped preview; missing/bad slug -> 404',
   assert.ok(r.rewrite.head.includes('og:title') && r.rewrite.head.includes('application/ld+json'));
   assert.ok(r.rewrite.head.includes('href="http://x/posts/tech/a%20b"'));
   assert.ok(!r.rewrite.head.includes('<b>T'));
-  assert.equal(r.rewrite.main, '<h1>&lt;b&gt;T&lt;/b&gt;</h1><p>d</p>');
+  assert.ok(r.rewrite.main.includes('<h1 class="post-title">&lt;b&gt;T&lt;/b&gt;</h1>'));
+  assert.ok(r.rewrite.main.includes('<p class="post-lead">d</p>') && r.rewrite.main.includes('<article class="article"></article>'));
+  assert.ok(!r.rewrite.main.includes('<b>T'));
   const nf = await handlePost(mk('/posts/x', { params: { slug: ['x'] } }), deps(fakeDb([])));
   assert.equal(nf.status, 404);
   assert.ok(noindex(nf));
@@ -157,4 +159,14 @@ test('rss + robots', async () => {
   const rb = await handleRobots(mk('/robots.txt'));
   assert.equal(rb.headers.get('content-type'), 'text/plain; charset=utf-8');
   assert.equal(await rb.text(), 'User-agent: *\nAllow: /\n\nSitemap: http://x/sitemap.xml\n');
+});
+
+test('posts: essay prerender has the related card, progress bar and no lead; escapes every field', async () => {
+  const row = { id: 1, title: 'E', slug: 'essays/x', date: '2026-01-02', description: 'd', body_head: null, reading_minutes: 3, category_id: null, tags: ['<i>'], content_md: 'x', category_name: null, category_path: 'essays/"><s>',
+    rel_slug: 'tech/r', rel_title: '<u>R</u>', rel_description: 'rd', rel_date: '2025-01-01' };
+  const r = await handlePost(mk('/posts/essays/x', { params: { slug: ['essays', 'x'] } }), deps(fakeDb([row], [])));
+  const m = r.rewrite.main;
+  assert.ok(m.startsWith('<div class="post post--essay">') && m.includes('class="reading-progress"') && m.includes('class="related-card"'));
+  assert.ok(m.includes('<article class="article essay"></article>') && !m.includes('post-lead'));
+  assert.ok(!/<(i|s|u)>/.test(m), m);
 });

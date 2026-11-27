@@ -2,6 +2,7 @@ import { fail } from './http.js';
 import { decodeSlug } from './slug.js';
 import { getPost, listCategories, listPosts, listSitemapEntries } from './queries.js';
 import { renderShell } from './shell.js';
+import { postLayoutHtml } from '../../src/lib/post-header.js';
 import { SECTIONS } from './sections.js';
 import { DEFAULT_DESCRIPTION, buildRss, buildSitemap, headTagsHtml, metaTags, pageMeta, siteOrigin } from './seo.js';
 
@@ -10,7 +11,7 @@ const ok = (body, type, status = 200) =>
 const asParts = (p) => (p == null ? [] : Array.isArray(p) ? p : [p]);
 const notFound = (ctx, deps) => renderShell(ctx.env, ctx.request, { status: 404, noindex: true }, deps.HTMLRewriter);
 const page = (ctx, deps, meta, extra) =>
-  renderShell(ctx.env, ctx.request, { headTags: headTagsHtml(meta), title: extra?.title, description: meta.description }, deps.HTMLRewriter);
+  renderShell(ctx.env, ctx.request, { headTags: headTagsHtml(meta), mainHtml: extra?.mainHtml }, deps.HTMLRewriter);
 
 // GET/HEAD only; any thrown error -> opaque 500 (HTML shell for pages, JSON for feeds), never the message.
 async function guarded(ctx, deps, run, onError) {
@@ -34,7 +35,7 @@ export const handlePost = (ctx, deps) =>
     if (!slug) return notFound(ctx, deps);
     const out = await getPost(deps.getDb(ctx.env), slug);
     if (!out) return notFound(ctx, deps);
-    return page(ctx, deps, metaTags(out, siteOrigin(ctx.env, ctx.request)), { title: out.post.title });
+    return page(ctx, deps, metaTags(out, siteOrigin(ctx.env, ctx.request)), { mainHtml: postLayoutHtml(out.post, { related: out.related }) });
   }, shell500(ctx, deps));
 
 // Trailing slashes: `/about/` == `/about` (200, canonical without slash); the SPA router ignores them too.

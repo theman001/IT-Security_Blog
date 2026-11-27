@@ -60,6 +60,7 @@
   --measure-essay: 60ch;
   --container: 72rem;
   --toc-width: 14rem;
+  --main-min-height: 60vh; /* reserve space so the footer does not jump when content renders */
 
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;

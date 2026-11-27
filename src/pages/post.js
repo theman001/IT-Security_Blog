@@ -3,21 +3,14 @@ import '../styles/post.css';
 import { ApiError, getPost } from '../lib/api.js';
 import { escapeHtml as e } from '../lib/escape.js';
 import { categoryHref, postHref } from '../lib/urls.js';
+import { postLayoutHtml, sectionOfSlug } from '../lib/post-header.js';
 import { buildToc, observeToc } from '../components/toc.js';
-import { relatedByHtml, relatedCardHtml } from '../components/related-card.js';
+import { relatedByHtml } from '../components/related-card.js';
 import { mountNotFound, notFoundView } from './not-found.js';
 
 const TOC_MIN = 3;
 const TOC_LABEL = '이 글의 목차';
 let cleanups = [];
-
-// "tech/security/x" -> ["tech", "tech/security"]; each prefix is a category link
-const crumbHtml = (path) => {
-  const parts = String(path ?? '').split('/').filter(Boolean);
-  if (!parts.length) return '';
-  const links = parts.map((p, i) => `<a data-link href="${e(categoryHref(parts.slice(0, i + 1).join('/')))}">${e(p)}</a>`);
-  return `<p class="post-crumb">${links.join('<span class="post-crumb__sep" aria-hidden="true"> / </span>')}</p>`;
-};
 
 const navHtml = ({ prev, next }, slug, essay) => {
   const word = essay ? '사유' : '글';
@@ -52,27 +45,14 @@ export default {
   render(data) {
     if (data.notFound) return notFoundView();
     const { post, related, relatedBy } = data;
-    const essay = post.slug.split('/')[0] === 'essays';
-    const meta = `<p class="post-meta"><time datetime="${e(post.date)}">${e(post.date)}</time><span>${e(post.readingMinutes)}분</span></p>`;
-    const tags = post.tags?.length ? `<p class="post-tags">${post.tags.map((t) => `<span class="post-tag">#${e(t)}</span>`).join(' ')}</p>` : '';
+    const essay = sectionOfSlug(post.slug) === 'essays';
     return {
       title: post.title,
-      html: `<div class="post post--${essay ? 'essay' : 'tech'}">
-${essay ? '<div class="reading-progress" aria-hidden="true"></div>' : ''}
-${essay && related ? relatedCardHtml(related, '이 생각의 계기가 된 글') : ''}
-<header class="post-head">
-  ${crumbHtml(post.categoryPath)}
-  <h1 class="post-title">${e(post.title)}</h1>
-  ${meta}
-  ${tags}
-  ${!essay && post.description ? `<p class="post-lead">${e(post.description)}</p>` : ''}
-</header>
-<div class="post-body">
-  <article class="article${essay ? ' essay' : ''}">${data.bodyHtml}</article>
-</div>
-${essay ? '' : relatedByHtml(relatedBy)}
-${navHtml(data, post.slug, essay)}
-</div>`,
+      html: postLayoutHtml(post, {
+        related,
+        bodyHtml: data.bodyHtml,
+        tailHtml: `${essay ? '' : relatedByHtml(relatedBy)}\n${navHtml(data, post.slug, essay)}`,
+      }),
     };
   },
 

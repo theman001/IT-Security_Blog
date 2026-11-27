@@ -50,6 +50,9 @@ try {
     check(`${path} -> 200`, r.status === 200, String(r.status));
     check('post has og:title', t.includes('property="og:title"'));
     check('post has JSON-LD', t.includes('application/ld+json'));
+    const main = t.slice(t.indexOf('<main'), t.indexOf('</main>'));
+    check('post <main> has the prerendered <h1> with the title', main.includes(`<h1 class="post-title">${esc(post.title).replace(/"/g, '&quot;').replace(/'/g, '&#39;')}</h1>`) || main.includes(`<h1 class="post-title">${esc(post.title)}</h1>`), main.slice(0, 200));
+    check('post <main> has the empty article container', /<article class="article( essay)?"><\/article>/.test(main));
     check('post has canonical', /<link rel="canonical" href="[^"]+"/.test(t));
     check('post title escaped in <title>', t.includes(`<title>${esc(post.title).replace(/"/g, '&quot;').replace(/'/g, '&#39;')} - IT Security Blog</title>`) || t.includes(`<title>${esc(post.title)} - IT Security Blog</title>`));
     check('post has no raw <script> from data', (t.match(/<script/g) ?? []).length === (nf.t.match(/<script/g) ?? []).length + 1);
