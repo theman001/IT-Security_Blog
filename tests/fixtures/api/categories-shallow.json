@@ -1,0 +1,48 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "tech",
+      "path": "tech",
+      "parentId": null,
+      "depth": 1,
+      "postCount": 0,
+      "totalPostCount": 3,
+      "subCategoryCount": 1,
+      "section": "tech"
+    },
+    {
+      "id": 2,
+      "name": "보안",
+      "path": "tech/security",
+      "parentId": 1,
+      "depth": 2,
+      "postCount": 3,
+      "totalPostCount": 3,
+      "subCategoryCount": 0,
+      "section": "tech"
+    },
+    {
+      "id": 3,
+      "name": "trends",
+      "path": "trends",
+      "parentId": null,
+      "depth": 1,
+      "postCount": 0,
+      "totalPostCount": 0,
+      "subCategoryCount": 0,
+      "section": "trends"
+    },
+    {
+      "id": 4,
+      "name": "essays",
+      "path": "essays",
+      "parentId": null,
+      "depth": 1,
+      "postCount": 0,
+      "totalPostCount": 0,
+      "subCategoryCount": 0,
+      "section": "essays"
+    }
+  ]
+}

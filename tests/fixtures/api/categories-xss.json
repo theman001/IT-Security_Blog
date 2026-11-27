@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "tech",
+      "path": "tech",
+      "parentId": null,
+      "depth": 1,
+      "postCount": 0,
+      "totalPostCount": 2,
+      "subCategoryCount": 2,
+      "section": "tech"
+    },
+    {
+      "id": 2,
+      "name": "<img src=x onerror=alert(1)>",
+      "path": "tech/<img src=x onerror=alert(1)>",
+      "parentId": 1,
+      "depth": 2,
+      "postCount": 1,
+      "totalPostCount": 1,
+      "subCategoryCount": 0,
+      "section": "tech"
+    },
+    {
+      "id": 3,
+      "name": "인프라 & ops:aws",
+      "path": "tech/인프라 & ops:aws",
+      "parentId": 1,
+      "depth": 2,
+      "postCount": 1,
+      "totalPostCount": 1,
+      "subCategoryCount": 0,
+      "section": "tech"
+    }
+  ]
+}
