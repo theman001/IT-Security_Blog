@@ -48,3 +48,17 @@ export async function mockPost(page, responses) {
   });
   return calls;
 }
+
+/** Everything the site needs for a whole-site walk (a11y / screenshots): lists, categories, tech + essay posts, and the home lead essay's slug. */
+export async function mockSite(page) {
+  const posts = fixture('posts-normal');
+  const lead = posts.find((p) => p.section === 'essays');
+  const essay = postFixture('post-essay');
+  const tech = postFixture('post-tech');
+  await mockPosts(page, posts);
+  await mockPost(page, [tech, essay, { ...essay, post: { ...essay.post, slug: lead.slug, title: lead.title } }]);
+  await page.route('**/api/categories', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: fixture('categories-deep') }) }));
+  return { posts, lead, tech, essay };
+}
+
+export const postHref = (slug) => `/posts/${slug.split('/').map(encodeURIComponent).join('/')}`;

@@ -10,6 +10,7 @@
     "pages:dev": "vite build && wrangler pages dev dist --compatibility-date=2026-11-01",
     "test": "npm run test:unit && playwright test",
     "lint:tokens": "node scripts/check-tokens.mjs",
+    "check:bundle": "node scripts/check-bundle.mjs",
     "test:unit": "node --test tests/unit/*.test.js",
     "test:edge": "node scripts/test-edge.mjs"
   },

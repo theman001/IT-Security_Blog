@@ -87,6 +87,21 @@ body {
   color: var(--color-bg);
 }
 
+/* narrow: name + toggle share the first row, the four links get their own row (nothing clipped) */
+@media (max-width: 639px) {
+  .site-header__inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-block: var(--space-2);
+  }
+  .site-header__nav {
+    order: 3;
+    flex: 1 0 100%;
+    justify-content: flex-start;
+    gap: var(--space-4);
+  }
+}
+
 #main {
   flex: 1;
   padding-block: var(--space-12);
