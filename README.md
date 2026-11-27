@@ -1,45 +1,30 @@
-# IT-Security Blog
+# IT Security Blog
 
-IT 보안과 개발 지식을 공유하기 위해 구축된 **싱글 페이지 애플리케이션(SPA) 블로그**입니다.
-가벼운 Vanilla JavaScript와 Neon DB를 활용하여 빠른 성능과 직관적인 사용자 경험을 제공합니다.
+Security/infra engineering blog. Vanilla JS SPA on Cloudflare Pages, content stored as markdown in Neon Postgres and served through Pages Functions.
 
-## 🛠 Tech Stack
+## Stack
+- Frontend: Vanilla JS (ES modules), CSS variables, Vite. History API router.
+- Backend: Cloudflare Pages Functions (`functions/`), `@neondatabase/serverless` (SELECT-only role).
+- Rendering: `marked` -> `DOMPurify` -> `Prism.js` (client side).
+- SEO: edge meta injection for `/posts/*`, generated `sitemap.xml`, `robots.txt`, `rss.xml`.
+- Publishing: INSERT a row into the DB; changes appear after the edge cache (up to 10 min) or a cache purge. No rebuild.
 
-- **Frontend**: HTML5, CSS3 (Variables), Vanilla JavaScript (ES6+)
-- **Database**: [Neon](https://neon.tech) (Serverless PostgreSQL)
-- **Library**: 
-  - `marked.js` (Markdown Rendering)
-  - `DOMPurify` (XSS Protection)
-  - `Prism.js` (Syntax Highlighting)
-
-## ✨ Key Features
-
-### 1. Dynamic Content Rendering
-- 작성된 글은 **Markdown** 형식으로 DB에 저장되며, 클라이언트에서 즉시 렌더링됩니다.
-- 코드 블록 하이라이팅 및 보안을 위한 HTML Sanitizing이 적용되어 있습니다.
-
-### 2. Category Explorer (Tree View)
-- 복잡한 지식 체계를 효과적으로 탐색할 수 있는 **계층형 트리(Tree) UI**를 제공합니다.
-- 폴더 접기/펼치기 기능과 직관적인 아이콘(Chevron/Folder)을 지원합니다.
-
-### 3. Dark Mode Support
-- 사용자 시스템 설정에 따른 자동 테마 감지 및 수동 토글 기능을 지원합니다.
-- CSS 변수(Variables)를 활용하여 부드러운 전환과 일관된 색상 테마를 제공합니다.
-
-### 4. SPA Routing
-- 별도의 프레임워크 없이 자체 구현된 **Hash-based Router**를 통해 페이지 새로고침 없는 빠른 탐색이 가능합니다.
-
-## � Project Structure
-
+## Local development
 ```bash
-public/
-├── assets/
-│   ├── css/       # Global styles & Theme variables
-│   └── js/        # Core logic (Router, API, Renderer)
-├── pages/         # Page components (Home, Post, Categories)
-├── static/        # Static markdown files (About, Architecture)
-└── themes/        # Dark/Light theme definitions
+cp .dev.vars.example .dev.vars    # set DATABASE_URL (read-only role); never commit
+npm ci
+npm run pages:dev                 # Functions + DB on http://localhost:8788
+npm run dev                       # Vite HMR on http://localhost:5173 (proxies /api -> 8788)
+npm run build                     # production bundle in dist/
 ```
+Details: [docs/dev.md](docs/dev.md). API contract: [docs/api.md](docs/api.md).
 
----
-*Developed for IT Security & Development Knowledge Archive.*
+## Deployment (Cloudflare Pages)
+- Build command `npm run build`, output `dist`, Functions from `/functions`.
+- Env var `DATABASE_URL` in Production and Preview (separate lists; applies from the next deployment).
+- `main` = production (auto deploy on push). `renewal` and other branches = preview URLs.
+- Flow: work on a branch -> preview -> pull request -> maintainer merges.
+- Rollback: Cloudflare Pages dashboard -> Deployments -> roll back to a previous deployment, or revert the merge commit.
+
+## Working with Claude Code
+See [CLAUDE.md](CLAUDE.md). Skills and their provenance: [.claude/SKILLS.lock.md](.claude/SKILLS.lock.md).
