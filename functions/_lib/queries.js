@@ -47,19 +47,20 @@ export async function getPost(db, slug) {
   // prev/next: same category, created_at ASC, id ASC (window computed before the slug filter).
   const rows = await db.query(
     `SELECT ${SUMMARY_COLS}, r.content_md,
-       r.prev_slug, r.prev_title, r.next_slug, r.next_title,
+       nb.prev_slug, nb.prev_title, nb.next_slug, nb.next_title,
        rel.slug AS rel_slug, rel.title AS rel_title, rel.description AS rel_description,
        CASE WHEN coalesce(btrim(rel.description), '') = '' THEN left(rel.content_md, 600) END AS rel_body_head,
        to_char(rel.created_at, 'YYYY-MM-DD') AS rel_date
      FROM (
-       SELECT x.*,
+       SELECT x.id, x.category_id, x.slug, x.title, x.created_at,
          LAG(x.slug) OVER w AS prev_slug, LAG(x.title) OVER w AS prev_title,
          LEAD(x.slug) OVER w AS next_slug, LEAD(x.title) OVER w AS next_title
        FROM reports x WINDOW w AS (PARTITION BY x.category_id ORDER BY x.created_at, x.id)
-     ) r
+     ) nb
+     JOIN reports r ON r.id = nb.id
      LEFT JOIN categories c ON c.id = r.category_id
      LEFT JOIN reports rel ON rel.slug = r.related_slug
-     WHERE r.slug = $1`,
+     WHERE nb.slug = $1`,
     [slug],
   );
   const r = rows[0];
@@ -70,8 +71,9 @@ export async function getPost(db, slug) {
   );
   return {
     post: { ...toSummary(r), contentMd: r.content_md ?? '', description: r.description ?? '' },
-    prev: r.prev_slug ? { slug: r.prev_slug, title: r.prev_title } : null,
-    next: r.next_slug ? { slug: r.next_slug, title: r.next_title } : null,
+    // category-less posts share one NULL partition: their "neighbours" are unrelated, so no prev/next
+    prev: r.category_id != null && r.prev_slug ? { slug: r.prev_slug, title: r.prev_title } : null,
+    next: r.category_id != null && r.next_slug ? { slug: r.next_slug, title: r.next_title } : null,
     related: r.rel_slug
       ? { slug: r.rel_slug, title: r.rel_title, excerpt: makeExcerpt(r.rel_description, r.rel_body_head), date: r.rel_date, section: sectionOf(r.rel_slug) }
       : null,

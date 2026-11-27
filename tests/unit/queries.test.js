@@ -86,6 +86,15 @@ test('getPost null related row -> related null; prev/next mapped; relatedBy list
   assert.deepEqual(db.calls[1].params.slice(0, 1), ['tech/a/p5']);
   assert.equal(bareBody(db.calls[1].text), false);
 });
+test('getPost: category-less post gets no prev/next; window subquery selects explicit columns', async () => {
+  const db = fakeDb([postRow({ category_id: null, prev_slug: 'essays/other', prev_title: 'O', next_slug: 'essays/n', next_title: 'N' })], []);
+  const out = await getPost(db, 'essays/x');
+  assert.equal(out.prev, null);
+  assert.equal(out.next, null);
+  const sub = db.calls[0].text.match(/FROM \(([\s\S]*?)\) nb\b/)[1];
+  assert.doesNotMatch(sub, /x\.\*/);
+  assert.match(sub, /x\.id, x\.category_id, x\.slug, x\.title, x\.created_at/);
+});
 test('getPost maps related, tags null -> []', async () => {
   const db = fakeDb([postRow({ tags: null, rel_slug: 'essays/x', rel_title: 'X', rel_description: '', rel_body_head: 'hello **w**', rel_date: '2026-02-01' })], []);
   const out = await getPost(db, 'tech/a/p5');

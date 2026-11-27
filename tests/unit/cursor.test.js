@@ -24,3 +24,7 @@ test('cursor rejects ids outside int4', () => {
   assert.equal(decodeCursor(b64({ date: '2026-01-01', id: 2 ** 31 })), null);
   assert.equal(decodeCursor(b64({ date: '2026-01-01', id: -1 })), null);
 });
+test('cursor rejects year 0000 (Postgres ::timestamp has no year 0)', () => {
+  assert.equal(decodeCursor(b64({ date: '0000-01-01', id: 1 })), null);
+  assert.deepEqual(decodeCursor(b64({ date: '0001-01-01', id: 1 })), { date: '0001-01-01', id: 1 });
+});

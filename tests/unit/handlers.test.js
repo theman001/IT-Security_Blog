@@ -38,22 +38,26 @@ test('valid list query -> 200 with ok cache header', async () => {
   assert.deepEqual(await body(r), { items: [], nextCursor: null });
   assert.match(r.headers.get('cache-control'), /s-maxage=600/);
 });
-test('post detail: missing -> 404, bad slug -> 400, db error -> 500 without leaking', async () => {
+test('post detail: missing -> 404, bad slug -> 400, db error -> 500 without leaking', async (tc) => {
   let r = await handlePosts(mk('/api/posts/x', { params: { slug: ['x'] } }), deps(fakeDb([])));
   assert.equal(r.status, 404);
   assert.equal((await body(r)).error.code, 'not_found');
   r = await handlePosts(mk('/api/posts/..', { params: { slug: ['..'] } }), deps(fakeDb([])));
   assert.equal(r.status, 400);
   const boom = { query: async () => { throw new Error('postgres://u:secret@host/db SELECT 1'); } };
+  const log = tc.mock.method(console, 'error', () => {});
   r = await handlePosts(mk('/api/posts', {}), deps(boom));
   assert.equal(r.status, 500);
+  assert.equal(log.mock.callCount(), 1, 'handler logs the error');
   const t = JSON.stringify(await body(r));
   assert.doesNotMatch(t, /secret|postgres|SELECT/);
   assert.equal(JSON.parse(t).error.code, 'internal');
 });
-test('getDb throwing (missing env) -> 500 internal', async () => {
+test('getDb throwing (missing env) -> 500 internal', async (t) => {
+  const log = t.mock.method(console, 'error', () => {});
   const r = await handlePosts(mk('/api/posts'), { getDb: () => { throw new Error('DATABASE_URL missing'); } });
   assert.equal(r.status, 500);
+  assert.equal(log.mock.callCount(), 1);
 });
 test('slug params are decoded and passed exactly', async () => {
   const db = fakeDb([]);
