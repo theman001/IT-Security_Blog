@@ -1,4 +1,4 @@
-// Copy of src/content/sections.js title/description (functions/ must not import from src/).
+// Copy of src/content/sections.js title/description (functions/ imports from src/ only the pure, DOM-free src/lib/post-header.js and its pure deps).
 // tests/unit/edge.test.js asserts these stay equal.
 export const SECTIONS = {
   tech: { title: '기술', description: '취약점 분석, 리버싱, 인프라 보안 등 손으로 직접 확인한 기술 기록.' },

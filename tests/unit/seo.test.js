@@ -64,6 +64,14 @@ test('siteOrigin: SITE_URL trimmed else request origin', () => {
   const r = new Request('http://h:1/x');
   assert.equal(siteOrigin({ SITE_URL: ' https://s.com/// ' }, r), 'https://s.com');
   assert.equal(siteOrigin({ SITE_URL: '' }, r), 'http://h:1');
+  assert.equal(siteOrigin({}, r), 'http://h:1');
+  assert.equal(siteOrigin({ SITE_URL: 'http://localhost:8788/' }, r), 'http://localhost:8788');
+});
+test('siteOrigin: invalid SITE_URL (no scheme, junk, other scheme) falls back to the request origin, never throws', () => {
+  const r = new Request('http://h:1/x');
+  for (const v of ['example.com', 'example.com:8080', 'not a url', 'javascript:alert(1)', 'ftp://s.com', 'https://', '//s.com', 42]) {
+    assert.equal(siteOrigin({ SITE_URL: v }, r), 'http://h:1', String(v));
+  }
 });
 test('functions sections copy equals src; index.html default description matches', () => {
   for (const k of Object.keys(SRC)) assert.deepEqual(SECTIONS[k], { title: SRC[k].title, description: SRC[k].description });

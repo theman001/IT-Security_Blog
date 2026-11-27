@@ -6,7 +6,8 @@ import { scanText } from './lib/check-bundle.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dist = join(root, 'dist');
-if (!existsSync(dist)) execSync('npx vite build', { cwd: root, stdio: 'inherit' });
+// Always scan a fresh build; SKIP_BUILD=1 scans the existing dist/ (e.g. right after `npm run build`).
+if (process.env.SKIP_BUILD !== '1' || !existsSync(dist)) execSync('npx vite build', { cwd: root, stdio: 'inherit' });
 
 const walk = (d) =>
   readdirSync(d).flatMap((n) => {

@@ -12,8 +12,11 @@ const flat = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
 const abs = (origin, path) => origin + (path === '/' ? '/' : encodePath(path));
 
 export function siteOrigin(env, request) {
-  const v = String(env?.SITE_URL ?? '').trim().replace(/\/+$/, '');
-  return v || new URL(request.url).origin;
+  const v = String(env?.SITE_URL ?? '').trim();
+  try {
+    if (['http:', 'https:'].includes(new URL(v).protocol)) return v.replace(/\/+$/, '');
+  } catch { /* unset or malformed: fall back to the request origin */ }
+  return new URL(request.url).origin;
 }
 
 export function metaTags(input, origin) {
