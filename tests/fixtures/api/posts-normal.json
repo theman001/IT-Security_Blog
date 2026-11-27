@@ -1,0 +1,166 @@
+{
+  "items": [
+    {
+      "id": 100,
+      "title": "보안은 습관이다",
+      "slug": "essays/thoughts/04-post",
+      "date": "2026-11-26",
+      "section": "essays",
+      "readingMinutes": 7,
+      "excerpt": "도구보다 먼저 바뀌어야 하는 것은 우리가 위험을 바라보는 방식이다.",
+      "categoryId": 1,
+      "categoryName": "thoughts",
+      "categoryPath": "essays/thoughts",
+      "tags": [
+        "사유"
+      ],
+      "authorType": "admin"
+    },
+    {
+      "id": 101,
+      "title": "Kakao 인증 흐름 분석",
+      "slug": "tech/security/04-post",
+      "date": "2026-11-25",
+      "section": "tech",
+      "readingMinutes": 7,
+      "excerpt": "OAuth 토큰 교환 과정을 단계별로 따라가며 취약점이 생기는 지점을 짚는다.",
+      "categoryId": 1,
+      "categoryName": "security",
+      "categoryPath": "tech/security",
+      "tags": [
+        "oauth",
+        "re"
+      ],
+      "authorType": "admin"
+    },
+    {
+      "id": 102,
+      "title": "2026년 위협 동향",
+      "slug": "trends/weekly/03-post",
+      "date": "2026-11-24",
+      "section": "trends",
+      "readingMinutes": 6,
+      "excerpt": "올해 가장 많이 관측된 공격 유형과 그 변화를 정리했다.",
+      "categoryId": 1,
+      "categoryName": "weekly",
+      "categoryPath": "trends/weekly",
+      "tags": [
+        "trend"
+      ],
+      "authorType": "admin"
+    },
+    {
+      "id": 103,
+      "title": "읽는다는 것",
+      "slug": "essays/thoughts/03-post",
+      "date": "2026-11-23",
+      "section": "essays",
+      "readingMinutes": 6,
+      "excerpt": "글을 읽는 일은 타인의 사고를 잠시 빌려 쓰는 일이다.",
+      "categoryId": 1,
+      "categoryName": "thoughts",
+      "categoryPath": "essays/thoughts",
+      "tags": [],
+      "authorType": "admin"
+    },
+    {
+      "id": 104,
+      "title": "메모리 안전성 입문",
+      "slug": "tech/security/03-post",
+      "date": "2026-11-22",
+      "section": "tech",
+      "readingMinutes": 6,
+      "excerpt": "힙 오버플로가 어떻게 임의 코드 실행으로 이어지는지 설명한다.",
+      "categoryId": 1,
+      "categoryName": "security",
+      "categoryPath": "tech/security",
+      "tags": [],
+      "authorType": "admin"
+    },
+    {
+      "id": 105,
+      "title": "공급망 공격 사례",
+      "slug": "trends/weekly/02-post",
+      "date": "2026-11-21",
+      "section": "trends",
+      "readingMinutes": 5,
+      "excerpt": "패키지 레지스트리를 노린 최근 사건들을 비교한다.",
+      "categoryId": 1,
+      "categoryName": "weekly",
+      "categoryPath": "trends/weekly",
+      "tags": [],
+      "authorType": "admin"
+    },
+    {
+      "id": 106,
+      "title": "디버거 없이 보는 바이너리",
+      "slug": "tech/security/02-post",
+      "date": "2026-11-20",
+      "section": "tech",
+      "readingMinutes": 5,
+      "excerpt": "정적 분석만으로 알 수 있는 것과 없는 것을 구분한다.",
+      "categoryId": 1,
+      "categoryName": "security",
+      "categoryPath": "tech/security",
+      "tags": [],
+      "authorType": "admin"
+    },
+    {
+      "id": 107,
+      "title": "느리게 쓰기",
+      "slug": "essays/thoughts/02-post",
+      "date": "2026-11-19",
+      "section": "essays",
+      "readingMinutes": 5,
+      "excerpt": "빨리 쓴 글은 빨리 잊힌다. 오래 남는 문장은 오래 걸린다.",
+      "categoryId": 1,
+      "categoryName": "thoughts",
+      "categoryPath": "essays/thoughts",
+      "tags": [],
+      "authorType": "admin"
+    },
+    {
+      "id": 108,
+      "title": "랜섬웨어 현황",
+      "slug": "trends/weekly/01-post",
+      "date": "2026-11-18",
+      "section": "trends",
+      "readingMinutes": 4,
+      "excerpt": "피해 규모보다 협상 방식이 달라지고 있다.",
+      "categoryId": 1,
+      "categoryName": "weekly",
+      "categoryPath": "trends/weekly",
+      "tags": [],
+      "authorType": "admin"
+    },
+    {
+      "id": 109,
+      "title": "난독화 해제 기초",
+      "slug": "tech/security/01-post",
+      "date": "2026-11-17",
+      "section": "tech",
+      "readingMinutes": 4,
+      "excerpt": "문자열 암호화와 제어 흐름 평탄화를 되돌리는 기본기.",
+      "categoryId": 1,
+      "categoryName": "security",
+      "categoryPath": "tech/security",
+      "tags": [],
+      "authorType": "admin"
+    },
+    {
+      "id": 110,
+      "title": "첫 번째 글",
+      "slug": "essays/thoughts/01-post",
+      "date": "2026-11-16",
+      "section": "essays",
+      "readingMinutes": 4,
+      "excerpt": "이 블로그를 시작하며.",
+      "categoryId": 1,
+      "categoryName": "thoughts",
+      "categoryPath": "essays/thoughts",
+      "tags": [],
+      "authorType": "admin"
+    }
+  ],
+  "nextCursor": null
+}
