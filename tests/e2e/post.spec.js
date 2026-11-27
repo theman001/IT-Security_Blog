@@ -224,6 +224,21 @@ test('TOC click: hash only, no re-render, active heading follows', async ({ page
   expect(top).toBeLessThan(200);
 });
 
+test('deep link /posts/x#toc-heading-1 scrolls to that heading (initial load and client navigation)', async ({ page }) => {
+  await mockPost(page, [tech]);
+  const top = () => page.evaluate(() => Math.round(document.getElementById('toc-heading-1').getBoundingClientRect().top));
+  await page.goto(`${href(tech.post.slug)}#toc-heading-1`);
+  await expect(page.locator('#toc-heading-1')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200);
+  expect(await top()).toBeLessThan(200);
+  // client-side navigation from another post URL keeps working too, and an unknown hash falls back to the top
+  await page.evaluate(async (u) => (await import('/src/router.js')).navigate(u), `${href(tech.post.slug)}?x=1#toc-heading-2`);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200);
+  expect(await page.evaluate(() => Math.round(document.getElementById('toc-heading-2').getBoundingClientRect().top))).toBeLessThan(200);
+  await page.evaluate(async (u) => (await import('/src/router.js')).navigate(u), `${href(tech.post.slug)}?x=2#nope`);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
 test('code blocks get the copy button', async ({ page }) => {
   await mockPost(page, [tech]);
   await page.goto(href(tech.post.slug));

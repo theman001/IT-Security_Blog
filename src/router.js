@@ -81,6 +81,11 @@ async function show(initial = false) {
   try {
     page?.mount?.(main, data);
   } catch (err) {
+    try {
+      page.unmount?.(); // release whatever mount() set up before it threw
+    } catch {
+      // already failing; keep showing the mount error
+    }
     current = null;
     main.innerHTML = `<p role="alert">${escapeHtml(err?.message || '문제가 발생했습니다.')}</p>`;
   }
@@ -88,6 +93,18 @@ async function show(initial = false) {
     main.focus();
     scrollTo(0, 0);
   }
+  scrollToHash(); // after the reset above, so a deep link is not overwritten
+}
+
+// Scroll to the element named by location.hash (the browser could not: the content did not exist yet).
+function scrollToHash() {
+  let id;
+  try {
+    id = decodeURIComponent(location.hash.slice(1));
+  } catch {
+    return;
+  }
+  document.getElementById(id)?.scrollIntoView();
 }
 
 export function navigate(path, { replace = false } = {}) {
@@ -104,6 +121,12 @@ export function start() {
     if (u.origin !== location.origin) return;
     if (u.hash && u.pathname + u.search === location.pathname + location.search) return; // in-page anchor: browser handles it
     e.preventDefault();
+    if (u.pathname + u.search === location.pathname + location.search) {
+      // same page: no extra history entry, just return to the top
+      document.getElementById('main').focus();
+      scrollTo(0, 0);
+      return;
+    }
     navigate(u.pathname + u.search + u.hash);
   });
   addEventListener('popstate', () => {

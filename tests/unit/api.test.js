@@ -39,3 +39,16 @@ test('non-2xx without JSON body -> ApiError with fallback', async () => {
   stub(new Response('<html>bad gateway</html>', { status: 502 }));
   await assert.rejects(getCategories(), (e) => e instanceof ApiError && e.status === 502 && e.code === 'http_error' && e.message === 'HTTP 502');
 });
+test('. and .. segments -> 404 ApiError without a network request', async () => {
+  const calls = stub(json({}));
+  for (const fn of [() => getPost('tech/../x'), () => getPost('..'), () => getPost('./a'), () => getCategoryPosts('tech/..')]) {
+    await assert.rejects(fn(), (e) => e instanceof ApiError && e.status === 404 && e.code === 'not_found');
+  }
+  assert.deepEqual(calls, []);
+  await getPost('a/..b/c.d'); // dots inside a segment are fine
+  assert.equal(calls.length, 1);
+});
+test('200 with non-JSON body -> ApiError bad_response', async () => {
+  stub(new Response('<html>captive portal</html>', { status: 200 }));
+  await assert.rejects(getCategories(), (e) => e instanceof ApiError && e.status === 200 && e.code === 'bad_response' && e.message === 'Invalid response');
+});

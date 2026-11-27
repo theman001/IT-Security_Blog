@@ -181,3 +181,66 @@ test('shell landmarks: skip link, main, footer RSS', async ({ page }) => {
   await expect(page.locator('main#main')).toHaveAttribute('tabindex', '-1');
   await expect(page.locator('footer a[href="/rss.xml"]')).toBeVisible();
 });
+
+test('clicking a link to the current path does not push history; scrolls to top and focuses #main', async ({ page }) => {
+  await page.goto('/');
+  await setup(page);
+  await page.evaluate(async () => {
+    await window.go('/a');
+    document.getElementById('main').insertAdjacentHTML('beforeend', '<a data-link href="/a" id="self">self</a><div style="height:3000px"></div>');
+  });
+  await expect(page.locator('#main h1')).toHaveText('A');
+  const len = await page.evaluate(() => history.length);
+  await page.evaluate(() => window.scrollTo(0, 800));
+  await page.locator('#self').click();
+  expect(await page.evaluate(() => history.length)).toBe(len);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.locator('#main')).toBeFocused();
+  expect(await page.evaluate(() => window.renders)).toBe(1); // not re-rendered either
+});
+
+test('mount() that throws still unmounts the page', async ({ page }) => {
+  await page.goto('/');
+  await setup(page);
+  await page.evaluate(async () => {
+    const { route } = await import('/src/router.js');
+    route('/bad-mount', {
+      render: () => ({ title: 'Bad', html: '<h1>Bad</h1>' }),
+      mount: () => { throw new Error('mount failed'); },
+      unmount: () => window.unmounts.push('bad-mount'),
+    });
+    window.go('/bad-mount');
+  });
+  await expect(page.locator('#main [role="alert"]')).toHaveText('mount failed');
+  await page.evaluate(() => window.go('/a'));
+  await expect(page.locator('#main h1')).toHaveText('A');
+  expect(await page.evaluate(() => window.unmounts)).toEqual(['bad-mount']);
+});
+
+test('OS theme change updates the toggle only when no theme is stored', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+  const btn = page.getByRole('button', { name: '다크 모드' });
+  await expect(btn).toHaveAttribute('aria-pressed', 'false');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(btn).toHaveAttribute('aria-pressed', 'true');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await expect(btn).toHaveAttribute('aria-pressed', 'false');
+  // an explicit choice wins over later OS changes
+  await btn.click();
+  await expect(btn).toHaveAttribute('aria-pressed', 'true');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.emulateMedia({ colorScheme: 'light' });
+  await expect(btn).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('OS theme change is ignored when a stored theme exists', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.addInitScript(() => localStorage.setItem('theme', 'light'));
+  await page.goto('/');
+  const btn = page.getByRole('button', { name: '다크 모드' });
+  await expect(btn).toHaveAttribute('aria-pressed', 'false');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.waitForTimeout(150);
+  await expect(btn).toHaveAttribute('aria-pressed', 'false');
+});

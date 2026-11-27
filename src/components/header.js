@@ -26,6 +26,8 @@ export function mountHeader(el) {
   const sync = () => btn.setAttribute('aria-pressed', String(getTheme() === 'dark'));
   sync();
   btn.addEventListener('click', () => (toggleTheme(), sync()));
+  // With an explicit data-theme getTheme() ignores the OS, so this only matters when none is set.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', sync);
   onNavigate((pathname) => {
     const s = sectionOf(pathname);
     for (const a of links) {
