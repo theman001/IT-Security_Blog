@@ -58,9 +58,10 @@
   --space-16: 4rem;
   --space-24: 6rem;
 
-  --measure-tech: 72ch;
+  --measure-tech: 90ch;
   --measure-essay: 60ch;
-  --container: 72rem;
+  --container: 120rem;
+  --gutter: clamp(var(--space-4), 5vw, var(--space-16));
   --toc-width: 14rem;
   --main-min-height: 60vh; /* reserve space so the footer does not jump when content renders */
 

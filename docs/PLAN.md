@@ -17,7 +17,7 @@
 - API 성공 캐시 `public, max-age=60, s-maxage=600, stale-while-revalidate=86400`; 오류 `max-age=0, s-maxage=60`. 오류 본문 `{error:{code,message}}`.
 - 마크다운만 DOMPurify+innerHTML. 그 외 모든 DB 값은 `escapeHtml()`/`textContent`. JSON-LD는 `JSON.stringify` 후 `<`를 `<`로.
 - 색/간격/반경/폰트는 `tokens.css` 변수만. 하드코딩 grep 결과 0건 유지(`npm run lint:tokens`).
-- 기술·동향 본문 폭 `72ch`, 16px/1.75, 사유 본문 `60ch`, 18px/1.9. 목차는 소제목(h2/h3) 3개 이상일 때만, `>=1200px` 오른쪽 고정.
+- 기술·동향 본문 폭 `90ch`(초기 계획 72ch, 와이드 화면 확장으로 변경), 16px/1.75, 사유 본문 `60ch`, 18px/1.9. 목차는 소제목(h2/h3) 3개 이상일 때만, `>=1200px` 오른쪽 고정.
 - 서브에이전트는 공통 파일(`tokens.css`, `src/components/*`, `src/router.js`, `src/lib/*`)을 직접 고치지 않고 보고한다.
 - 각 Task 끝에서 `npm run build` 와 해당 테스트가 통과해야 한다. 완료 선언 전 `superpowers:verification-before-completion`.
 
