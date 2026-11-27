@@ -92,7 +92,7 @@
   .post-body--toc {
     display: grid;
     grid-template-columns: minmax(0, var(--measure-tech)) var(--toc-width);
-    justify-content: start;
+    justify-content: space-between;
     column-gap: var(--space-12);
     align-items: start;
   }

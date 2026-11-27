@@ -57,7 +57,7 @@
 
 ## 3. 간격 · 폭 · 반경 · 모션
 - 간격(4px 기반): `--space-1: 0.25rem`, `--space-2: 0.5rem`, `--space-3: 0.75rem`, `--space-4: 1rem`, `--space-6: 1.5rem`, `--space-8: 2rem`, `--space-12: 3rem`, `--space-16: 4rem`, `--space-24: 6rem`.
-- 본문 폭: `--measure-tech: 90ch`, `--measure-essay: 60ch`(읽기 폭은 유지), `--container: 120rem`(전체 레이아웃 최대폭; 1920px 모니터까지 좌우를 채운다), `--gutter: clamp(--space-4, 5vw, --space-16)`(좌우 여백, 헤더·본문·푸터 공통), `--toc-width: 14rem`. 글 상세는 본문 폭을 제한하고 목차를 본문 바로 옆에 둔다.
+- 본문 폭: `--measure-tech: 72ch`, `--measure-essay: 60ch`, `--container: 72rem`(전체 레이아웃), `--toc-width: 14rem`.
 - 반경: `--radius-sm: 0.25rem`, `--radius-md: 0.5rem`, `--radius-pill: 999px`(칩/태그만).
 - 선: `--border: 1px solid var(--color-border)`, 강조 선 `--rule-strong: 2px solid var(--color-fg)`(마스트헤드).
 - 모션: `--duration-fast: 120ms`, `--duration-base: 200ms`, `--ease: cubic-bezier(0.2, 0, 0, 1)`. `prefers-reduced-motion: reduce`에서는 모든 transition/animation을 0으로(읽기 진행선 포함).
