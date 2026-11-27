@@ -44,7 +44,7 @@ for p in / /tech /essays /nope /categories/tech /sitemap.xml /rss.xml /robots.tx
 - 롤백해도 DB 내용은 그대로다. 옛 프론트가 새 DB 구조(섹션 슬러그, 새 샘플 글)에서 어떻게 보이는지는 별도로 확인한다.
 
 ## 6. 알려진 사항
-- 파비콘은 `index.html`의 `<link rel="icon" href="data:,">`(빈 아이콘)로 `/favicon.ico` 404 소음만 막았다. 실제 파비콘은 디자인 결정이므로 선택 후속 작업이다(`public/`에 파일을 두고 `<link rel="icon">`을 바꾼다).
+- 파비콘은 펜촉(사유를 적는다) 아이콘이다: `public/favicon.svg`(OS 다크 모드에 따라 색이 바뀜), `favicon.ico`(32px), `apple-touch-icon.png`(180px). 색은 `DESIGN.md`의 accent 값을 SVG에 직접 적었다(SVG는 CSS 변수를 쓸 수 없음). accent를 바꾸면 SVG를 고치고 ico/png를 다시 만든다(`docs/dev.md` 파비콘 절). 홈 화면 추가용 192/512 PNG와 manifest는 만들지 않았다.
 - 기술 샘플 글(`sample-android-auth`)의 일반 링크 텍스트 "링크"는 Lighthouse SEO 감점 원인이다(콘텐츠 문제, [seo.md](seo.md) 6절). 샘플 글을 지우면 사라진다.
 
 ## 7. 권장(사용자 결정): `app_reader` 비밀번호 교체

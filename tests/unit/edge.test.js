@@ -203,3 +203,15 @@ test('isAssetPath: files and /assets/* yes; pages and /categories/* with dots no
   for (const p of ['/assets/a.js', '/assets/x', '/favicon.ico', '/llms.txt', '/a/b.css']) assert.ok(isAssetPath(p), p);
   for (const p of ['/', '/tech', '/posts/tech/a', '/categories/tech/v1.2', '/about/']) assert.ok(!isAssetPath(p), p);
 });
+
+test('favicon: index.html links existing public files that Functions skip', async () => {
+  const { readFileSync, existsSync } = await import('node:fs');
+  const html = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+  const routes = JSON.parse(readFileSync(new URL('../../public/_routes.json', import.meta.url), 'utf8'));
+  for (const f of ['/favicon.svg', '/favicon.ico', '/apple-touch-icon.png']) {
+    assert.ok(html.includes(`href="${f}"`), `${f} linked`);
+    assert.ok(existsSync(new URL(`../../public${f}`, import.meta.url)), `${f} exists`);
+    assert.ok(routes.exclude.includes(f), `${f} excluded from Functions`);
+  }
+  assert.ok(!html.includes('href="data:,"'));
+});

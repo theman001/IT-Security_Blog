@@ -1,1 +1,1 @@
-{"version":1,"include":["/*"],"exclude":["/assets/*","/favicon.ico"]}
+{"version":1,"include":["/*"],"exclude":["/assets/*","/favicon.ico","/favicon.svg","/apple-touch-icon.png"]}

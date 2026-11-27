@@ -43,7 +43,7 @@ src/               main.js, router.js, pages/ (home, section, post, about, not-f
 tests/unit/        node --test (handlers, queries, edge, seo, http, slug, cursor, excerpt, escape, urls, post-header, headers, lint, bundle)
 tests/e2e/         Playwright specs (API mocked via tests/fixtures/api/*.json); tests/fixtures/
 scripts/           check-tokens.mjs, check-bundle.mjs, test-edge.mjs (+ lib/)
-public/            _headers (immutable /assets/*), _routes.json (Functions skip /assets, /favicon.ico), 404.html
+public/            _headers (immutable /assets/*), _routes.json (Functions skip /assets, favicon.*, apple-touch-icon), 404.html, favicon.svg/.ico, apple-touch-icon.png
 docs/              api.md, dev.md, seo.md, post-merge-checklist.md, contents-repo.md, backlog.md, PLAN.md, superpowers/specs/
 .claude/skills/    vendored reviewed skills + blog-platform; .claude/SKILLS.lock.md = provenance
 DESIGN.md          design tokens contract (single source for color/space/radius/font)
