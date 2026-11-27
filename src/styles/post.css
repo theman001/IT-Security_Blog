@@ -18,6 +18,10 @@
   text-transform: uppercase;
   overflow-wrap: anywhere;
 }
+.post-crumb__sep {
+  padding-inline: var(--space-2);
+  white-space: pre;
+}
 .post-crumb a {
   display: inline-flex;
   align-items: center;

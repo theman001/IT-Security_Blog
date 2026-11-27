@@ -122,6 +122,26 @@ test('related: null -> no card; present -> card at the very top of an essay', as
   expect(await card.evaluate((el) => getComputedStyle(el).borderTopStyle)).toBe('solid');
 });
 
+test('related card title is a <p>, so an essay has no heading before its h1', async ({ page }) => {
+  await mockPost(page, [essay]);
+  await page.goto(href(essay.post.slug));
+  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.locator('.related-card h3')).toHaveCount(0);
+  await expect(page.locator('.related-card p.related-card__title a')).toHaveAttribute('href', href(essay.related.slug));
+  const first = await page.evaluate(() => document.querySelector('#main h1, #main h2, #main h3')?.tagName);
+  expect(first).toBe('H1');
+});
+
+test('crumb separator has visible spacing', async ({ page }) => {
+  await mockPost(page, [tech]);
+  await page.goto(href(tech.post.slug));
+  const links = page.locator('.post-crumb a');
+  await expect(links).toHaveCount(2);
+  const [a, b] = await Promise.all([links.nth(0).boundingBox(), links.nth(1).boundingBox()]);
+  expect(b.x - (a.x + a.width)).toBeGreaterThan(16); // glyph + token padding, not a collapsed ~7px
+  await expect(page.locator('.post-crumb')).toHaveText(/^tech\s*\/\s*security$/i);
+});
+
 test('relatedBy: box after the body for tech, absent when empty', async ({ page }) => {
   await mockPost(page, [tech, clone(tech, { slug: 'tech/security/empty' }, { relatedBy: [] })]);
   await page.goto(href(tech.post.slug));

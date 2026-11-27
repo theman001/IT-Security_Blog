@@ -16,7 +16,7 @@ const crumbHtml = (path) => {
   const parts = String(path ?? '').split('/').filter(Boolean);
   if (!parts.length) return '';
   const links = parts.map((p, i) => `<a data-link href="${e(categoryHref(parts.slice(0, i + 1).join('/')))}">${e(p)}</a>`);
-  return `<p class="post-crumb">${links.join('<span aria-hidden="true"> / </span>')}</p>`;
+  return `<p class="post-crumb">${links.join('<span class="post-crumb__sep" aria-hidden="true"> / </span>')}</p>`;
 };
 
 const navHtml = ({ prev, next }, slug, essay) => {

@@ -27,16 +27,16 @@ test('lead essay comes first, before the Tech section; recent column excludes it
   });
   expect(order).toBeTruthy();
   const recent = page.locator('.home-recent');
-  await expect(recent.locator('a')).toHaveCount(normal.length - 1 > 7 ? 7 : normal.length - 1);
+  await expect(recent.locator('a')).toHaveCount(5);
   await expect(recent.getByRole('link', { name: lead.title })).toHaveCount(0);
-  // requests: lead, recent, 3 sections
+  // requests: essays (lead + Essays section share it), recent, tech, trends
+  expect(calls).toHaveLength(4);
   expect(calls).toEqual(
     expect.arrayContaining([
-      { section: 'essays', limit: '1' },
+      { section: 'essays', limit: '4' },
       { limit: '8' },
       { section: 'tech', limit: '3' },
       { section: 'trends', limit: '3' },
-      { section: 'essays', limit: '3' },
     ]),
   );
 });
@@ -51,7 +51,41 @@ test('sections: 3 cards each, "더 보기" links, essays as pull quotes', async 
   await expect(section(page, 'essays').getByRole('link', { name: /더 보기/ })).toHaveAttribute('href', '/essays');
   const quotes = section(page, 'essays').locator('blockquote');
   await expect(quotes).toHaveCount(3);
-  await expect(quotes.first()).toContainText(lead.excerpt);
+  const others = normal.filter((p) => p.section === 'essays').slice(1, 4);
+  await expect(quotes.first()).toContainText(others[0].excerpt);
+});
+
+test('Essays section does not repeat the lead essay', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/');
+  await expect(section(page, 'essays').locator('blockquote')).toHaveCount(3);
+  await expect(section(page, 'essays')).not.toContainText(lead.excerpt);
+  await expect(section(page, 'essays').getByRole('link', { name: lead.title })).toHaveCount(0);
+});
+
+test('only one essay: Essays section says there are no other essays', async ({ page }) => {
+  await mockPosts(page, normal.filter((p) => p.section !== 'essays' || p.slug === lead.slug));
+  await page.goto('/');
+  await expect(page.locator('.home-lead h2')).toContainText(lead.title);
+  await expect(section(page, 'essays').locator('.home-notice')).toHaveText('아직 다른 사유 글이 없습니다.');
+  await expect(section(page, 'essays').locator('blockquote')).toHaveCount(0);
+});
+
+test('failed lead request is distinct from "no essays"', async ({ page }) => {
+  await mockPosts(page, normal, { fail: ['essays'] });
+  await page.goto('/');
+  await expect(page.locator('.home-lead .home-notice')).toHaveText('불러오지 못했습니다.');
+  await expect(section(page, 'tech').locator('article')).toHaveCount(3);
+});
+
+test('"더 보기" links have distinct accessible names', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/');
+  for (const [key, name] of [['tech', 'Tech'], ['trends', 'Trends'], ['essays', 'Essays']]) {
+    const more = section(page, key).locator('.home-more');
+    await expect(more).toHaveAttribute('aria-label', `${name} 더 보기`);
+    await expect(more).toHaveText('더 보기 →');
+  }
 });
 
 test('XSS strings render as text only', async ({ page }) => {

@@ -51,7 +51,7 @@ export function makeListPage(fixed) {
   return {
     async load(params) {
       const path = fixed ?? params['*'];
-      if (!SECTIONS[path.split('/')[0]]) return { notFound: true };
+      if (!Object.hasOwn(SECTIONS, path.split('/')[0])) return { notFound: true };
       const [cats, posts] = await Promise.all([getCategories(), getPosts({ category: path, limit: LIMIT })]);
       const list = cats.items;
       const key = path.split('/')[0];
@@ -127,6 +127,7 @@ export function makeListPage(fixed) {
               const before = rows.children.length;
               rows.insertAdjacentHTML('beforeend', rowsHtml(next.items));
               rows.children[before]?.querySelector('a')?.focus();
+              btn.textContent = '더 보기';
               cursor = next.nextCursor;
               if (!cursor) box.remove();
             } catch {

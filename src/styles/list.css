@@ -163,7 +163,7 @@
   color: var(--color-fg-muted);
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 64em) {
   .list-page--tree {
     grid-template-columns: var(--toc-width) minmax(0, 1fr);
     column-gap: var(--space-12);

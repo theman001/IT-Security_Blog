@@ -4,7 +4,7 @@ import { postHref } from '../lib/urls.js';
 /** Bordered card: accent label (omitted when empty), title link, 2-line excerpt, date. */
 export const relatedCardHtml = (r, label) => `<article class="related-card">
   ${label ? `<p class="related-card__label">${e(label)}</p>` : ''}
-  <h3 class="related-card__title"><a data-link href="${e(postHref(r.slug))}">${e(r.title)}</a></h3>
+  <p class="related-card__title"><a data-link href="${e(postHref(r.slug))}">${e(r.title)}</a></p>
   <p class="related-card__excerpt">${e(r.excerpt)}</p>
   <time class="related-card__date" datetime="${e(r.date)}">${e(r.date)}</time>
 </article>`;

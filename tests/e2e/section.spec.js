@@ -131,6 +131,23 @@ test('tree is a collapsed "카테고리" disclosure below 1024px and a sidebar a
   expect(side.x + side.width).toBeLessThanOrEqual(main.x);
 });
 
+test('JS breakpoint and CSS breakpoint agree (tree open + sidebar at 1100px; em-based media query)', async ({ page }) => {
+  await mockList(page, deep, deepPosts);
+  await page.setViewportSize({ width: 1100, height: 800 });
+  await page.goto('/tech');
+  const state = () =>
+    page.evaluate(() => ({
+      open: document.querySelector('.cat-nav').open,
+      sidebar: getComputedStyle(document.querySelector('.list-page--tree')).gridTemplateColumns.split(' ').length === 2,
+    }));
+  await expect.poll(state).toEqual({ open: true, sidebar: true });
+  // JS uses (min-width: 64em); a px breakpoint in CSS would drift from it when the browser default font size is not 16px
+  const css = await page.evaluate(() => [...document.styleSheets].flatMap((s) => { try { return [...s.cssRules]; } catch { return []; } }).filter((r) => r.media && r.cssText.includes('.list-page--tree')).map((r) => r.conditionText));
+  expect(css.length).toBeGreaterThan(0);
+  expect(css.some((c) => c.includes('1024px'))).toBe(false);
+  expect(css.some((c) => c.includes('64em'))).toBe(true);
+});
+
 test('더 보기 loads the next page with nextCursor, then disappears; focus moves to first new row', async ({ page }) => {
   const calls = await mockList(page, deep, deepPosts);
   await page.goto('/categories/tech/security/reversing');
@@ -155,6 +172,18 @@ test('더 보기 failure shows an inline error and retries', async ({ page }) =>
   await retry.click();
   await expect(page.locator('.post-row')).toHaveCount(25);
   await expect(page.locator('.list-error')).toHaveCount(0);
+});
+
+test('더 보기 retry that succeeds with more pages left restores the "더 보기" label', async ({ page }) => {
+  const more = many(45, 'tech/security/reversing');
+  await mockList(page, deep, more, { failMoreOnce: true });
+  await page.goto('/categories/tech/security/reversing');
+  await page.getByRole('button', { name: '더 보기' }).click();
+  await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
+  await page.getByRole('button', { name: '다시 시도' }).click();
+  await expect(page.locator('.post-row')).toHaveCount(40);
+  await expect(page.getByRole('button', { name: '더 보기' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '다시 시도' })).toHaveCount(0);
 });
 
 test('empty category: one sentence with a home link', async ({ page }) => {
@@ -193,7 +222,7 @@ test('section root row missing but deeper categories exist: header, crumb, chips
 
 test('unknown category or section -> 페이지를 찾을 수 없습니다 with title', async ({ page }) => {
   await mockList(page, deep, deepPosts);
-  for (const url of ['/categories/tech/nope', '/categories/other/x', '/categories/tech/security/reversing/deeper']) {
+  for (const url of ['/categories/tech/nope', '/categories/other/x', '/categories/tech/security/reversing/deeper', '/categories/constructor/x', '/categories/__proto__/x', '/categories/toString']) {
     await page.goto(url);
     await expect(page.locator('#main')).toContainText('페이지를 찾을 수 없습니다');
     expect(await page.title()).toBe('페이지를 찾을 수 없습니다 - IT Security Blog');
