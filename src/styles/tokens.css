@@ -20,8 +20,8 @@
   --code-comment: oklch(0.5 0.01 70);
   --code-punct: oklch(0.42 0.01 60);
 
-  /* typography (families only; font loading is done elsewhere) */
-  --font-display: "Noto Serif KR", "Noto Serif", Georgia, serif;
+  /* typography (families only; self-hosted via npm font packages, imported in src/main.js) */
+  --font-display: "Noto Serif KR Variable", "Noto Serif KR", "Noto Serif", Georgia, serif;
   --font-body-tech: "Pretendard Variable", Pretendard, system-ui, sans-serif;
   --font-body-essay: var(--font-display);
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;

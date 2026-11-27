@@ -32,12 +32,12 @@
 ## 2. 타이포그래피
 | 토큰 | 값 |
 |---|---|
-| `--font-display` | `"Noto Serif KR", "Noto Serif", Georgia, serif` (제목, 사유 본문, 인용) |
+| `--font-display` | `"Noto Serif KR Variable", "Noto Serif KR", "Noto Serif", Georgia, serif` (제목, 사유 본문, 인용) |
 | `--font-body-tech` | `"Pretendard Variable", Pretendard, system-ui, sans-serif` (기술·동향 본문, UI) |
 | `--font-body-essay` | `var(--font-display)` |
 | `--font-mono` | `"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace` |
 
-영문 전용 폰트는 본문에 쓰지 않는다(한글 글리프 필요). 세 폰트 모두 `font-display: swap`.
+영문 전용 폰트는 본문에 쓰지 않는다(한글 글리프 필요). 세 폰트 모두 같은 출처에서 npm 패키지로 자체 호스팅한다(`pretendard` 동적 서브셋 가변, `@fontsource-variable/noto-serif-kr` wght, `@fontsource/jetbrains-mono` latin 400/600; `src/main.js`에서 import). 한글은 `unicode-range` 서브셋이라 쓰인 글자의 조각만 내려받고, 세 폰트 모두 `font-display: swap`.
 
 타입 스케일(modular, 1.2 비율 기반; `rem`, 루트 16px):
 | 토큰 | 값 | 용도 |
