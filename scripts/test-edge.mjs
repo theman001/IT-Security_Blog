@@ -80,6 +80,9 @@ try {
   check('HEAD -> BYPASS', (await edge(cp, { method: 'HEAD' })) === 'BYPASS');
   check('405 is never cached/tagged HIT', (await edge('/api/posts', { method: 'POST' })) !== 'HIT');
   check('/assets/* is not wrapped by the edge cache', (await edge('/assets/' + readdirSync('dist/assets').find((f) => f.endsWith('.js')))) === null);
+  const lp = (u) => get('/api/link-preview?url=' + encodeURIComponent(u));
+  check('/api/link-preview: private url -> 400, url in no post -> 404 (real DB lookup, nothing fetched)',
+    (await lp('http://127.0.0.1/')).r.status === 400 && (await lp(`https://example.org/not-in-any-post-${Date.now()}`)).r.status === 404);
   const redirect = await get('/categories/tech');
   check('/categories/tech -> 301 /tech', redirect.r.status === 301 && redirect.r.headers.get('location') === '/tech', `${redirect.r.status} ${redirect.r.headers.get('location')}`);
   const post405 = await fetch(BASE + '/about', { method: 'POST' });

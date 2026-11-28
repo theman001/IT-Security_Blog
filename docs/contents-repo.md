@@ -23,18 +23,27 @@ contents/
 - DB의 `reports.related_slug`(nullable text)는 이미 있는 컬럼이다(`ALTER TABLE reports ADD COLUMN related_slug text;` 적용 완료). 새 테이블/GRANT는 없다.
 
 ## 2-1. 본문 안 링크 카드 (외부 링크 포함)
-본문 어디에나 ` ```link ` 코드 블록을 쓰면 제목+설명 카드로 보인다. 제목과 설명은 **직접 적는다**(페이지를 가져오지 않으므로 서버 부담, 추적, SSRF 위험이 없고 DB·sync 변경도 필요 없다). 글 맨 위에 두면 "계기가 된 글" 카드처럼 쓸 수 있다.
+본문 어디에나 ` ```link ` 코드 블록을 쓰면 제목+설명 카드로 보인다. **`url:`만 쓰면 그 페이지의 메타데이터(제목, 설명)를 서버가 가져와 채운다**(`/api/link-preview`, 24시간 엣지 캐시, DB·sync 변경 없음). 글 맨 위에 두면 "계기가 된 글" 카드처럼 쓸 수 있다.
+
+````
+```link
+url: https://example.org/articles/security-habit
+```
+````
+직접 쓰고 싶으면 `title:`과 `description:`을 추가한다(하나라도 있으면 가져오지 않는다. 설명은 3줄을 넘으면 말줄임).
 
 ````
 ```link
 url: https://example.org/articles/security-habit
 title: 글 제목
-description: 한두 문장 설명 (3줄을 넘으면 말줄임)
+description: 한두 문장 설명
 ```
 ````
 - `url`은 `http(s)://` 주소 또는 `/`로 시작하는 사이트 내부 경로만 허용한다. 외부 주소는 새 탭(`noopener noreferrer`)으로, 내부 경로는 같은 탭으로 열린다. 그 밖의 값(`javascript:`, `//host`, url 없음)은 카드가 아니라 일반 코드 블록으로 남는다.
-- `title`이 없으면 도메인을 제목으로 쓰고, `description`은 선택이다. 모든 값은 텍스트로 이스케이프된다(마크업 불가).
-- 구현: `src/render/markdown.js`의 `linkCard`, 스타일: `src/styles/article.css`의 `.link-card`.
+- 자동 채움은 **글 본문에 그 URL이 그대로 적혀 있을 때만** 동작한다(오픈 프록시 방지). 상대 사이트가 응답하지 않거나 메타데이터가 없으면 도메인과 링크만 있는 카드로 남는다. 메타데이터가 엉뚱하게 나오는 사이트는 `title:`/`description:`으로 직접 쓴다.
+- `title`이 없으면 도메인을 제목으로 쓴다. 가져온 값과 직접 쓴 값 모두 텍스트로만 표시된다(마크업 불가).
+- 새 글이 DB에 반영된 직후 처음 보는 카드는 가져오는 시간만큼 늦게 채워지고, 이후 24시간은 캐시된다. 바로 갱신하려면 Cloudflare Purge Cache(`docs/seo.md`).
+- 구현: `src/render/markdown.js`의 `linkCard`, `src/render/link-cards.js`(채우기), 스타일: `src/styles/article.css`의 `.link-card`.
 
 ## 3. sync 스크립트(`sync_to_db.js`) 수정 지점 (적용은 사용자)
 1. `_category.md`는 글로 취급하지 않고 해당 카테고리의 `name`에만 반영한다. 섹션 설명 문구는 프론트 정적 설정(`src/content/sections.js`)에 둔다.

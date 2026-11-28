@@ -30,12 +30,13 @@ export default {
   async load(params) {
     try {
       // dynamic: markdown/DOMPurify/Prism stay out of the main chunk
-      const [data, { renderMarkdown }, { enhanceCodeBlocks }] = await Promise.all([
+      const [data, { renderMarkdown }, { enhanceCodeBlocks }, { hydrateLinkCards }] = await Promise.all([
         getPost(params['*']),
         import('../render/markdown.js'),
         import('../render/code-blocks.js'),
+        import('../render/link-cards.js'),
       ]);
-      return { ...data, bodyHtml: renderMarkdown(data.post.contentMd), enhanceCodeBlocks };
+      return { ...data, bodyHtml: renderMarkdown(data.post.contentMd), enhanceCodeBlocks, hydrateLinkCards };
     } catch (err) {
       if (err instanceof ApiError && err.status === 404) return { notFound: true };
       throw err;
@@ -63,6 +64,7 @@ export default {
     }
     const article = root.querySelector('.article');
     data.enhanceCodeBlocks(article);
+    cleanups.push(data.hydrateLinkCards(article));
 
     const bar = root.querySelector('.reading-progress');
     if (bar) {

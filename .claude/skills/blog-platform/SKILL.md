@@ -14,6 +14,7 @@ Source of truth: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pa
 - Dates: `to_char(created_at, 'YYYY-MM-DD')` in SQL; never pass `created_at` through JS `Date` (naive timestamp, tz shifts the day).
 - Sort ties: always add `id` as a secondary key. Slugs are full paths, case-sensitive, may contain spaces, `&`, `:`, Korean: encode per segment in URLs, match exactly (no last-segment fallback).
 - Errors: `{error:{code,message}}`, real status codes (400/404/405/500). Never leak SQL, stack, or env values. 405 on `/api/posts*` and `/api/categories*` sends `Allow: GET`, on unrouted `/api`/`/api/<unknown>` (edge catch-all) `Allow: GET, HEAD`; `/api` 500s are `no-store`; bare `/api` and unknown `/api/*` are JSON 404.
+- `/api/link-preview?url=` (external link cards) is the only Function that fetches third-party pages: keep ALL its guards (url must appear in a published post via bound `strpos`, public http(s) hosts only, manual redirects re-validated, 5s timeout, 256KB, text only, 24h edge ttl). Its output is third-party text: `textContent` only. Details: `docs/api.md`.
 - DB role is SELECT-only. No writes, no schema changes from code.
 
 ## 2. Functions, edge cache

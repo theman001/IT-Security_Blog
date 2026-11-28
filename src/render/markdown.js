@@ -11,7 +11,8 @@ const FORBID_TAGS = ['style', 'form', 'input', 'button', 'textarea', 'select', '
 const FORBID_ATTR = ['style', 'name', 'srcset', 'poster'];
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
-// ```link fence -> link card (url, title, description are written by hand; nothing is fetched).
+// ```link fence -> link card. Only `url:` -> title/description come from the page's own metadata, filled in
+// later by hydrateLinkCards (src/render/link-cards.js); `title:`/`description:` write them by hand instead.
 // url must be http(s) or a site path; anything else leaves the block as a normal code block.
 const linkCard = ({ text, lang }) => {
   if (lang?.trim() !== 'link') return false;
@@ -29,7 +30,7 @@ const linkCard = ({ text, lang }) => {
       return false;
     }
   } else if (!/^\/(?!\/)/.test(url)) return false;
-  return `<a class="link-card" href="${e(url)}">${host ? `<span class="link-card__host">${e(host)}</span>` : ''}<span class="link-card__title">${e(f.title || host || url)}</span>${f.description ? `<span class="link-card__desc">${e(f.description)}</span>` : ''}</a>\n`;
+  return `<a class="link-card" href="${e(url)}"${host && !f.title && !f.description ? ' data-preview' : ''}>${host ? `<span class="link-card__host">${e(host)}</span>` : ''}<span class="link-card__title">${e(f.title || host || url)}</span>${f.description ? `<span class="link-card__desc">${e(f.description)}</span>` : ''}</a>\n`;
 };
 const parser = new Marked({ renderer: { code: linkCard } });
 

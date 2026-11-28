@@ -332,3 +332,26 @@ test('SPA navigation never reads a #post-data element that appears after boot as
   await expect(page.locator('h1')).toHaveText('C 제목');
   expect(calls).toEqual(['/api/posts/tech/a', '/api/posts/tech/b', '/api/posts/tech/c']);
 });
+
+test('external link card in a post is filled from /api/link-preview (text only); failures keep the domain card', async ({ page }) => {
+  const url = 'https://example.org/a?x=1&y=2';
+  const md = `\`\`\`link\nurl: ${url}\n\`\`\`\n\n\`\`\`link\nurl: https://down.example.org/z\n\`\`\`\n\n\`\`\`link\nurl: https://hand.example.org/h\ntitle: 손으로 쓴 제목\n\`\`\``;
+  await mockPost(page, [clone(essay, { contentMd: md })]);
+  const asked = [];
+  await page.route('**/api/link-preview?*', (route) => {
+    const u = new URL(route.request().url()).searchParams.get('url');
+    asked.push(u);
+    if (u === url) return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ title: '<img src=x onerror=alert(1)>메타 제목', description: '메타 설명 & 요약' }) });
+    return route.fulfill({ status: 502, contentType: 'application/json', body: '{"error":{"code":"upstream_failed","message":"x"}}' });
+  });
+  await page.goto(href(essay.post.slug));
+  const cards = page.locator('.article a.link-card');
+  await expect(cards).toHaveCount(3);
+  await expect(cards.nth(0).locator('.link-card__title')).toHaveText('<img src=x onerror=alert(1)>메타 제목'); // text, not markup
+  await expect(cards.nth(0).locator('.link-card__desc')).toHaveText('메타 설명 & 요약');
+  await expect(cards.nth(0).locator('img')).toHaveCount(0);
+  await expect(cards.nth(1).locator('.link-card__title')).toHaveText('down.example.org'); // failed -> domain fallback
+  await expect(cards.nth(1).locator('.link-card__desc')).toHaveCount(0);
+  await expect(cards.nth(2).locator('.link-card__title')).toHaveText('손으로 쓴 제목');
+  expect(asked.sort()).toEqual([url, 'https://down.example.org/z'].sort()); // hand-written card is never looked up
+});
