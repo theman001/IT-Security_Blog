@@ -36,7 +36,8 @@ Source of truth: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pa
 ## 4. Rendering and XSS
 - Pipeline order: `marked` -> `DOMPurify.sanitize` -> insert -> Prism highlight -> code-block enhance (copy button).
 - Markdown body is the ONLY thing allowed through DOMPurify+innerHTML. EVERY other DB field (title, excerpt, description, tags, category name/path, author, slugs in attributes) goes through `escapeHtml()` or `textContent`.
-- Markdown fences `link` (link cards) and `youtube` (click-to-play) are built in `src/render/markdown.js` from validated, escaped values; raw `<iframe>`/`<form>`/`<button>` stay forbidden. The YouTube iframe is created in JS on click (`src/render/video-embeds.js`, `youtube-nocookie.com`), never from markdown; nothing from YouTube loads before the click (privacy policy relies on it).
+- Markdown fences `link` (link cards) and `youtube` (click-to-play) are built in `src/render/markdown.js` from validated, escaped values; raw `<iframe>`/`<form>`/`<button>` stay forbidden. The YouTube iframe is created in JS on click (`src/render/video-embeds.js`, `youtube-nocookie.com`), never from markdown; only the thumbnail (`i.ytimg.com`, no Referer) loads before the click and no iframe/cookies (privacy policy section 5 discloses it; keep both in sync).
+- Body images: `![alt](url "WxH")` becomes width/height (CLS), click opens a native `<dialog>` zoom built in JS (`src/render/image-zoom.js`). Blog_Contents sync can write the `WxH` hint (`docs/patches/blog-contents-image-size.patch`, user applies).
 - Never put DB values into `href` unencoded, inline handlers, or `<script>`. JSON-LD is built with `JSON.stringify` and `<` escaped as `\u003c`.
 
 ## 5. Routing (SPA)

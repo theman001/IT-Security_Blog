@@ -55,9 +55,20 @@ title: 영상 제목
 ```
 ````
 - `url`은 `youtube.com/watch?v=`, `youtu.be/`, `shorts/`, `embed/`, `live/` 주소 또는 11자 영상 ID. 시작 시간은 `t=65`, `t=1m5s`, `start=65`. 그 밖의 주소(다른 사이트, 흉내 도메인)는 영상이 아니라 일반 코드 블록으로 남는다. 첫 줄에 주소만 적어도 된다.
-- **재생 버튼을 누르기 전에는 YouTube 쪽 요청이 하나도 없다**(쿠키, IP 전달, 썸네일 없음). 누르면 `youtube-nocookie.com` iframe으로 바뀌어 바로 재생된다. Ctrl/Cmd 클릭이나 JS가 꺼진 환경에서는 그냥 youtube.com 링크(새 탭)로 열린다.
-- 본문에 직접 쓴 `<iframe>`은 보안상 제거된다. 썸네일 미리보기가 필요하면 `i.ytimg.com` 요청이 생겨 개인정보처리방침과 어긋나므로 쓰지 않았다.
+- 글을 열면 영상 **썸네일**(`https://i.ytimg.com/vi/<ID>/hqdefault.jpg`, `referrerpolicy=no-referrer`)만 불러온다. 이때 방문자 브라우저가 구글 서버에 접속하므로 개인정보처리방침 5절에 그 사실을 적어 두었다. **재생 버튼을 누르기 전에는 영상(iframe)·쿠키 요청이 없다.** 누르면 `youtube-nocookie.com` iframe으로 바뀌어 바로 재생된다. Ctrl/Cmd 클릭이나 JS가 꺼진 환경에서는 그냥 youtube.com 링크(새 탭)로 열린다.
+- 본문에 직접 쓴 `<iframe>`은 보안상 제거된다. 썸네일 요청 자체도 없애려면(방침에서 해당 문장 삭제) `src/render/markdown.js`의 `videoEmbed`에서 `<img class="video-embed__thumb">`를 빼면 된다.
 - 구현: `src/lib/youtube.js`(주소 해석), `src/render/markdown.js`의 `videoEmbed`, `src/render/video-embeds.js`(클릭 시 iframe), 스타일 `.video-embed`.
+
+## 2-3. 본문 이미지: 클릭 확대, 크기 힌트(레이아웃 흔들림 방지)
+- **클릭 확대**: 글 상세의 본문 이미지는 클릭(또는 키보드 Tab 후 Enter/Space)하면 큰 화면(`<dialog>`)으로 열린다. 이미지/바깥/닫기 버튼 클릭이나 Esc로 닫고, 닫으면 원래 이미지로 포커스가 돌아온다. 링크 안의 이미지(`[![..](..)](주소)`)와 유튜브 썸네일은 확대하지 않는다.
+- **크기 힌트**: 이미지 title에 `가로x세로`를 적으면 `width`/`height`로 바뀌어, 파일이 늦게 와도 자리가 미리 잡혀 아래 글이 밀리지 않는다(title은 툴팁이 아니므로 제거됨). 직접 `<img width= height=>`를 쓰면 그 값이 우선이다. 일반 title(`"설명"`)은 그대로 둔다.
+  ```markdown
+  ![사진 설명](https://asset.taeuk.site/posts/essays/photo.png "1600x900")
+  ```
+- **자동으로 적기(권장)**: `./assets/photo.png`를 쓰는 평소 방식에서는 sync가 파일의 실제 크기를 읽어 위 title을 자동으로 붙이도록 [`docs/patches/blog-contents-image-size.patch`](patches/blog-contents-image-size.patch)를 만들어 두었다(적용은 사용자). `scripts/lib/media.js`(새 파일, 테스트 포함)와 `sync_to_db.js` 수정, `image-size` 의존성 추가가 들어 있고, 최신 Blog_Contents `main`에 `git apply --check`로 깔끔히 적용되고 `npm test`(29개)가 통과함을 확인했다. 적용: Blog_Contents 브랜치에서 `git apply <patch>` 후 `npm ci`, PR로 병합. 파일이 없거나 크기를 못 읽으면 title 없이 URL만 바꾼다(기존 동작).
+- 아직 이 힌트가 없는 기존 글의 이미지는 늦게 로드되면 아래가 밀릴 수 있다(패치 적용 후 다시 sync하면 채워짐).
+- 외부 링크 카드(`url:`만 쓴 경우)는 메타데이터가 오기 전에도 제목+설명 2줄 높이의 자리를 미리 잡는다. 유튜브 박스는 16:9 비율 고정이다.
+- 구현: `src/render/image-zoom.js`, `src/render/markdown.js`의 크기 힌트 처리, `src/styles/article.css`(`.zoomable`, `.image-zoom`).
 
 ## 3. sync 스크립트(`sync_to_db.js`) 수정 지점 (적용은 사용자)
 1. `_category.md`는 글로 취급하지 않고 해당 카테고리의 `name`에만 반영한다. 섹션 설명 문구는 프론트 정적 설정(`src/content/sections.js`)에 둔다.

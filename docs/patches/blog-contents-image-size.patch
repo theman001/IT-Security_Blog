@@ -1,0 +1,164 @@
+diff --git a/package-lock.json b/package-lock.json
+index 6001f0b..e7d9b7b 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -8,6 +8,7 @@
+       "dependencies": {
+         "@aws-sdk/client-s3": "^3.700.0",
+         "gray-matter": "^4.0.3",
++        "image-size": "^2.2.0",
+         "mime-types": "^2.1.35",
+         "pg": "^8.13.1"
+       }
+@@ -427,6 +428,17 @@
+         "node": ">=6.0"
+       }
+     },
++    "node_modules/image-size": {
++      "version": "2.2.0",
++      "resolved": "https://registry.npmjs.org/image-size/-/image-size-2.2.0.tgz",
++      "integrity": "sha512-93QTtmEv0UD26RTJfmxQvWzhlauWO1TizNPjCumqzlACXYmI7TlwRWWT2+M4at7kZwnj+WkMOW9XKI76eX0dWw==",
++      "bin": {
++        "image-size": "bin/image-size.js"
++      },
++      "engines": {
++        "node": ">=22"
++      }
++    },
+     "node_modules/is-extendable": {
+       "version": "0.1.1",
+       "resolved": "https://registry.npmjs.org/is-extendable/-/is-extendable-0.1.1.tgz",
+diff --git a/package.json b/package.json
+index 83738b6..b4ea3c8 100644
+--- a/package.json
++++ b/package.json
+@@ -11,6 +11,7 @@
+   "dependencies": {
+     "@aws-sdk/client-s3": "^3.700.0",
+     "gray-matter": "^4.0.3",
++    "image-size": "^2.2.0",
+     "mime-types": "^2.1.35",
+     "pg": "^8.13.1"
+   }
+diff --git a/scripts/lib/media.js b/scripts/lib/media.js
+new file mode 100644
+index 0000000..a1cb366
+--- /dev/null
++++ b/scripts/lib/media.js
+@@ -0,0 +1,33 @@
++import fs from "fs";
++import path from "path";
++import { imageSize } from "image-size";
++
++/**
++ * markdown 내 ./assets/* 이미지를 R2 public URL로 바꾸고, 파일의 실제 크기를 title에 "가로x세로"로 적는다.
++ *
++ * ![alt](./assets/image.png)
++ * → ![alt](https://asset.taeuk.site/posts/{slug}/image.png "800x600")
++ *
++ * 블로그가 이 값을 width/height로 바꿔 이미지가 늦게 떠도 레이아웃이 흔들리지 않게 한다.
++ * 파일이 없거나 크기를 못 읽으면(예: 크기 정보 없는 SVG) title 없이 URL만 바꾼다(기존 동작).
++ */
++export function rewriteMediaLinks(markdown, { base, assetsDir }) {
++  return markdown.replace(
++    /!\[([^\]]*)\]\((\.\/assets\/[^)]+)\)/g,
++    (_, alt, assetPath) => {
++      const filename = path.basename(assetPath);
++      const url = `${base}/${filename}`;
++      const size = readSize(path.join(assetsDir, filename));
++      return `![${alt}](${url}${size ? ` "${size.width}x${size.height}"` : ""})`;
++    }
++  );
++}
++
++export function readSize(file) {
++  try {
++    const { width, height } = imageSize(fs.readFileSync(file));
++    return Number.isInteger(width) && Number.isInteger(height) && width > 0 && height > 0 ? { width, height } : null;
++  } catch {
++    return null;
++  }
++}
+diff --git a/scripts/lib/media.test.js b/scripts/lib/media.test.js
+new file mode 100644
+index 0000000..4f80a72
+--- /dev/null
++++ b/scripts/lib/media.test.js
+@@ -0,0 +1,27 @@
++import { test } from "node:test";
++import assert from "node:assert/strict";
++import fs from "fs";
++import os from "os";
++import path from "path";
++import { rewriteMediaLinks } from "./media.js";
++
++// 1x1 PNG
++const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
++const dir = fs.mkdtempSync(path.join(os.tmpdir(), "media-"));
++fs.writeFileSync(path.join(dir, "a.png"), PNG);
++fs.writeFileSync(path.join(dir, "broken.png"), "not an image");
++const opts = { base: "https://asset.taeuk.site/posts/essays", assetsDir: dir };
++
++test("rewriteMediaLinks rewrites the URL and adds the real size as a title", () => {
++  assert.equal(rewriteMediaLinks("![사진](./assets/a.png)", opts), '![사진](https://asset.taeuk.site/posts/essays/a.png "1x1")');
++});
++
++test("rewriteMediaLinks falls back to URL only when the file is missing or unreadable", () => {
++  assert.equal(rewriteMediaLinks("![x](./assets/none.png) ![y](./assets/broken.png)", opts),
++    "![x](https://asset.taeuk.site/posts/essays/none.png) ![y](https://asset.taeuk.site/posts/essays/broken.png)");
++});
++
++test("rewriteMediaLinks leaves other links and external images alone", () => {
++  const md = "![e](https://example.org/x.png) [t](./assets/a.png)";
++  assert.equal(rewriteMediaLinks(md, opts), md);
++});
+diff --git a/scripts/sync_to_db.js b/scripts/sync_to_db.js
+index aa27728..d37e7af 100644
+--- a/scripts/sync_to_db.js
++++ b/scripts/sync_to_db.js
+@@ -7,6 +7,7 @@ import { parseCategoryMeta, buildCategoryChain } from "./lib/category.js";
+ import { normalizeRelated, checkRelated } from "./lib/related.js";
+ import { toDateString } from "./lib/date.js";
+ import { validatePostFrontMatter } from "./lib/frontmatter.js";
++import { rewriteMediaLinks } from "./lib/media.js";
+ 
+ const BASE_DIR = "contents";
+ const CATEGORY_FILE = "_category.md";
+@@ -49,25 +50,6 @@ function toPosixRelative(file) {
+   return path.relative(BASE_DIR, file).split(path.sep).join("/");
+ }
+ 
+-/**
+- * markdown 내 ./assets/* 경로를
+- * R2 public URL로 rewrite
+- *
+- * ![alt](./assets/image.png)
+- * → ![alt](https://asset.taeuk.site/posts/{slug}/image.png)
+- */
+-function rewriteMediaLinks(markdown, slug) {
+-  const base = slug ? `${R2_ASSET_BASE}/${slug}` : R2_ASSET_BASE;
+-
+-  return markdown.replace(
+-    /!\[([^\]]*)\]\((\.\/assets\/[^)]+)\)/g,
+-    (_, alt, assetPath) => {
+-      const filename = path.basename(assetPath);
+-      return `![${alt}](${base}/${filename})`;
+-    }
+-  );
+-}
+-
+ /* ---------- plan building (pure w.r.t. the filesystem; no DB) ---------- */
+ 
+ function buildPlan() {
+@@ -150,7 +132,10 @@ function buildPlan() {
+       slug: post.slug,
+       title: post.data.title,
+       description: post.data.description,
+-      content: rewriteMediaLinks(post.content, assetSlug),
++      content: rewriteMediaLinks(post.content, {
++        base: assetSlug ? `${R2_ASSET_BASE}/${assetSlug}` : R2_ASSET_BASE,
++        assetsDir: path.join(BASE_DIR, ...post.folderParts, "assets")
++      }),
+       categorySlug: post.folderParts.join("/") || null,
+       authorType: post.data.author_type ?? "admin",
+       tags: Array.isArray(post.data.tags) ? post.data.tags : [],

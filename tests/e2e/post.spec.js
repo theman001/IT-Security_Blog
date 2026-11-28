@@ -356,19 +356,23 @@ test('external link card in a post is filled from /api/link-preview (text only);
   expect(asked.sort()).toEqual([url, 'https://down.example.org/z'].sort()); // hand-written card is never looked up
 });
 
-test('youtube fence: nothing from YouTube loads until click; click swaps in a youtube-nocookie iframe; modified click and bad ids do not', async ({ page }) => {
+test('youtube fence: only the thumbnail loads before click, no iframe; click swaps in a youtube-nocookie iframe; modified click and bad ids do not', async ({ page }) => {
   const id = 'dQw4w9WgXcQ';
   const md = `\`\`\`youtube\nurl: https://youtu.be/${id}?t=1m5s\ntitle: 테스트 영상\n\`\`\`\n\n\`\`\`youtube\nhttps://www.youtube.com/watch?v=${id}\n\`\`\`\n\n\`\`\`youtube\nurl: https://evil.example/watch?v=${id}\n\`\`\`\n\n<iframe src="https://www.youtube.com/embed/${id}"></iframe>`;
   await mockPost(page, [clone(essay, { contentMd: md })]);
   const yt = [];
   page.on('request', (r) => /youtube|ytimg|google/.test(new URL(r.url()).hostname) && yt.push(r.url()));
+  await page.route('https://i.ytimg.com/**', (r) => r.fulfill({ status: 200, contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360"/>' }));
   await page.route('https://www.youtube-nocookie.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>stub</title>' }));
   await page.goto(href(essay.post.slug));
   const boxes = page.locator('.article .video-embed');
   await expect(boxes).toHaveCount(2);
   await expect(page.locator('.article iframe')).toHaveCount(0); // raw <iframe> in markdown is stripped, embeds are not iframes yet
   await expect(page.locator('.article pre')).toHaveCount(1); // the evil.example block stayed a code block
-  expect(yt).toEqual([]);
+  await expect(boxes.nth(0).locator('img.video-embed__thumb')).toHaveAttribute('src', `https://i.ytimg.com/vi/${id}/hqdefault.jpg`);
+  await expect(boxes.nth(0).locator('img.video-embed__thumb')).toHaveAttribute('referrerpolicy', 'no-referrer');
+  await expect.poll(() => yt.length).toBeGreaterThan(0); // the thumbnail (same id twice = one request); never an iframe / nocookie request before a click
+  expect(yt.every((u) => u.startsWith('https://i.ytimg.com/vi/'))).toBe(true);
   const first = boxes.nth(0).locator('a.video-embed__play');
   await expect(first).toHaveAttribute('href', `https://www.youtube.com/watch?v=${id}&t=65`); // no-JS / new-tab fallback
   await expect(first.locator('.video-embed__label')).toHaveText('테스트 영상');
@@ -391,4 +395,41 @@ test('youtube embed ignores a spoofed data-video (raw html in markdown) and clea
   const a = page.locator('.article a.video-embed__play');
   await a.click({ noWaitAfter: true }).catch(() => {});
   await expect(page.locator('.article iframe')).toHaveCount(0);
+});
+
+test('image zoom: click / Enter opens a modal dialog with the large image; Esc, click and the button close it; links and thumbnails are skipped', async ({ page }) => {
+  const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  await page.route('https://asset.taeuk.site/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from(png.split(',')[1], 'base64') }));
+  await page.route('https://i.ytimg.com/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from(png.split(',')[1], 'base64') }));
+  const md = '![첫 사진](https://asset.taeuk.site/posts/a.png)\n\n[![링크 사진](https://asset.taeuk.site/posts/b.png)](https://example.org)\n\n![둘째](https://asset.taeuk.site/posts/c.png)\n\n```youtube\nhttps://youtu.be/dQw4w9WgXcQ\n```';
+  await mockPost(page, [clone(essay, { contentMd: md })]);
+  await page.goto(href(essay.post.slug));
+  const zoomables = page.locator('.article img.zoomable');
+  await expect(zoomables).toHaveCount(2); // the linked image and the youtube thumbnail are not zoomable
+  await expect(zoomables.nth(0)).toHaveAttribute('role', 'button');
+  await expect(zoomables.nth(0)).toHaveAttribute('aria-label', '이미지 크게 보기: 첫 사진');
+  const dlg = page.locator('dialog.image-zoom');
+  await expect(dlg).toHaveCount(0);
+  await zoomables.nth(0).click();
+  await expect(dlg).toBeVisible();
+  await expect(dlg.locator('img')).toHaveAttribute('src', 'https://asset.taeuk.site/posts/a.png');
+  await expect(dlg.locator('img')).toHaveAttribute('alt', '첫 사진');
+  await page.keyboard.press('Escape');
+  await expect(dlg).toHaveCount(0);
+  await expect(zoomables.nth(0)).toBeFocused(); // focus returns to the image
+  await page.keyboard.press('Enter'); // keyboard opens it too
+  await expect(dlg).toBeVisible();
+  await dlg.locator('.image-zoom__close').click();
+  await expect(dlg).toHaveCount(0);
+  await zoomables.nth(1).click();
+  await expect(dlg.locator('img')).toHaveAttribute('src', 'https://asset.taeuk.site/posts/c.png');
+  await dlg.locator('img').click(); // clicking the image closes
+  await expect(dlg).toHaveCount(0);
+  await page.locator('.article .video-embed__thumb').click({ noWaitAfter: true }); // thumbnail click = play, not zoom
+  await expect(dlg).toHaveCount(0);
+  // Ctrl-click leaves the image alone
+  await zoomables.nth(0).click({ modifiers: ['Control'] });
+  await expect(dlg).toHaveCount(0);
+  await zoomables.nth(0).click();
+  await expect(dlg).toBeVisible();
 });

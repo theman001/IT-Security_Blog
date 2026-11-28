@@ -34,8 +34,9 @@ const linkCard = ({ text, lang }) => {
   return `<a class="link-card" href="${e(url)}"${host && !f.title && !f.description ? ' data-preview' : ''}>${host ? `<span class="link-card__host">${e(host)}</span>` : ''}<span class="link-card__title">${e(f.title || host || url)}</span>${f.description ? `<span class="link-card__desc">${e(f.description)}</span>` : ''}</a>\n`;
 };
 
-// ```youtube fence (`url:` or a bare url/id on the first line; optional `title:`) -> click-to-play placeholder.
-// The iframe is created on click by src/render/video-embeds.js; an invalid url stays a normal code block.
+// ```youtube fence (`url:` or a bare url/id on the first line; optional `title:`) -> click-to-play placeholder with the
+// video's thumbnail (i.ytimg.com, no Referer; disclosed in the privacy policy). The iframe is created on click by
+// src/render/video-embeds.js; an invalid url stays a normal code block.
 const videoEmbed = ({ text }) => {
   const f = {};
   const lines = text.split('\n');
@@ -47,7 +48,7 @@ const videoEmbed = ({ text }) => {
   if (!v) return false;
   const label = e(f.title || 'YouTube 영상 재생');
   const href = `https://www.youtube.com/watch?v=${v.id}${v.start ? `&t=${v.start}` : ''}`;
-  return `<div class="video-embed" data-video="${v.id}" data-start="${v.start}"><a class="video-embed__play" href="${href}"><span class="video-embed__icon" aria-hidden="true"></span><span class="video-embed__label">${label}</span><span class="video-embed__host">youtube.com</span></a></div>\n`;
+  return `<div class="video-embed" data-video="${v.id}" data-start="${v.start}"><a class="video-embed__play" href="${href}"><img class="video-embed__thumb" src="https://i.ytimg.com/vi/${v.id}/hqdefault.jpg" alt="" width="480" height="270"><span class="video-embed__icon" aria-hidden="true"></span><span class="video-embed__caption"><span class="video-embed__label">${label}</span><span class="video-embed__host">youtube.com</span></span></a></div>\n`;
 };
 
 const fences = new Map([['link', linkCard], ['youtube', videoEmbed]]);
@@ -96,6 +97,17 @@ export function renderMarkdown(src) {
       const src = img.getAttribute('src') ?? '';
       // relative or https only (asset.taeuk.site is https); drops data:, http:, anything else
       if (HAS_SCHEME.test(src) && !/^https:/i.test(src)) return img.remove();
+      if (src.startsWith('https://i.ytimg.com/')) img.referrerPolicy = 'no-referrer'; // DOMPurify drops the attribute from markup; privacy policy: no Referer to Google
+      // `![alt](url "800x600")`: the size hint (written by the Blog_Contents sync, or by hand) becomes width/height so the
+      // browser reserves the box before the file arrives (no layout shift). It is not a tooltip, so the title goes away.
+      const hint = /^(\d{1,5})x(\d{1,5})$/.exec(img.getAttribute('title') ?? '');
+      if (hint) {
+        img.removeAttribute('title');
+        if (!img.hasAttribute('width') && !img.hasAttribute('height') && +hint[1] > 0 && +hint[2] > 0) {
+          img.setAttribute('width', hint[1]);
+          img.setAttribute('height', hint[2]);
+        }
+      }
       img.loading = 'lazy';
       img.decoding = 'async';
     });
