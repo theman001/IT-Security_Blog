@@ -42,12 +42,12 @@ curl -sI https://<운영 도메인>/tech | grep -i -E 'x-edge-cache|cf-cache-sta
 
 | 페이지 | title | description | og:type | JSON-LD |
 |---|---|---|---|---|
-| `/` | `IT Security Blog` | 사이트 기본 설명 | website | 없음 |
-| `/about` | `About - IT Security Blog` | 소개 문구 | website | 없음 |
-| `/privacy` | `개인정보처리방침 - IT Security Blog` | 방침 소개 문구 | website | 없음 |
-| `/tech` `/trends` `/essays` | `<섹션 제목> - IT Security Blog` | 섹션 설명(`functions/_lib/sections.js`) | website | 없음 |
-| `/categories/<섹션>/<하위>` | `<카테고리명> - IT Security Blog` | 사이트 기본 설명 | website | 없음 |
-| `/posts/<slug>` | `<글 제목> - IT Security Blog` | 글 `description`, 없으면 본문 앞부분 요약 | article (+`article:published_time`) | `BlogPosting`: headline, datePublished, dateModified(=글 날짜), description, url, mainEntityOfPage, author(Person, 사이트명), keywords(태그), articleSection |
+| `/` | `TheMan의 Patch Notes - IT Security Blog` | 사이트 기본 설명 | website | `WebSite`(name, alternateName `TheMan's Patch Notes`) |
+| `/about` | `About - TheMan의 Patch Notes` | 소개 문구 | website | 없음 |
+| `/privacy` | `개인정보처리방침 - TheMan의 Patch Notes` | 방침 소개 문구 | website | 없음 |
+| `/tech` `/trends` `/essays` | `<섹션 제목> - TheMan의 Patch Notes` | 섹션 설명(`functions/_lib/sections.js`) | website | 없음 |
+| `/categories/<섹션>/<하위>` | `<카테고리명> - TheMan의 Patch Notes` | 사이트 기본 설명 | website | 없음 |
+| `/posts/<slug>` | `<글 제목> - TheMan의 Patch Notes` | 글 `description`, 없으면 본문 앞부분 요약 | article (+`article:published_time`) | `BlogPosting`: headline, datePublished, dateModified(=글 날짜), description, url, mainEntityOfPage, author(Person, 사이트명), keywords(태그), articleSection |
 | 404 / 500 | 셸 기본값 | 셸 기본값 | - | 없음. `<meta name="robots" content="noindex">` 추가 |
 
 글 페이지는 추가로 글 헤더를 프리렌더하고 API 페이로드를 인라인한다(LCP와 요청 수 개선). JSON-LD의 `<`는 `\u003c`로 이스케이프된다.

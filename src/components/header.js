@@ -1,5 +1,6 @@
 import { getTheme, toggleTheme } from '../lib/theme.js';
 import { onNavigate } from '../router.js';
+import { SITE, SITE_SUBTITLE } from '../lib/site.js';
 
 const SECTIONS = [
   ['', 'Home'],
@@ -25,7 +26,7 @@ const sectionOf = (pathname) => {
 export function mountHeader(el) {
   el.className = 'site-header';
   el.innerHTML = `<div class="site-header__inner">
-  <a class="site-header__name" href="/" data-link>IT Security Blog</a>
+  <a class="site-header__name" href="/" data-link><span class="site-header__title">${SITE}</span><span class="site-header__sub">${SITE_SUBTITLE}</span></a>
   ${SUPPORT}
   <nav class="site-header__nav" aria-label="주요 메뉴">${SECTIONS.map(([s, label]) => `<a href="/${s}" data-link>${label}</a>`).join('')}</nav>
   <button type="button" class="theme-toggle" aria-label="다크 모드">${ICONS}</button>

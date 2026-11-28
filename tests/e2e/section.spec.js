@@ -53,7 +53,7 @@ test('section page: header, description, count, rows', async ({ page }) => {
   await expect(page.locator('.list-desc')).not.toBeEmpty();
   await expect(page.locator('.list-count')).toHaveText('27개의 글');
   await expect(page.locator('.post-row')).toHaveCount(20);
-  expect(await page.title()).toBe('기술 - IT Security Blog');
+  expect(await page.title()).toBe('기술 - TheMan의 Patch Notes');
   expect(calls[0]).toEqual({ category: 'tech', limit: '20' });
   await page.goto('/trends');
   await expect(page.locator('h1')).toHaveText('동향');
@@ -200,7 +200,7 @@ test('section without a DB row still renders its static header and empty state',
   await expect(page.locator('.list-desc')).not.toBeEmpty();
   await expect(page.locator('.list-count')).toHaveText('0개의 글');
   await expect(page.locator('.list-empty')).toHaveText('아직 글이 없습니다. 홈으로');
-  expect(await page.title()).toBe('사유 - IT Security Blog');
+  expect(await page.title()).toBe('사유 - TheMan의 Patch Notes');
 });
 
 test('section root row missing but deeper categories exist: header, crumb, chips and tree survive', async ({ page }) => {
@@ -225,7 +225,7 @@ test('unknown category or section -> 페이지를 찾을 수 없습니다 with t
   for (const url of ['/categories/tech/nope', '/categories/other/x', '/categories/tech/security/reversing/deeper', '/categories/constructor/x', '/categories/__proto__/x', '/categories/toString']) {
     await page.goto(url);
     await expect(page.locator('#main')).toContainText('페이지를 찾을 수 없습니다');
-    expect(await page.title()).toBe('페이지를 찾을 수 없습니다 - IT Security Blog');
+    expect(await page.title()).toBe('페이지를 찾을 수 없습니다 - TheMan의 Patch Notes');
     await expect(page.locator('.list-rows')).toHaveCount(0);
   }
 });

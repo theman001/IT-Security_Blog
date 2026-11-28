@@ -1,6 +1,7 @@
 import '../styles/home.css';
 import { getPosts } from '../lib/api.js';
 import { escapeHtml as e } from '../lib/escape.js';
+import { SITE, SITE_TAGLINE } from '../lib/site.js';
 import { categoryHref, postHref } from '../lib/urls.js';
 import { postCardHtml, pullQuoteHtml } from '../components/post-card.js';
 
@@ -64,7 +65,7 @@ export default {
   render({ lead, recent, sections }) {
     return {
       title: '',
-      html: `<h1 class="home-sr">IT Security Blog</h1>
+      html: `<h1 class="home-sr">${e(SITE)}: ${e(SITE_TAGLINE)}</h1>
 <div class="home-top">
   <div class="home-lead">${leadHtml(lead)}</div>
   <aside class="home-recent" aria-labelledby="home-recent">

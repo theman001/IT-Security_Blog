@@ -12,7 +12,7 @@ const evil = {
 
 test('metaTags + headTagsHtml: fully escaped, no raw script, no </script> in JSON-LD', () => {
   const m = metaTags(evil, 'https://e.com');
-  assert.equal(m.title, `${evil.title} - IT Security Blog`);
+  assert.equal(m.title, `${evil.title} - TheMan의 Patch Notes`);
   assert.equal(m.canonical, 'https://e.com/posts/tech/a%20b%26c%3A%ED%95%9C%EA%B8%80');
   assert.equal(m.og['og:type'], 'article');
   assert.equal(m.og['article:published_time'], '2026-01-02');
@@ -36,10 +36,10 @@ test('metaTags uses excerpt when description empty, accepts getPost() shape', ()
 });
 test('pageMeta: home title and canonical', () => {
   const h = pageMeta({ title: '', description: 'd', path: '/' }, 'https://e.com');
-  assert.equal(h.title, 'IT Security Blog');
+  assert.equal(h.title, 'TheMan의 Patch Notes - IT Security Blog');
   assert.equal(h.canonical, 'https://e.com/');
   const s = pageMeta({ title: '기술', description: 'd', path: '/categories/tech/a b' }, 'https://e.com');
-  assert.equal(s.title, '기술 - IT Security Blog');
+  assert.equal(s.title, '기술 - TheMan의 Patch Notes');
   assert.equal(s.canonical, 'https://e.com/categories/tech/a%20b');
   assert.ok(!headTagsHtml(s).includes('ld+json'));
 });

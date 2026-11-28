@@ -5,7 +5,7 @@ import { fixture, mockPosts, mockPost } from './mock-api.js';
 const normal = fixture('posts-normal');
 const xss = fixture('posts-xss');
 const NF = '페이지를 찾을 수 없습니다';
-const SITE = 'IT Security Blog';
+const SITE = 'TheMan의 Patch Notes';
 
 test('/about renders the markdown inside .article with title About', async ({ page }) => {
   let dialog = false;
@@ -214,7 +214,7 @@ test('support widget: right of the site name, external link opening a new tab, t
   await expect(w).toHaveAttribute('rel', /noreferrer/);
   await expect(w).not.toHaveAttribute('data-link', /.*/); // external: never routed by the SPA
   await expect(w).toHaveAttribute('aria-label', /커피 한 잔 후원하기/);
-  // right of "IT Security Blog", before the nav
+  // right of the brand name, before the nav
   await page.setViewportSize({ width: 1440, height: 900 });
   const [wb, nb, nav] = await Promise.all([w.boundingBox(), page.locator('.site-header__name').boundingBox(), page.locator('.site-header__nav').boundingBox()]);
   expect(nb.x + nb.width).toBeLessThanOrEqual(wb.x);
@@ -279,4 +279,34 @@ test('header controls stay inside the viewport at in-between widths (widget + na
     const clipped = await page.locator('.site-header__nav').evaluate((el) => el.scrollWidth > el.clientWidth + 1);
     expect(clipped, `nav clipped @${width}`).toBe(false);
   }
+});
+
+test('brand: header shows "TheMan의 Patch Notes" with "IT Security Blog" as the sub-line; home h1 carries name + tagline', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/about');
+  const brand = page.locator('.site-header__name');
+  await expect(brand).toHaveAttribute('href', '/');
+  await expect(brand.locator('.site-header__title')).toHaveText('TheMan의 Patch Notes');
+  await expect(brand.locator('.site-header__sub')).toHaveText('IT Security Blog');
+  const g = await brand.evaluate((el) => {
+    const t = el.querySelector('.site-header__title').getBoundingClientRect();
+    const s = el.querySelector('.site-header__sub').getBoundingClientRect();
+    return { titleSize: parseFloat(getComputedStyle(el.querySelector('.site-header__title')).fontSize), subSize: parseFloat(getComputedStyle(el.querySelector('.site-header__sub')).fontSize), titleBottom: t.bottom, subTop: s.top };
+  });
+  expect(g.subSize).toBeLessThan(g.titleSize);
+  expect(g.subTop).toBeGreaterThanOrEqual(g.titleBottom - 1); // a second line under the name
+  await page.setViewportSize({ width: 360, height: 800 });
+  const small = await brand.locator('.site-header__title').evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+  expect(small).toBeLessThan(g.titleSize); // smaller name on narrow screens
+  // 360px: name, widget and theme toggle share the first header row (the toggle must not wrap under the name)
+  const row = await page.evaluate(() => {
+    const r = (s) => document.querySelector(s).getBoundingClientRect();
+    return { name: r('.site-header__name'), widget: r('.support-widget'), toggle: r('.theme-toggle'), nav: r('.site-header__nav') };
+  });
+  expect(row.toggle.top).toBeLessThan(row.name.bottom);
+  expect(row.widget.top).toBeLessThan(row.name.bottom);
+  expect(row.nav.top).toBeGreaterThanOrEqual(row.name.bottom - 1); // the menu is the second row
+  await expect(page.locator('#main .article')).toContainText('기술을 읽고, 생각을 적는다');
+  await page.goto('/');
+  await expect(page.locator('h1.home-sr')).toHaveText('TheMan의 Patch Notes: 기술을 읽고, 생각을 적는다');
 });

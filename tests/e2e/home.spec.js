@@ -9,7 +9,7 @@ test('title is exactly the site name', async ({ page }) => {
   await mockPosts(page, normal);
   await page.goto('/');
   await expect(page.locator('.home-lead')).toBeVisible();
-  expect(await page.title()).toBe('IT Security Blog');
+  expect(await page.title()).toBe('TheMan의 Patch Notes - IT Security Blog');
 });
 
 test('lead essay comes first, before the Tech section; recent column excludes it', async ({ page }) => {
@@ -166,7 +166,7 @@ test('card click navigates via pushState (no reload) to the encoded slug', async
 test('navigating back to home moves focus to #main', async ({ page }) => {
   await mockPosts(page, normal);
   await page.goto('/tech');
-  await page.getByRole('link', { name: 'IT Security Blog' }).first().click();
+  await page.locator('.site-header__name').click();
   await expect(page.locator('.home-lead')).toBeVisible();
   await expect(page.locator('#main')).toBeFocused();
 });
