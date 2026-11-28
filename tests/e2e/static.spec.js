@@ -100,7 +100,7 @@ test('route order: other routes still win over the wildcard', async ({ page }) =
   await mockPosts(page, normal);
   await mockPost(page, []);
   await page.route('**/api/categories', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [] }) }));
-  for (const [url, h1] of [['/about', 'About'], ['/tech', '기술'], ['/trends', '동향·사건사고'], ['/essays', '사유']]) {
+  for (const [url, h1] of [['/about', 'About'], ['/tech', '기술'], ['/trends', '동향'], ['/essays', '사유']]) {
     await page.goto(url);
     await expect(page.locator('#main h1')).toHaveText(h1);
   }

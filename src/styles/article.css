@@ -266,6 +266,7 @@ nav[aria-label="이 글의 목차"] a[aria-current="true"] {
 }
 @media (min-width: 1200px) {
   nav[aria-label="이 글의 목차"] {
+    margin-top: var(--space-2); /* first line level with the sidebar's first row */
     position: sticky;
     top: var(--space-8);
     width: var(--toc-width);

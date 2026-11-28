@@ -83,6 +83,11 @@ try {
   const lp = (u) => get('/api/link-preview?url=' + encodeURIComponent(u));
   check('/api/link-preview: private url -> 400, url in no post -> 404 (real DB lookup, nothing fetched)',
     (await lp('http://127.0.0.1/')).r.status === 400 && (await lp(`https://example.org/not-in-any-post-${Date.now()}`)).r.status === 404);
+  const nav = await get('/api/nav');
+  const navJson = nav.r.status === 200 ? JSON.parse(nav.t) : {};
+  check('/api/nav -> {categories, posts[{slug,title}]} for every section, without bodies',
+    Array.isArray(navJson.categories) && Array.isArray(navJson.posts) && navJson.posts.every((p) => Object.keys(p).sort().join() === 'slug,title'),
+    `${nav.r.status}`);
   const redirect = await get('/categories/tech');
   check('/categories/tech -> 301 /tech', redirect.r.status === 301 && redirect.r.headers.get('location') === '/tech', `${redirect.r.status} ${redirect.r.headers.get('location')}`);
   const post405 = await fetch(BASE + '/about', { method: 'POST' });

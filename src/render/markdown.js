@@ -52,7 +52,9 @@ const videoEmbed = ({ text }) => {
 };
 
 const fences = new Map([['link', linkCard], ['youtube', videoEmbed]]);
-const parser = new Marked({ renderer: { code: (tok) => fences.get(tok.lang?.trim())?.(tok) ?? false } });
+// No strikethrough: GFM turns a pair of single tildes into <del>, which swallows ranges like "1986~1987 ... 1992~1995".
+// `del: () => undefined` = never produce a del token, so `~` and `~~` stay literal text. (Raw <del>/<s> html still works.)
+const parser = new Marked({ tokenizer: { del: () => undefined }, renderer: { code: (tok) => fences.get(tok.lang?.trim())?.(tok) ?? false } });
 
 /**
  * Markdown -> sanitized HTML string. marked -> DOMPurify (no hooks, so no global state

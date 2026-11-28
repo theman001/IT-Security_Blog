@@ -114,6 +114,16 @@ export async function getCategoryPosts(db, path) {
   return { category: toCategory(cat), children: children.map(toCategory), posts: posts.map(toSummary) };
 }
 
+// Post-page sidebar: every category + every post as {slug, title} (no body, no excerpt, nothing to bind).
+// A post's category is the folder part of its slug.
+export async function getNav(db) {
+  const [categories, posts] = await Promise.all([
+    listCategories(db),
+    db.query('SELECT r.slug, r.title FROM reports r ORDER BY r.created_at, r.id', []),
+  ]);
+  return { categories, posts: posts.map((p) => ({ slug: p.slug, title: p.title })) };
+}
+
 // Sitemap: slug + date only (no body), bound-free fixed query.
 export const listSitemapEntries = (db) =>
   db.query(`SELECT slug, to_char(created_at, 'YYYY-MM-DD') AS date FROM reports ORDER BY created_at DESC, id DESC`, []);

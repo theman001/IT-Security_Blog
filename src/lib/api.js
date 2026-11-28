@@ -53,4 +53,5 @@ function takeInlinePost(slug) {
 }
 export const getPost = async (slug) => takeInlinePost(slug) ?? get(`/api/posts/${seg(slug)}`);
 export const getCategories = () => get('/api/categories');
+export const getNav = () => get('/api/nav');
 export const getCategoryPosts = async (path) => get(`/api/categories/${seg(path)}/posts`);

@@ -1,7 +1,7 @@
 import { json, fail } from './http.js';
 import { decodeSlug } from './slug.js';
 import { decodeCursor } from './cursor.js';
-import { listPosts, getPost, listCategories, getCategoryPosts } from './queries.js';
+import { listPosts, getPost, listCategories, getCategoryPosts, getNav } from './queries.js';
 
 const SECTIONS = ['tech', 'trends', 'essays'];
 const asParts = (p) => (p == null ? [] : Array.isArray(p) ? p : [p]);
@@ -47,6 +47,9 @@ export const handlePosts = (ctx, deps) =>
     }
     return json(await listPosts(db(), { section, category, limit, cursor }));
   });
+
+// GET /api/nav -> { categories, posts: [{slug,title}] } for the post-page sidebar (all sections)
+export const handleNav = (ctx, deps) => guarded(ctx, deps, async (_url, _parts, db) => json(await getNav(db())));
 
 export const handleCategories = (ctx, deps) =>
   guarded(ctx, deps, async (_url, parts, db) => {
