@@ -18,7 +18,11 @@ test('/about renders the markdown inside .article with title About', async ({ pa
   const rss = page.locator('#main .article a[href="/rss.xml"]');
   await expect(rss).toBeVisible();
   await expect(rss).not.toHaveAttribute('data-link', /.*/);
-  await expect(page.locator('#main .article')).toContainText('연락처는 곧 추가됩니다.');
+  await expect(page.locator('#main .article')).not.toContainText('연락처는 곧');
+  await expect(page.locator('#main .article h2').filter({ hasText: '연락·구독' })).toHaveCount(0);
+  const ext = page.locator('#main .article a[href="https://github.com/theman001"], #main .article a[href="https://litt.ly/theman"]');
+  await expect(ext).toHaveCount(2);
+  for (const a of await ext.all()) { await expect(a).toHaveAttribute('target', '_blank'); await expect(a).toHaveAttribute('rel', /noopener/); }
   await expect(page.locator('#main .article')).not.toContainText('TODO');
   expect(dialog).toBe(false);
 });
@@ -258,10 +262,23 @@ test('support widget: right of the site name, external link opening a new tab, t
   expect(page.url()).toContain('/about'); // this tab stays on the blog
 });
 
-test('privacy policy mentions the external support link (litt.ly)', async ({ page }) => {
+test('privacy policy covers support/revenue, overseas transfer, officer and remedies', async ({ page }) => {
   await page.goto('/privacy');
-  await expect(page.locator('#main .article')).toContainText('리틀리(litt.ly)');
-  await expect(page.locator('#main .article h2').filter({ hasText: '외부 링크(후원)' })).toHaveCount(1);
+  const a = page.locator('#main .article');
+  await expect(a).toContainText('리틀리(litt.ly)');
+  for (const h of ['후원과 수익에 관한 고지', '개인정보 처리 위탁과 국외 이전', '개인정보 보호책임자', '권익 침해 구제 방법', '콘텐츠 이용 안내']) {
+    await expect(page.locator('#main .article h2').filter({ hasText: h })).toHaveCount(1);
+  }
+  await expect(a).toContainText('notion.personal@gmail.com');
+  await expect(a).not.toContainText('곧 추가됩니다');
+});
+
+test('/contact shows the mail address as a mailto link and the support route', async ({ page }) => {
+  await page.goto('/contact');
+  await expect(page.locator('#main .article a[href="mailto:notion.personal@gmail.com"]')).toBeVisible();
+  const s = page.locator('#main .article a[href="https://litt.ly/theman"]');
+  await expect(s).toHaveAttribute('target', '_blank');
+  await expect(page.locator('#main .article')).not.toContainText('준비 중');
 });
 
 test('header controls stay inside the viewport at in-between widths (widget + name + nav + toggle)', async ({ page }) => {
