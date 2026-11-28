@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 const activeIs = (page, sel) => page.evaluate((s) => document.activeElement?.matches(s), sel);
-const SITE = 'IT Security Blog';
+const SITE = 'TheMan의 Patch Notes';
 
 test('keyboard: Tab order is skip link, site name, support widget, nav links (Home first), theme toggle; Enter on skip link focuses #main', async ({ page }) => {
   await page.goto('/');

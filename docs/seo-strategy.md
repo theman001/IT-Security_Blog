@@ -40,12 +40,12 @@
 
 | 경로 | 처리 파일 | 색인 | title | canonical | 비고 |
 |---|---|---|---|---|---|
-| `/` | `functions/[[path]].js` → `handleCatchAll` | O | `IT Security Blog` | `<origin>/` | 첫 HTML에 `<h1>`은 없고 SPA가 시각적으로 숨긴 `h1`을 그린다 |
-| `/tech` `/trends` `/essays` | 〃 | O | `<섹션 제목> - IT Security Blog` | `<origin>/<섹션>` | 설명은 `functions/_lib/sections.js`(= `src/content/sections.js`, 유닛 테스트가 동일성 검사) |
-| `/categories/<섹션>/<하위…>` | 〃 | O | `<카테고리명> - IT Security Blog` | `<origin>/categories/<경로>` | DB에 있는 카테고리만. 없으면 404 |
+| `/` | `functions/[[path]].js` → `handleCatchAll` | O | `TheMan의 Patch Notes - IT Security Blog` | `<origin>/` | `WebSite` JSON-LD(사이트 이름 신호). 첫 HTML에 `<h1>`은 없고 SPA가 시각적으로 숨긴 `h1`(이름 + 한 줄 소개)을 그린다 |
+| `/tech` `/trends` `/essays` | 〃 | O | `<섹션 제목> - TheMan의 Patch Notes` | `<origin>/<섹션>` | 설명은 `functions/_lib/sections.js`(= `src/content/sections.js`, 유닛 테스트가 동일성 검사) |
+| `/categories/<섹션>/<하위…>` | 〃 | O | `<카테고리명> - TheMan의 Patch Notes` | `<origin>/categories/<경로>` | DB에 있는 카테고리만. 없으면 404 |
 | `/categories/<섹션>` (루트) | 〃 | 301 | - | → `/<섹션>` | 같은 화면이므로 중복 제거(`Location: /<섹션>`) |
-| `/posts/<slug…>` | `functions/posts/[[slug]].js` → `handlePost` | O | `<글 제목> - IT Security Blog` | `<origin>/posts/<인코딩된 slug>` | 글 헤더 프리렌더, JSON-LD, 인라인 데이터. 슬러그 오류/없음은 404 |
-| `/about` `/privacy` `/contact` | `handleCatchAll` | O | `About` / `개인정보처리방침` / `문의하기` + ` - IT Security Blog` | 각자 | `/contact`는 내용이 얇다(5절) |
+| `/posts/<slug…>` | `functions/posts/[[slug]].js` → `handlePost` | O | `<글 제목> - TheMan의 Patch Notes` | `<origin>/posts/<인코딩된 slug>` | 글 헤더 프리렌더, JSON-LD, 인라인 데이터. 슬러그 오류/없음은 404 |
+| `/about` `/privacy` `/contact` | `handleCatchAll` | O | `About` / `개인정보처리방침` / `문의하기` + ` - TheMan의 Patch Notes` | 각자 | `/contact`는 내용이 얇다(5절) |
 | `/sitemap.xml` `/rss.xml` `/robots.txt` | `functions/sitemap.xml.js` `rss.xml.js` `robots.txt.js` | - | - | - | 4절 |
 | 그 밖의 모든 경로 | `handleCatchAll` → `notFound` | **noindex** | 셸 기본값 | - | **HTTP 404** + SPA 셸 + `<meta name="robots" content="noindex">` |
 | 없는 정적 파일(확장자 있는 경로) | `handleCatchAll` (`isAssetPath`) | noindex | - | - | Pages가 `index.html`을 200으로 돌려주면(soft 404) 404 셸로 바꾼다. `_routes.json` 제외 경로는 `public/404.html`(noindex) |
@@ -57,14 +57,14 @@
 - **인코딩**: slug 안의 공백, `&`, `:`, 한글은 세그먼트별로 퍼센트 인코딩해 canonical, sitemap, RSS에 쓴다(`seo.js` `encodePath`). 디코드 규칙은 `functions/_lib/slug.js`(대소문자 구분, 마지막 세그먼트 폴백 없음).
 - **origin**: 환경변수 `SITE_URL`(`seo.js` `siteOrigin`). **Production에서 필수.** 비어 있으면 요청 host로 대신해서 `*.pages.dev`와 커스텀 도메인이 각자 canonical을 내보내 중복 색인될 수 있다([seo.md](seo.md) 5절).
 - **`index.html`의 기본값**(`index.html`): `lang="ko"`, viewport, 기본 description, `og:site_name`, RSS `<link rel="alternate" type="application/rss+xml">`, 파비콘(`favicon.svg`, `favicon.ico`, `apple-touch-icon.png`).
-- **클라이언트 이동 시**: `src/router.js`가 `document.title`을 같은 형식(`<제목> - IT Security Blog`)으로 갱신한다. 검색엔진은 첫 HTML(엣지 값)을 기준으로 본다.
+- **클라이언트 이동 시**: `src/router.js`가 `document.title`을 같은 형식(`<제목> - TheMan의 Patch Notes`)으로 갱신한다. 검색엔진은 첫 HTML(엣지 값)을 기준으로 본다.
 
 ## 4. 메타데이터, 구조화 데이터, 발견(sitemap/RSS/robots)
 
 ### 4.1 메타 태그 (`functions/_lib/seo.js`)
 | 태그 | 글(`metaTags`) | 일반 페이지(`pageMeta`) |
 |---|---|---|
-| `<title>` | `<제목> - IT Security Blog` | 홈은 사이트명, 나머지는 `<제목> - IT Security Blog` |
+| `<title>` | `<제목> - TheMan의 Patch Notes` | 홈은 `TheMan의 Patch Notes - IT Security Blog`, 나머지는 `<제목> - TheMan의 Patch Notes` |
 | `meta description` | 글 `description`, 없으면 본문 앞 180자 요약(`functions/_lib/excerpt.js` `makeExcerpt`: 마크다운 기호 제거) | 페이지별 고정 문구 / 섹션 설명 / 기본 설명 |
 | `link canonical` | `<origin>/posts/<slug>` | `<origin><경로>` |
 | Open Graph | `og:type=article`, `og:title`, `og:description`, `og:url`, `og:site_name`, `article:published_time` | `og:type=website` + 같은 필드 |
@@ -74,7 +74,7 @@
 `og:image`는 없다(링크 미리보기에 이미지가 없다).
 
 ### 4.2 구조화 데이터
-글 페이지에만 JSON-LD `BlogPosting`(`seo.js` `metaTags`): `headline`, `datePublished`, `dateModified`(= 글 날짜), `description`, `url`, `mainEntityOfPage`, `author`(Person, 이름은 사이트명), `keywords`(태그), `articleSection`(카테고리명). `BreadcrumbList`, `WebSite`, `Organization`은 없다.
+홈에는 `WebSite`(구글 사이트 이름용 `name`=`TheMan의 Patch Notes`, `alternateName`=`TheMan's Patch Notes`), 글 페이지에는 JSON-LD `BlogPosting`(`seo.js` `metaTags`): `headline`, `datePublished`, `dateModified`(= 글 날짜), `description`, `url`, `mainEntityOfPage`, `author`(Person, 이름은 `TheMan`), `keywords`(태그), `articleSection`(카테고리명). `BreadcrumbList`, `WebSite`, `Organization`은 없다.
 
 ### 4.3 sitemap, RSS, robots
 | 파일 | 내용 | 코드 |
@@ -82,6 +82,8 @@
 | `/sitemap.xml` | `/`, `/about`, `/privacy`, `/contact`, 섹션 3개, 섹션 하위 카테고리, 모든 글(`<lastmod>` = 글 날짜). 섹션 루트 카테고리 URL은 넣지 않는다(301이므로). 한 파일 5만 URL 상한 | `handleSitemap`, `seo.js` `buildSitemap` |
 | `/rss.xml` | 최신 20개(제목, 링크, 요약, pubDate는 KST 00:00 기준), `<guid isPermaLink>` | `handleRss`, `buildRss` |
 | `/robots.txt` | `User-agent: *` `Allow: /` + `Sitemap: <origin>/sitemap.xml` | `handleRobots` |
+
+**운영 도메인의 robots.txt에는 위 내용 앞에 Cloudflare가 자동으로 붙인 관리형 규칙이 있다**(`Content-Signal: search=yes,ai-train=no,...`와 GPTBot, ClaudeBot, Google-Extended, CCBot, Baiduspider 등 `Disallow: /`). 이 부분은 코드가 아니라 Cloudflare 대시보드 설정이고, 검색 봇(`User-agent: *`)은 막지 않는다. 모두 허용하려면 [seo.md](seo.md) 7절.
 
 세 파일 모두 DB에서 요청 때 만들어지므로 글을 올려도 재빌드가 필요 없다. Workers Cache API로 10분 엣지 캐시([api.md](api.md) 엣지 캐시 절, `functions/_lib/cache.js`).
 

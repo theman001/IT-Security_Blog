@@ -4,7 +4,7 @@ import { getPost, listCategories, listPosts, listSitemapEntries } from './querie
 import { renderShell } from './shell.js';
 import { postLayoutHtml } from '../../src/lib/post-header.js';
 import { SECTIONS } from './sections.js';
-import { DEFAULT_DESCRIPTION, buildRss, buildSitemap, headTagsHtml, metaTags, pageMeta, siteOrigin } from './seo.js';
+import { DEFAULT_DESCRIPTION, SITE, buildRss, buildSitemap, headTagsHtml, metaTags, pageMeta, siteOrigin } from './seo.js';
 
 const ok = (body, type, status = 200) =>
   new Response(body, { status, headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=60, s-maxage=600, stale-while-revalidate=60' } });
@@ -60,9 +60,9 @@ export const handleCatchAll = (ctx, deps) =>
     const path = raw.length > 1 ? raw.replace(/\/+$/, '') : raw;
     const origin = siteOrigin(ctx.env, ctx.request);
     if (path === '/') return page(ctx, deps, pageMeta({ title: '', description: DEFAULT_DESCRIPTION, path }, origin));
-    if (path === '/about') return page(ctx, deps, pageMeta({ title: 'About', description: 'IT Security Blog와 운영자에 대한 소개.', path }, origin));
-    if (path === '/privacy') return page(ctx, deps, pageMeta({ title: '개인정보처리방침', description: 'IT Security Blog의 개인정보처리방침.', path }, origin));
-    if (path === '/contact') return page(ctx, deps, pageMeta({ title: '문의하기', description: 'IT Security Blog 문의 안내.', path }, origin));
+    if (path === '/about') return page(ctx, deps, pageMeta({ title: 'About', description: `${SITE} 소개: 기술을 읽고, 생각을 적는 블로그와 운영자.`, path }, origin));
+    if (path === '/privacy') return page(ctx, deps, pageMeta({ title: '개인정보처리방침', description: `${SITE} 개인정보처리방침.`, path }, origin));
+    if (path === '/contact') return page(ctx, deps, pageMeta({ title: '문의하기', description: `${SITE} 문의 안내.`, path }, origin));
     const key = path.slice(1);
     if (Object.hasOwn(SECTIONS, key)) return page(ctx, deps, pageMeta({ title: SECTIONS[key].title, description: SECTIONS[key].description, path }, origin));
     if (path.startsWith('/categories/')) {

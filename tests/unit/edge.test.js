@@ -62,7 +62,7 @@ test('catch-all: known pages 200, unknown 404 + noindex', async () => {
   }
   const t = await handleCatchAll(mk('/tech/'), deps(fakeDb()));
   assert.ok(t.rewrite.head.includes('href="http://x/tech"'));
-  assert.ok(t.rewrite.head.includes('<title>기술 - IT Security Blog</title>'));
+  assert.ok(t.rewrite.head.includes('<title>기술 - TheMan의 Patch Notes</title>'));
   for (const p of ['/nope', '/a/b/c', '/Tech', '/posts-x', '/categories', '/categories/', '/about/x', '/toString', '/__proto__']) {
     const r = await handleCatchAll(mk(p), deps(fakeDb()));
     assert.equal(r.status, 404, p);
@@ -99,7 +99,7 @@ test('categories: existing section-rooted 200 (name as title), missing/non-secti
   const db = fakeDb([{ slug: 'tech/web', name: 'Web <x>' }, { slug: 'Security/Hack', name: 'Old' }]);
   const ok = await handleCatchAll(mk('/categories/tech/web'), deps(db));
   assert.equal(ok.status, 200);
-  assert.ok(ok.rewrite.head.includes('<title>Web &lt;x&gt; - IT Security Blog</title>'));
+  assert.ok(ok.rewrite.head.includes('<title>Web &lt;x&gt; - TheMan의 Patch Notes</title>'));
   for (const p of ['/categories/tech/nope', '/categories/Security/Hack', '/categories/tech/%E0%A4', '/categories/tech/../x']) {
     const r = await handleCatchAll(mk(p), deps(db));
     assert.equal(r.status, 404, p);

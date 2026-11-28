@@ -1,4 +1,5 @@
 # IT Security Blog — Renewal (CLAUDE.md)
+Brand: **TheMan의 Patch Notes** (en: TheMan's Patch Notes), subtitle `IT Security Blog`, tagline 기술을 읽고, 생각을 적는다. Single source `src/lib/site.js` (router, header, edge `seo.js`); `index.html`/`public/404.html` are static copies kept in sync by `tests/unit/site.test.js`. The repo/project name stays IT-Security_Blog.
 
 Repo: `theman001/IT-Security_Blog`. Work branch: `renewal`. The user merges `renewal` -> `main` via PR.
 Detailed rules live in the `blog-platform` skill (`.claude/skills/blog-platform/SKILL.md`); read it before any work.
@@ -31,7 +32,7 @@ Env vars (Cloudflare Production and Preview are separate lists; apply from the n
 
 ## 3. Directory layout
 ```
-functions/         Pages Functions (import from src/ only the pure post-header.js chain: escape, urls, related-card)
+functions/         Pages Functions (import from src/ only the pure post-header.js chain: escape, urls, related-card, and the constants in lib/site.js)
   api/posts, api/categories   JSON API (catch-all [[slug]]/[[path]]); api/link-preview.js (external link card metadata, guarded fetch), api/nav.js (post-page sidebar data)
   posts/[[slug]].js           post HTML: meta + JSON-LD + prerendered header + inline payload; 404 if missing
   [[path]].js                 catch-all: /, /about, /privacy, /contact (content TBD), sections, /categories/*, assets, 404, bare /api 404

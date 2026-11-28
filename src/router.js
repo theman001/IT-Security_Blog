@@ -7,7 +7,7 @@
 // `route('*', page)` registers the not-found page. Routes match in registration order.
 import { escapeHtml } from './lib/escape.js';
 
-const SITE = 'IT Security Blog';
+import { SITE, HOME_TITLE } from './lib/site.js';
 const routes = [];
 let notFoundPage = {
   render: () => ({
@@ -76,7 +76,7 @@ async function show(initial = false) {
   }
   const main = document.getElementById('main');
   main.innerHTML = out.html;
-  document.title = out.title ? `${out.title} - ${SITE}` : SITE;
+  document.title = out.title ? `${out.title} - ${SITE}` : HOME_TITLE;
   current = page;
   try {
     page?.mount?.(main, data);

@@ -1,6 +1,6 @@
-# IT Security Blog
+# TheMan의 Patch Notes
 
-보안 취약점 분석, 보안 동향, 보안을 바라보는 생각을 기록하는 블로그. 세 섹션(`tech` 기술, `trends` 동향, `essays` 사유)을 가진 에디토리얼 스타일 SPA다. 글은 마크다운으로 Neon Postgres에 저장되고 Cloudflare Pages Functions가 읽기 전용으로 제공한다.
+**IT Security Blog** · 기술을 읽고, 생각을 적는다. IT·AI·보안의 기술과 동향, 그리고 보안을 바라보는 생각을 기록하는 블로그(영문 표기 `TheMan's Patch Notes`). 세 섹션(`tech` 기술, `trends` 동향, `essays` 사유)을 가진 에디토리얼 스타일 SPA다. 글은 마크다운으로 Neon Postgres에 저장되고 Cloudflare Pages Functions가 읽기 전용으로 제공한다.
 
 ## Stack
 - Frontend: Vanilla JS (ES modules), CSS variables(`DESIGN.md` 토큰), Vite 8. History API 라우터. 폰트는 npm 패키지 셀프 호스팅(Pretendard, Noto Serif KR, JetBrains Mono).

@@ -1,6 +1,6 @@
 // Pure SEO builders (no Workers globals): head tags, sitemap, RSS.
-export const SITE = 'IT Security Blog';
-export const DEFAULT_DESCRIPTION = '보안 취약점 분석, 보안 동향, 그리고 보안을 바라보는 생각을 기록하는 IT 보안 블로그.';
+import { SITE, SITE_EN, AUTHOR, HOME_TITLE, DEFAULT_DESCRIPTION } from '../../src/lib/site.js';
+export { SITE, DEFAULT_DESCRIPTION };
 
 const MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 export const escapeText = (s) => String(s ?? '').replace(/[&<>]/g, (c) => MAP[c]);
@@ -33,7 +33,7 @@ export function metaTags(input, origin) {
     description,
     url,
     mainEntityOfPage: url,
-    author: { '@type': 'Person', name: SITE }, // author is not stored
+    author: { '@type': 'Person', name: AUTHOR }, // the blog has one author (not stored per post)
     keywords: (p.tags ?? []).join(', '),
     articleSection: p.categoryName ?? p.section,
   }).replace(/</g, '\\u003c');
@@ -55,7 +55,7 @@ export function metaTags(input, origin) {
 }
 
 export function pageMeta({ title, description, path }, origin) {
-  const full = path === '/' ? SITE : `${title} - ${SITE}`;
+  const full = path === '/' ? HOME_TITLE : `${title} - ${SITE}`;
   const url = abs(origin, path);
   return {
     title: full,
@@ -63,7 +63,8 @@ export function pageMeta({ title, description, path }, origin) {
     canonical: url,
     og: { 'og:type': 'website', 'og:title': full, 'og:description': description, 'og:url': url, 'og:site_name': SITE },
     twitter: { 'twitter:card': 'summary', 'twitter:title': full, 'twitter:description': description },
-    jsonLd: '',
+    // the home page tells search engines the site name (Google site names read WebSite name + alternateName)
+    jsonLd: path === '/' ? JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: SITE, alternateName: [SITE_EN], url, inLanguage: 'ko' }).replace(/</g, '\\u003c') : '',
   };
 }
 

@@ -71,12 +71,12 @@ test('internal link click uses pushState, focuses #main, sets title', async ({ p
   await page.goto('/a');
   await setup(page);
   await page.evaluate(() => window.go('/a', { replace: true }));
-  await expect(page).toHaveTitle('A - IT Security Blog');
+  await expect(page).toHaveTitle('A - TheMan의 Patch Notes');
   await page.locator('#main a[href="/b"]').click();
   await expect(page).toHaveURL(/\/b$/);
   await expect(page.locator('#main h1')).toHaveText('B');
   await expect(page.locator('#main')).toBeFocused();
-  await expect(page).toHaveTitle('B - IT Security Blog');
+  await expect(page).toHaveTitle('B - TheMan의 Patch Notes');
   expect(await page.evaluate(() => window.marker)).toBe('same-document');
   expect(await page.evaluate(() => window.unmounts)).toEqual(['A']);
 });
@@ -90,7 +90,7 @@ test('header links navigate and mark aria-current', async ({ page }) => {
     route('/tech', { render: () => ({ title: 'Tech', html: '<h1>Tech</h1>' }) });
     window.go('/');
   });
-  await expect(page).toHaveTitle('IT Security Blog');
+  await expect(page).toHaveTitle('TheMan의 Patch Notes - IT Security Blog');
   const nav = page.locator('header nav');
   await expect(nav.locator('[aria-current="page"]')).toHaveText('Home'); // the home page marks Home only
   await expect(nav.locator('[aria-current]')).toHaveCount(1);
@@ -114,7 +114,7 @@ test('back/forward re-render without reload', async ({ page }) => {
   await page.goBack();
   await expect(page.locator('#main h1')).toHaveText('A');
   await page.goBack();
-  await expect(page).toHaveTitle('IT Security Blog');
+  await expect(page).toHaveTitle('TheMan의 Patch Notes - IT Security Blog');
   await page.goForward();
   await expect(page.locator('#main h1')).toHaveText('A');
   expect(await page.evaluate(() => window.marker)).toBe('same-document');
@@ -151,7 +151,7 @@ test('stale async load never renders after a newer navigation', async ({ page })
   await page.evaluate(() => window.releaseSlow());
   await page.waitForTimeout(100);
   await expect(page.locator('#main h1')).toHaveText('B');
-  await expect(page).toHaveTitle('B - IT Security Blog');
+  await expect(page).toHaveTitle('B - TheMan의 Patch Notes');
   await expect(page.locator('#main')).not.toContainText('slow-data');
 });
 

@@ -169,7 +169,7 @@ test('prev / 목록 / next hrefs round-trip the encoding', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('다음 글 제목');
   expect(new URL(page.url()).pathname).toBe('/posts/tech/security/next%26two');
   expect(calls.at(-1)).toBe('/api/posts/tech/security/next%26two');
-  expect(await page.title()).toBe('다음 글 제목 - IT Security Blog');
+  expect(await page.title()).toBe('다음 글 제목 - TheMan의 Patch Notes');
 });
 
 test('목록 target: section root, and a single-segment slug goes home', async ({ page }) => {
@@ -196,7 +196,7 @@ test('404 from the API renders the not-found message and title', async ({ page }
   await page.goto('/posts/tech/none');
   await expect(page.locator('h1')).toHaveText('페이지를 찾을 수 없습니다');
   await expect(page.locator('#main a[data-link][href="/"]')).toBeVisible();
-  expect(await page.title()).toBe('페이지를 찾을 수 없습니다 - IT Security Blog');
+  expect(await page.title()).toBe('페이지를 찾을 수 없습니다 - TheMan의 Patch Notes');
 });
 
 test('other API errors reach the router error state', async ({ page }) => {

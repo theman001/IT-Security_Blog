@@ -42,12 +42,12 @@ curl -sI https://<운영 도메인>/tech | grep -i -E 'x-edge-cache|cf-cache-sta
 
 | 페이지 | title | description | og:type | JSON-LD |
 |---|---|---|---|---|
-| `/` | `IT Security Blog` | 사이트 기본 설명 | website | 없음 |
-| `/about` | `About - IT Security Blog` | 소개 문구 | website | 없음 |
-| `/privacy` | `개인정보처리방침 - IT Security Blog` | 방침 소개 문구 | website | 없음 |
-| `/tech` `/trends` `/essays` | `<섹션 제목> - IT Security Blog` | 섹션 설명(`functions/_lib/sections.js`) | website | 없음 |
-| `/categories/<섹션>/<하위>` | `<카테고리명> - IT Security Blog` | 사이트 기본 설명 | website | 없음 |
-| `/posts/<slug>` | `<글 제목> - IT Security Blog` | 글 `description`, 없으면 본문 앞부분 요약 | article (+`article:published_time`) | `BlogPosting`: headline, datePublished, dateModified(=글 날짜), description, url, mainEntityOfPage, author(Person, 사이트명), keywords(태그), articleSection |
+| `/` | `TheMan의 Patch Notes - IT Security Blog` | 사이트 기본 설명 | website | `WebSite`(name, alternateName `TheMan's Patch Notes`) |
+| `/about` | `About - TheMan의 Patch Notes` | 소개 문구 | website | 없음 |
+| `/privacy` | `개인정보처리방침 - TheMan의 Patch Notes` | 방침 소개 문구 | website | 없음 |
+| `/tech` `/trends` `/essays` | `<섹션 제목> - TheMan의 Patch Notes` | 섹션 설명(`functions/_lib/sections.js`) | website | 없음 |
+| `/categories/<섹션>/<하위>` | `<카테고리명> - TheMan의 Patch Notes` | 사이트 기본 설명 | website | 없음 |
+| `/posts/<slug>` | `<글 제목> - TheMan의 Patch Notes` | 글 `description`, 없으면 본문 앞부분 요약 | article (+`article:published_time`) | `BlogPosting`: headline, datePublished, dateModified(=글 날짜), description, url, mainEntityOfPage, author(Person, 사이트명), keywords(태그), articleSection |
 | 404 / 500 | 셸 기본값 | 셸 기본값 | - | 없음. `<meta name="robots" content="noindex">` 추가 |
 
 글 페이지는 추가로 글 헤더를 프리렌더하고 API 페이로드를 인라인한다(LCP와 요청 수 개선). JSON-LD의 `<`는 `\u003c`로 이스케이프된다.
@@ -80,3 +80,15 @@ npx lighthouse "https://<URL>/" --only-categories=performance,accessibility,best
   --output=html --output-path=./lh-home.html --chrome-flags="--headless=new"
 ```
 URL을 홈, `/tech`, `/about`, 실제 글(`/posts/...`)로 바꿔 각각 측정한다. 한 번의 점수는 편차가 있으니 3회 정도 보고 중앙값을 쓴다.
+
+## 7. robots.txt: Cloudflare 관리형 규칙
+`functions/robots.txt.js`가 내보내는 내용은 `User-agent: *` / `Allow: /` + `Sitemap:`뿐이다(모두 허용). 그런데 운영 도메인(`blog.taeuk.site`)의 `/robots.txt`를 받아 보면(2026-11-28 확인) **앞쪽에 Cloudflare가 자동으로 붙인 규칙**이 있다: `Content-Signal: search=yes,ai-train=no,use=reference`, 그리고 Amazonbot, Applebot-Extended, Bytespider, CCBot, ClaudeBot, GPTBot, Google-Extended, anthropic-ai, cohere-ai, meta-externalagent, GoogleOther, Baiduspider, PetalBot 등의 `Disallow: /`. Google 검색과 네이버 검색 봇은 막히지 않는다. 이 규칙은 이 저장소의 코드가 아니라 Cloudflare 설정이다.
+
+모두 허용하려면 Cloudflare 대시보드에서 해당 도메인의 **관리형 robots.txt(AI 크롤러에 robots.txt로 지시하기)** 와 **AI 봇 차단** 옵션을 끈다. 메뉴 이름과 위치(Security/Bots 쪽으로 알고 있음)는 이 환경에서 확인하지 못했으니 화면에서 찾는다. 두 가지는 별개다: robots.txt 문구를 없애도 **AI 봇 차단(실제 차단)** 이 켜져 있으면 봇은 계속 막힌다.
+
+끈 뒤 확인(엣지 캐시 때문에 최대 10분 걸리므로 `no-cache`로 갱신):
+```bash
+curl -s -H "Cache-Control: no-cache" https://<운영 도메인>/robots.txt | grep -c "Disallow"   # 0이면 관리형 규칙이 없다
+```
+허용하면 AI 학습용 크롤러(GPTBot, ClaudeBot, Google-Extended 등)도 글을 수집할 수 있다. 검색 노출에는 필요하지 않으니, 허용 범위는 의도에 맞게 정한다.
+
