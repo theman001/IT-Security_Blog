@@ -61,6 +61,7 @@
 
   --measure-tech: 72ch;
   --measure-essay: 60ch;
+  --measure-essay-post: 70ch;
   --container: 72rem;
   --toc-width: 14rem;
   --main-min-height: 60vh; /* reserve space so the footer does not jump when content renders */

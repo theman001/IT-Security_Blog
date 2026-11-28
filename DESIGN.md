@@ -57,7 +57,7 @@
 
 ## 3. 간격 · 폭 · 반경 · 모션
 - 간격(4px 기반): `--space-1: 0.25rem`, `--space-2: 0.5rem`, `--space-3: 0.75rem`, `--space-4: 1rem`, `--space-6: 1.5rem`, `--space-8: 2rem`, `--space-12: 3rem`, `--space-16: 4rem`, `--space-24: 6rem`.
-- 본문 폭: `--measure-tech: 72ch`, `--measure-essay: 60ch`(홈 대표 사유 요약·목록 설명에만 사용; 사유 글 상세는 폭 제한 없이 홈과 같은 전체 폭), `--container: 72rem`(전체 레이아웃), `--toc-width: 14rem`.
+- 본문 폭: `--measure-tech: 72ch`, `--measure-essay: 60ch`(홈 대표 사유 요약·목록 설명), `--measure-essay-post: 70ch`(사유 글 상세: 제목 영역·연결 카드·본문·이전/다음이 같은 폭의 가운데 정렬 단 하나), `--container: 72rem`(전체 레이아웃), `--toc-width: 14rem`.
 - 반경: `--radius-sm: 0.25rem`, `--radius-md: 0.5rem`, `--radius-pill: 999px`(칩/태그만).
 - 선: `--border: 1px solid var(--color-border)`, 강조 선 `--rule-strong: 2px solid var(--color-fg)`(마스트헤드).
 - 모션: `--duration-fast: 120ms`, `--duration-base: 200ms`, `--ease: cubic-bezier(0.2, 0, 0, 1)`. `prefers-reduced-motion: reduce`에서는 모든 transition/animation을 0으로(읽기 진행선 포함).
