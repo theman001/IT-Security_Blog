@@ -200,18 +200,19 @@ body {
   .support-widget {
     margin-inline-end: auto; /* name + widget stay left, the toggle goes right */
   }
+  /* second row spans the full header width: five equal cells (20% each), labels centered */
   .site-header__nav {
     order: 3;
-    flex: 1 0 100%;
-    justify-content: flex-start;
-    gap: var(--space-4);
+    flex: none;
+    width: calc(100% + 2 * var(--space-4));
+    margin-inline: calc(-1 * var(--space-4));
+    gap: 0;
+    justify-content: stretch;
   }
-}
-
-/* very narrow phones (360px): five nav links need a tighter gap to stay unclipped */
-@media (max-width: 380px) {
-  .site-header__nav {
-    gap: var(--space-3);
+  .site-header__nav a {
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
   }
 }
 

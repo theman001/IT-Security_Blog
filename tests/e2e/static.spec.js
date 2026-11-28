@@ -327,3 +327,29 @@ test('brand: header shows "TheMan의 Patch Notes" with "IT Security Blog" as the
   await page.goto('/');
   await expect(page.locator('h1.home-sr')).toHaveText('TheMan의 Patch Notes: 기술을 읽고, 생각을 적는다');
 });
+
+test('compact header: the nav row spans the full width as five equal cells; desktop keeps the inline nav', async ({ page }) => {
+  await mockPosts(page, normal);
+  await page.goto('/about');
+  for (const width of [360, 390, 640, 859]) {
+    await page.setViewportSize({ width, height: 800 });
+    const g = await page.locator('.site-header__nav').evaluate((nav) => {
+      const n = nav.getBoundingClientRect();
+      const cells = [...nav.querySelectorAll('a')].map((a) => { const r = a.getBoundingClientRect(); return { l: r.left, w: r.width, cx: r.left + r.width / 2, tc: getComputedStyle(a).justifyContent }; });
+      return { l: n.left, w: n.width, top: n.top, cells, scroll: nav.scrollWidth > nav.clientWidth + 1 };
+    });
+    expect(Math.round(g.l), `nav left @${width}`).toBe(0);
+    expect(Math.round(g.w), `nav width @${width}`).toBe(width);
+    expect(g.cells).toHaveLength(5);
+    for (const c of g.cells) {
+      expect(Math.abs(c.w - width / 5), `cell width @${width}`).toBeLessThan(1);
+      expect(c.tc).toBe('center');
+    }
+    expect(g.scroll, `nav clipped @${width}`).toBe(false);
+    const row1Bottom = await page.locator('.support-widget').evaluate((el) => el.getBoundingClientRect().bottom);
+    expect(g.top, `nav is on its own row @${width}`).toBeGreaterThanOrEqual(row1Bottom - 1);
+  }
+  await page.setViewportSize({ width: 1100, height: 800 });
+  const d = await page.locator('.site-header__nav').evaluate((nav) => ({ w: nav.getBoundingClientRect().width, left: nav.getBoundingClientRect().left }));
+  expect(d.w).toBeLessThan(1100 - 100); // desktop: inline, not full-bleed
+});
