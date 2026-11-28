@@ -3,7 +3,7 @@ Brand: **TheMan의 Patch Notes** (en: TheMan's Patch Notes), subtitle `IT Securi
 
 Repo: `theman001/IT-Security_Blog`. Work branch: `renewal`. The user merges `renewal` -> `main` via PR.
 Detailed rules live in the `blog-platform` skill (`.claude/skills/blog-platform/SKILL.md`); read it before any work.
-Docs: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pages settings), `docs/seo-strategy.md` (SEO strategy + implementation/file map), `docs/seo.md` (Naver/Google, cache purge, Lighthouse), `docs/post-merge-checklist.md`, `docs/contents-repo.md` (Blog_Contents), `docs/backlog.md` (future work: analytics/ads, favicon, contact info; sponsor widget is done), `docs/PLAN.md`, `DESIGN.md` (tokens).
+Docs: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pages settings), `docs/seo-strategy.md` (SEO strategy + implementation/file map), `docs/seo.md` (Naver/Google, cache purge, Lighthouse), `docs/post-merge-checklist.md`, `docs/contents-repo.md` (Blog_Contents), `docs/backlog.md` (future work: analytics/ads, favicon, sponsor widget is done), `docs/PLAN.md`, `DESIGN.md` (tokens).
 
 ## 1. Overview and architecture
 - Frontend: Vanilla JS (ES modules), HTML5, CSS variables, Vite. NO React/Next/frameworks or framework-specific skills.
@@ -35,7 +35,7 @@ Env vars (Cloudflare Production and Preview are separate lists; apply from the n
 functions/         Pages Functions (import from src/ only the pure post-header.js chain: escape, urls, related-card, and the constants in lib/site.js)
   api/posts, api/categories   JSON API (catch-all [[slug]]/[[path]]); api/link-preview.js (external link card metadata, guarded fetch), api/nav.js (post-page sidebar data)
   posts/[[slug]].js           post HTML: meta + JSON-LD + prerendered header + inline payload; 404 if missing
-  [[path]].js                 catch-all: /, /about, /privacy, /contact (content TBD), sections, /categories/*, assets, 404, bare /api 404
+  [[path]].js                 catch-all: /, /about, /privacy, /contact, sections, /categories/*, assets, 404, bare /api 404
   sitemap.xml.js robots.txt.js rss.xml.js
   _lib/   handlers (API), edge-handlers, queries (SQL), seo (meta/sitemap/RSS), shell (HTMLRewriter),
           http (JSON + cache headers), cache (Cache API wrapper), slug, cursor, excerpt, sections, db
