@@ -301,7 +301,7 @@
   list-style: none;
 }
 .sidenav ul ul {
-  margin-left: var(--space-2);
+  margin-left: var(--space-1); /* guide line x = the open triangle's tip: half of the 8px (--space-2) marker box */
   padding-left: var(--space-3);
   border-left: var(--border);
 }

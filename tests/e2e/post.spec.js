@@ -547,3 +547,26 @@ test('TOC (1200-1279px, no sidebar): the sticky column starts on the title row a
   expect(Math.abs(g.toc.top - g.head.top)).toBeLessThanOrEqual(1);
   expect(g.toc.left).toBeGreaterThanOrEqual(g.art.right);
 });
+
+test('sidebar: the guide line under an open folder sits exactly under the tip of its pointing-down triangle', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockPost(page, [tech]);
+  await page.goto(href(tech.post.slug));
+  const side = page.locator('.post-sidenav .sidenav');
+  await expect(side).toBeVisible();
+  const open = side.locator('details[open]');
+  expect(await open.count()).toBeGreaterThanOrEqual(2); // section + nested folder
+  for (let i = 0; i < await open.count(); i++) {
+    const m = await open.nth(i).evaluate((d) => {
+      const sum = d.querySelector(':scope > summary');
+      const ul = d.querySelector(':scope > ul');
+      const w = parseFloat(getComputedStyle(sum, '::before').width);
+      const bw = parseFloat(getComputedStyle(ul).borderLeftWidth);
+      const tip = sum.getBoundingClientRect().left + w / 2; // the rotated triangle's tip is at the centre of its box
+      const line = ul.getBoundingClientRect().left + bw / 2;
+      return { tip, line, rot: getComputedStyle(sum, '::before').transform };
+    });
+    expect(m.rot).not.toBe('none'); // rotated = pointing down
+    expect(Math.abs(m.tip - m.line)).toBeLessThanOrEqual(0.5);
+  }
+});
