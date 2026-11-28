@@ -83,6 +83,8 @@
 | `/rss.xml` | 최신 20개(제목, 링크, 요약, pubDate는 KST 00:00 기준), `<guid isPermaLink>` | `handleRss`, `buildRss` |
 | `/robots.txt` | `User-agent: *` `Allow: /` + `Sitemap: <origin>/sitemap.xml` | `handleRobots` |
 
+**운영 도메인의 robots.txt에는 위 내용 앞에 Cloudflare가 자동으로 붙인 관리형 규칙이 있다**(`Content-Signal: search=yes,ai-train=no,...`와 GPTBot, ClaudeBot, Google-Extended, CCBot, Baiduspider 등 `Disallow: /`). 이 부분은 코드가 아니라 Cloudflare 대시보드 설정이고, 검색 봇(`User-agent: *`)은 막지 않는다. 모두 허용하려면 [seo.md](seo.md) 7절.
+
 세 파일 모두 DB에서 요청 때 만들어지므로 글을 올려도 재빌드가 필요 없다. Workers Cache API로 10분 엣지 캐시([api.md](api.md) 엣지 캐시 절, `functions/_lib/cache.js`).
 
 ## 5. 정보 구조와 내부 링크

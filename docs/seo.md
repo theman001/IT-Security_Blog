@@ -80,3 +80,15 @@ npx lighthouse "https://<URL>/" --only-categories=performance,accessibility,best
   --output=html --output-path=./lh-home.html --chrome-flags="--headless=new"
 ```
 URL을 홈, `/tech`, `/about`, 실제 글(`/posts/...`)로 바꿔 각각 측정한다. 한 번의 점수는 편차가 있으니 3회 정도 보고 중앙값을 쓴다.
+
+## 7. robots.txt: Cloudflare 관리형 규칙
+`functions/robots.txt.js`가 내보내는 내용은 `User-agent: *` / `Allow: /` + `Sitemap:`뿐이다(모두 허용). 그런데 운영 도메인(`blog.taeuk.site`)의 `/robots.txt`를 받아 보면(2026-11-28 확인) **앞쪽에 Cloudflare가 자동으로 붙인 규칙**이 있다: `Content-Signal: search=yes,ai-train=no,use=reference`, 그리고 Amazonbot, Applebot-Extended, Bytespider, CCBot, ClaudeBot, GPTBot, Google-Extended, anthropic-ai, cohere-ai, meta-externalagent, GoogleOther, Baiduspider, PetalBot 등의 `Disallow: /`. Google 검색과 네이버 검색 봇은 막히지 않는다. 이 규칙은 이 저장소의 코드가 아니라 Cloudflare 설정이다.
+
+모두 허용하려면 Cloudflare 대시보드에서 해당 도메인의 **관리형 robots.txt(AI 크롤러에 robots.txt로 지시하기)** 와 **AI 봇 차단** 옵션을 끈다. 메뉴 이름과 위치(Security/Bots 쪽으로 알고 있음)는 이 환경에서 확인하지 못했으니 화면에서 찾는다. 두 가지는 별개다: robots.txt 문구를 없애도 **AI 봇 차단(실제 차단)** 이 켜져 있으면 봇은 계속 막힌다.
+
+끈 뒤 확인(엣지 캐시 때문에 최대 10분 걸리므로 `no-cache`로 갱신):
+```bash
+curl -s -H "Cache-Control: no-cache" https://<운영 도메인>/robots.txt | grep -c "Disallow"   # 0이면 관리형 규칙이 없다
+```
+허용하면 AI 학습용 크롤러(GPTBot, ClaudeBot, Google-Extended 등)도 글을 수집할 수 있다. 검색 노출에는 필요하지 않으니, 허용 범위는 의도에 맞게 정한다.
+
