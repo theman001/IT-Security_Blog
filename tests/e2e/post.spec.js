@@ -476,9 +476,9 @@ test('sidebar (>= 1280px): all three sections in the left column; the current se
   await top.nth(0).locator('> summary').click();
   await expect(top.nth(0)).toHaveJSProperty('open', false);
   await expect(side.locator('a[aria-current="page"]')).toBeHidden();
-  // 전체 보기 goes to the section / category page
-  await expect(top.nth(1).locator('a.sidenav__all').first()).toHaveAttribute('href', '/trends');
-  await expect(top.nth(0).locator('details', { hasText: '보안' }).first().locator('a.sidenav__all').first()).toHaveAttribute('href', '/categories/tech/security');
+  // no "전체 보기" rows: only folders and posts
+  await expect(side.getByText('전체 보기')).toHaveCount(0);
+  await expect(side.locator('a:not(.sidenav__post)')).toHaveCount(0);
   await expect(side.locator('summary', { hasText: '보안' }).first().locator('.sidenav__count')).toHaveText(/^\d+$/);
 });
 

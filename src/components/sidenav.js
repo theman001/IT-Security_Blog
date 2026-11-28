@@ -1,5 +1,5 @@
 import { escapeHtml as e } from '../lib/escape.js';
-import { categoryHref, postHref } from '../lib/urls.js';
+import { postHref } from '../lib/urls.js';
 import { SECTIONS } from '../content/sections.js';
 
 // Post-page sidebar: tech / trends / essays as collapsible folders, each with its category tree and posts.
@@ -40,7 +40,7 @@ function buildTree(section, { categories = [], posts = [] }) {
   return node(section);
 }
 
-const listHtml = (n, cur, open) => `<ul><li><a class="sidenav__all" data-link href="${e(categoryHref(n.path))}">전체 보기</a></li>${n.children
+const listHtml = (n, cur, open) => `<ul>${n.children
   .map((c) => folderHtml(c, cur, open))
   .join('')}${n.posts
   .map((p) => `<li><a class="sidenav__post" data-link href="${e(postHref(p.slug))}"${p.slug === cur ? ' aria-current="page"' : ''}>${e(p.title)}</a></li>`)

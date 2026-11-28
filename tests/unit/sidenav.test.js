@@ -27,9 +27,8 @@ test('three sections in a fixed order with the static section titles, each a <de
   const at = ['기술', '동향·사건사고', '사유'].map((n) => techHtml.indexOf(`<span class="sidenav__name">${n}</span>`));
   assert.ok(at[0] > 0 && at[0] < at[1] && at[1] < at[2], `section order ${at}`);
   assert.match(techHtml, /<ul class="sidenav__sections"><li><details open><summary><span class="sidenav__name">기술/);
-  assert.match(techHtml, /href="\/tech">전체 보기/);
-  assert.match(techHtml, /href="\/trends">전체 보기/);
-  assert.match(techHtml, /href="\/essays">전체 보기/);
+  assert.doesNotMatch(techHtml, /전체 보기|sidenav__all/); // folders only toggle; no extra "view all" rows
+  assert.doesNotMatch(techHtml, /href="\/(tech|trends|essays)"|href="\/categories\//);
   assert.match(techHtml, /<span class="sidenav__name">기술<\/span><span class="sidenav__count">3<\/span>/); // subtree total: 3 tech posts
 });
 test('only the folders on the way to the current post are open', () => {

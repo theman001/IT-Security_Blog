@@ -342,8 +342,7 @@
   font-weight: var(--weight-regular);
   color: var(--color-fg-muted);
 }
-.sidenav a.sidenav__post,
-.sidenav a.sidenav__all {
+.sidenav a.sidenav__post {
   display: flex;
   align-items: center;
   min-height: var(--space-12);
@@ -353,12 +352,7 @@
   text-decoration: none;
   overflow-wrap: anywhere;
 }
-.sidenav a.sidenav__all {
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-}
-.sidenav a.sidenav__post:hover,
-.sidenav a.sidenav__all:hover {
+.sidenav a.sidenav__post:hover {
   color: var(--color-fg);
   text-decoration: underline;
 }
