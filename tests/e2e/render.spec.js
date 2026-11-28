@@ -298,3 +298,17 @@ test('pending link card reserves room for its metadata; hand-written cards do no
   expect(await h(0)).toBeGreaterThanOrEqual(160); // title + two description lines
   expect(await h(1)).toBeLessThan(160);
 });
+
+test('tildes are literal text: no strikethrough for ranges, ~, ~~ or pairs (tables and code stay fine)', async ({ page }) => {
+  const md = '이후 1986~1987년 HIG, 1992~1995년 HIG, 1996~1997년 HIG로 이어진다. 그리고 2000~2001, 2012~2014년.\n\n~~두 틸드~~ 와 ~한 틸드~ 와 a ~ b ~ c\n\n`1~2`\n\n```\n3~4\n```\n\n| a | b |\n|---|---|\n| 1~2 | ~x~ |';
+  await mount(page, md);
+  await expect(page.locator('#root del, #root s, #root strike')).toHaveCount(0);
+  const text = await page.locator('#root').innerText();
+  for (const s of ['1986~1987년', '1992~1995년', '1996~1997년', '2000~2001', '2012~2014년', '~~두 틸드~~', '~한 틸드~', 'a ~ b ~ c']) expect(text).toContain(s);
+  await expect(page.locator('#root code').first()).toHaveText('1~2');
+  await expect(page.locator('#root td').nth(0)).toHaveText('1~2');
+  await expect(page.locator('#root td').nth(1)).toHaveText('~x~');
+  // explicit html strikethrough is still the author's choice
+  await mount(page, 'a <del>b</del> c');
+  await expect(page.locator('#root del')).toHaveText('b');
+});
