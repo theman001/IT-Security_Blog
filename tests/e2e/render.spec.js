@@ -231,3 +231,70 @@ test('article styling applies tokens (table wrapper scrolls, code scrolls withou
   const ws = await page.locator('.code-block pre').evaluate((e) => getComputedStyle(e).whiteSpace);
   expect(ws).toBe('pre');
 });
+
+test('```link fence renders a hand-written link card; external opens in a new tab; nothing is fetched', async ({ page }) => {
+  const reqs = [];
+  page.on('request', (r) => reqs.push(r.url()));
+  await mount(page, '앞 문단\n\n```link\nurl: https://example.org/a?x=1&y=2\ntitle: 외부 글 <b>제목</b>\ndescription: 한두 줄 설명 & 요약\n```\n\n뒤 문단');
+  const card = page.locator('#root a.link-card');
+  await expect(card).toHaveCount(1);
+  await expect(card).toHaveAttribute('href', 'https://example.org/a?x=1&y=2');
+  await expect(card).toHaveAttribute('target', '_blank');
+  await expect(card).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(card.locator('.link-card__host')).toHaveText('example.org');
+  await expect(card.locator('.link-card__title')).toHaveText('외부 글 <b>제목</b>'); // text, not markup
+  await expect(card.locator('.link-card__desc')).toHaveText('한두 줄 설명 & 요약');
+  await expect(page.locator('#root p')).toHaveCount(2);
+  expect(reqs.filter((u) => u.includes('example.org'))).toHaveLength(0);
+});
+
+test('link card: site path stays in the tab, title falls back to the host, bad urls stay code blocks', async ({ page }) => {
+  await mount(page, '```link\nurl: /posts/tech/a\ntitle: 내부 글\n```\n\n```link\nurl: https://example.org/z\n```\n\n```link\nurl: javascript:alert(1)\ntitle: x\n```\n\n```link\nurl: //evil.example/x\ntitle: y\n```\n\n```link\ntitle: no url\n```');
+  const cards = page.locator('#root a.link-card');
+  await expect(cards).toHaveCount(2);
+  expect(await cards.nth(0).getAttribute('target')).toBeNull();
+  await expect(cards.nth(0).locator('.link-card__host')).toHaveCount(0);
+  await expect(cards.nth(1).locator('.link-card__title')).toHaveText('example.org');
+  await expect(cards.nth(1).locator('.link-card__desc')).toHaveCount(0);
+  await expect(page.locator('#root pre')).toHaveCount(3); // the three invalid ones fall back to code blocks
+  expect(await page.locator('#root a[href^="javascript"]').count()).toBe(0);
+});
+
+test('link card styling: bordered card with tokens, whole card is the link', async ({ page }) => {
+  await mount(page, '```link\nurl: https://example.org/a\ntitle: 제목\ndescription: 설명\n```');
+  const c = page.locator('#root a.link-card');
+  await expect(c).toHaveCSS('border-top-style', 'solid');
+  await expect(c).toHaveCSS('text-decoration-line', 'none');
+  const ok = await c.evaluate((el) => { const r = el.getBoundingClientRect(); return r.height > 60 && el.querySelector('.link-card__title').getBoundingClientRect().top >= r.top; });
+  expect(ok).toBe(true);
+});
+
+test('image size hint "WxH" in the title becomes width/height (no layout shift) and is not a tooltip', async ({ page }) => {
+  await mount(page, '![a](https://asset.taeuk.site/p/a.png "800x600")\n\n![b](https://asset.taeuk.site/p/b.png "진짜 제목")\n\n![c](https://asset.taeuk.site/p/c.png)\n\n![d](https://asset.taeuk.site/p/d.png "0x0")\n\n<img src="https://asset.taeuk.site/p/e.png" width="300" height="100" title="1x1">');
+  const img = page.locator('#root img');
+  await expect(img.nth(0)).toHaveAttribute('width', '800');
+  await expect(img.nth(0)).toHaveAttribute('height', '600');
+  expect(await img.nth(0).getAttribute('title')).toBeNull();
+  await expect(img.nth(1)).toHaveAttribute('title', '진짜 제목'); // an ordinary title is untouched
+  expect(await img.nth(1).getAttribute('width')).toBeNull();
+  expect(await img.nth(2).getAttribute('width')).toBeNull();
+  expect(await img.nth(3).getAttribute('width')).toBeNull(); // 0x0 ignored
+  await expect(img.nth(4)).toHaveAttribute('width', '300'); // explicit attributes win
+  await expect(img.nth(4)).toHaveAttribute('height', '100');
+});
+
+test('image with width/height reserves its box before the file loads and never overflows the column', async ({ page }) => {
+  await page.route('https://asset.taeuk.site/**', () => {}); // never answers: the image stays "loading"
+  await mount(page, '앞\n\n![a](https://asset.taeuk.site/p/a.png "2000x1000")\n\n뒤');
+  const box = await page.locator('#root img').evaluate((el) => { const r = el.getBoundingClientRect(); return { w: r.width, h: r.height, col: el.parentElement.getBoundingClientRect().width }; });
+  expect(box.w).toBeLessThanOrEqual(box.col + 0.5); // capped by max-width: 100%
+  expect(box.h).toBeGreaterThan(0); // height reserved from the 2:1 hint even though nothing has loaded
+  expect(box.h / box.w).toBeCloseTo(0.5, 2);
+});
+
+test('pending link card reserves room for its metadata; hand-written cards do not', async ({ page }) => {
+  await mount(page, '```link\nurl: https://example.org/a\n```\n\n```link\nurl: https://example.org/b\ntitle: 직접\n```');
+  const h = (i) => page.locator('#root a.link-card').nth(i).evaluate((el) => el.getBoundingClientRect().height);
+  expect(await h(0)).toBeGreaterThanOrEqual(160); // title + two description lines
+  expect(await h(1)).toBeLessThan(160);
+});

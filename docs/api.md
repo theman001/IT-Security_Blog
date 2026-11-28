@@ -80,6 +80,16 @@ Category = {
 ```
 `<path…>`는 전체 경로와 정확히 일치해야 한다. 없으면 404. (끝의 `/posts`는 라우팅용 접미사다. 카테고리 이름이 `posts`인 경우만 모호하므로 그런 카테고리는 만들지 않는다. 접미사가 없으면 404.)
 
+## `GET /api/link-preview?url=<절대 URL>`
+글 본문 외부 링크 카드(` ```link ` 블록에 `url:`만 쓴 경우)의 제목/설명. 엣지(Function)가 그 페이지를 가져와 메타데이터만 돌려준다(브라우저는 외부 사이트에 접속하지 않는다).
+```json
+{ "title": string, "description": string }
+```
+`og:title`/`twitter:title`/`<title>`, `og:description`/`twitter:description`/`description` 순으로 읽고 공백을 정리해 제목 120자, 설명 200자로 줄인다(없으면 빈 문자열). 값은 제3자 텍스트이므로 클라이언트는 `textContent`로만 넣는다.
+- 남용(SSRF/오픈 프록시) 방지: ① `url`이 **공개된 글 본문에 문자 그대로 들어 있어야** 한다(`strpos(content_md, $1)`, 바인딩, 본문은 SELECT하지 않음), 없으면 404. ② `http(s)`만, IP 주소·`localhost`류·`user:pass@`·포트 지정·점 없는 호스트는 400. ③ 리다이렉트는 수동으로 최대 3번, 매 단계 ②를 다시 검사. ④ 타임아웃 5초, `text/html`만, 본문 앞 256KB만 읽음. ⑤ 쿠키·인증 헤더 없이 일반 GET.
+- 오류: 잘못된 url 400, 글에 없는 url 404, 상대 사이트 응답 실패/HTML 아님/타임아웃 502(`upstream_failed`, 저장 안 함), DB 오류 500. 클라이언트는 어떤 오류든 카드를 도메인+링크 그대로 둔다.
+- 캐시: 성공(200)은 엣지에 **24시간**(`ttl: 86400`) 저장, 404는 60초. 구현: `functions/_lib/link-preview.js`, `functions/api/link-preview.js`.
+
 ## 엣지 캐시
 Cloudflare는 Pages Function이 만든 응답을 `Cache-Control: s-maxage`만으로는 캐시하지 않는다(Cache API를 직접 써야 한다). 그래서 `functions/_lib/cache.js`의 `withEdgeCache`가 각 라우트(`/api/posts*`, `/api/categories*`, `/posts/*`, catch-all의 HTML 응답, `/sitemap.xml`, `/rss.xml`, `/robots.txt`)의 `onRequest`를 감싼다.
 - GET만 캐시한다(HEAD 등은 통과, `X-Edge-Cache: BYPASS`). 키는 요청 URL 전체(쿼리 포함). catch-all의 정적 파일 통과(`env.ASSETS`)는 감싸지 않는다.

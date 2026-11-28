@@ -273,3 +273,173 @@ nav[aria-label="이 글의 목차"] a[aria-current="true"] {
     overflow-y: auto;
   }
 }
+
+/* link card: hand-written external/site link (```link fence, see docs/contents-repo.md) */
+.article a.link-card {
+  display: block;
+  max-width: var(--measure-essay);
+  padding: var(--space-4) var(--space-6);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  color: var(--color-fg);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.article a.link-card:hover {
+  border-color: var(--color-accent);
+}
+.link-card__host {
+  display: block;
+  font-family: var(--font-body-tech);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  color: var(--color-accent);
+}
+.link-card__title {
+  display: block;
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+.link-card__desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  margin-top: var(--space-2);
+  font-family: var(--font-body-tech);
+  font-size: var(--text-base);
+  line-height: var(--leading-body-tech);
+  color: var(--color-fg-muted);
+}
+
+/* YouTube embed: thumbnail + play icon (a link) that becomes a youtube-nocookie iframe on click */
+.video-embed {
+  aspect-ratio: 16 / 9;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.video-embed:hover {
+  border-color: var(--color-accent);
+}
+.article a.video-embed__play {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  color: var(--color-fg);
+  text-decoration: none;
+  text-align: center;
+}
+.article .video-embed__thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  border-radius: 0;
+  object-fit: cover; /* hqdefault is 4:3 with letterbox bars: cover crops to the 16:9 picture */
+}
+.video-embed__icon {
+  position: relative;
+  flex: none;
+  width: var(--space-12);
+  height: var(--space-12);
+  margin-block: auto;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+}
+.video-embed__icon::after {
+  content: "";
+  position: absolute;
+  inset: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  background: var(--color-on-accent);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.video-embed__caption {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg);
+  border-top: var(--border);
+}
+.video-embed__label {
+  font-family: var(--font-body-tech);
+  font-weight: var(--weight-medium);
+}
+.video-embed__host {
+  font-family: var(--font-body-tech);
+  font-size: var(--text-sm);
+  color: var(--color-fg-muted);
+}
+.video-embed iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* image zoom (src/render/image-zoom.js) */
+.article img.zoomable {
+  cursor: zoom-in;
+}
+.image-zoom {
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--color-fg);
+  cursor: zoom-out;
+}
+.image-zoom[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-zoom::backdrop {
+  background: var(--color-bg);
+  opacity: 0.97;
+}
+.image-zoom img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+.image-zoom__close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  min-width: var(--space-12);
+  min-height: var(--space-12);
+  padding: 0 var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-fg);
+  font-family: var(--font-body-tech);
+  cursor: pointer;
+}
+.image-zoom__close:hover {
+  border-color: var(--color-accent);
+}
+
+/* no layout shift: a link card waiting for its metadata keeps the room of a title + two description lines */
+.article a.link-card[data-preview] {
+  min-height: calc(var(--space-24) + var(--space-16));
+}

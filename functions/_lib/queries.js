@@ -117,3 +117,9 @@ export async function getCategoryPosts(db, path) {
 // Sitemap: slug + date only (no body), bound-free fixed query.
 export const listSitemapEntries = (db) =>
   db.query(`SELECT slug, to_char(created_at, 'YYYY-MM-DD') AS date FROM reports ORDER BY created_at DESC, id DESC`, []);
+
+// Link-preview allowlist: only URLs written in a published post may be fetched (no open proxy).
+// content_md is searched, never selected.
+export async function isUrlReferenced(db, url) {
+  return (await db.query('SELECT 1 AS ok FROM reports WHERE strpos(content_md, $1) > 0 LIMIT 1', [url])).length > 0;
+}
