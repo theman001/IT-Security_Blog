@@ -443,7 +443,7 @@ test('sidebar (>= 1280px): all three sections in the left column; the current se
   await expect(side).toHaveAttribute('aria-label', '카테고리와 글');
   const top = side.locator('.sidenav__sections > li > details');
   await expect(top).toHaveCount(3);
-  await expect(top.locator('> summary .sidenav__name')).toHaveText(['기술', '동향·사건사고', '사유']);
+  await expect(top.locator('> summary .sidenav__name')).toHaveText(['기술', '동향', '사유']);
   // tech open, trends/essays collapsed
   await expect(top.nth(0)).toHaveJSProperty('open', true);
   await expect(top.nth(1)).toHaveJSProperty('open', false);

@@ -56,7 +56,7 @@ test('section page: header, description, count, rows', async ({ page }) => {
   expect(await page.title()).toBe('기술 - IT Security Blog');
   expect(calls[0]).toEqual({ category: 'tech', limit: '20' });
   await page.goto('/trends');
-  await expect(page.locator('h1')).toHaveText('동향·사건사고');
+  await expect(page.locator('h1')).toHaveText('동향');
   await expect(page.locator('.post-row')).toHaveCount(2);
   await page.goto('/essays');
   await expect(page.locator('h1')).toHaveText('사유');

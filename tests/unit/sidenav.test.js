@@ -24,7 +24,7 @@ const techHtml = html('tech/security/web/w1');
 test('three sections in a fixed order with the static section titles, each a <details> with its tree', () => {
   assert.match(techHtml, /aria-label="카테고리와 글"/);
   assert.equal((techHtml.match(/<ul class="sidenav__sections">/g) ?? []).length, 1);
-  const at = ['기술', '동향·사건사고', '사유'].map((n) => techHtml.indexOf(`<span class="sidenav__name">${n}</span>`));
+  const at = ['기술', '동향', '사유'].map((n) => techHtml.indexOf(`<span class="sidenav__name">${n}</span>`));
   assert.ok(at[0] > 0 && at[0] < at[1] && at[1] < at[2], `section order ${at}`);
   assert.match(techHtml, /<ul class="sidenav__sections"><li><details open><summary><span class="sidenav__name">기술/);
   assert.doesNotMatch(techHtml, /전체 보기|sidenav__all/); // folders only toggle; no extra "view all" rows
@@ -34,13 +34,13 @@ test('three sections in a fixed order with the static section titles, each a <de
 test('only the folders on the way to the current post are open', () => {
   assert.equal((techHtml.match(/<details open>/g) ?? []).length, 3); // 기술, 보안, 웹
   assert.match(techHtml, /<details open><summary><span class="sidenav__name">기술/);
-  assert.match(techHtml, /<details><summary><span class="sidenav__name">동향·사건사고/);
+  assert.match(techHtml, /<details><summary><span class="sidenav__name">동향/);
   assert.match(techHtml, /<details><summary><span class="sidenav__name">사유/);
   assert.match(techHtml, /<details><summary><span class="sidenav__name">인프라/);
   assert.match(techHtml, /href="\/posts\/tech\/security\/web\/w1" aria-current="page">웹 1</);
   assert.equal((techHtml.match(/aria-current="page"/g) ?? []).length, 1);
   // trends / essays pages open their own section
-  assert.match(html('trends/ai/x'), /<details open><summary><span class="sidenav__name">동향·사건사고/);
+  assert.match(html('trends/ai/x'), /<details open><summary><span class="sidenav__name">동향/);
   assert.match(html('trends/ai/x'), /<details><summary><span class="sidenav__name">기술/);
   assert.match(html('essays/e1'), /<details open><summary><span class="sidenav__name">사유/);
   assert.match(html('essays/e1'), /href="\/posts\/essays\/e1" aria-current="page">사유 1</);
@@ -50,7 +50,7 @@ test('everything is escaped and urls are encoded per segment; posts stay in thei
   assert.match(techHtml, /웹 &lt;b&gt;/);
   assert.match(techHtml, /글 &quot;A&quot;/);
   assert.match(techHtml, /href="\/posts\/tech\/security\/a%20b%26c"/);
-  const trendsPart = techHtml.slice(techHtml.indexOf('동향·사건사고'), techHtml.indexOf('사유</span>'));
+  const trendsPart = techHtml.slice(techHtml.indexOf('동향'), techHtml.indexOf('사유</span>'));
   assert.doesNotMatch(trendsPart, /글 &quot;A&quot;|웹 1|루트 글/);
 });
 test('missing category rows, empty input and foreign paths do not break it', () => {
