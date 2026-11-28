@@ -355,3 +355,40 @@ test('external link card in a post is filled from /api/link-preview (text only);
   await expect(cards.nth(2).locator('.link-card__title')).toHaveText('손으로 쓴 제목');
   expect(asked.sort()).toEqual([url, 'https://down.example.org/z'].sort()); // hand-written card is never looked up
 });
+
+test('youtube fence: nothing from YouTube loads until click; click swaps in a youtube-nocookie iframe; modified click and bad ids do not', async ({ page }) => {
+  const id = 'dQw4w9WgXcQ';
+  const md = `\`\`\`youtube\nurl: https://youtu.be/${id}?t=1m5s\ntitle: 테스트 영상\n\`\`\`\n\n\`\`\`youtube\nhttps://www.youtube.com/watch?v=${id}\n\`\`\`\n\n\`\`\`youtube\nurl: https://evil.example/watch?v=${id}\n\`\`\`\n\n<iframe src="https://www.youtube.com/embed/${id}"></iframe>`;
+  await mockPost(page, [clone(essay, { contentMd: md })]);
+  const yt = [];
+  page.on('request', (r) => /youtube|ytimg|google/.test(new URL(r.url()).hostname) && yt.push(r.url()));
+  await page.route('https://www.youtube-nocookie.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>stub</title>' }));
+  await page.goto(href(essay.post.slug));
+  const boxes = page.locator('.article .video-embed');
+  await expect(boxes).toHaveCount(2);
+  await expect(page.locator('.article iframe')).toHaveCount(0); // raw <iframe> in markdown is stripped, embeds are not iframes yet
+  await expect(page.locator('.article pre')).toHaveCount(1); // the evil.example block stayed a code block
+  expect(yt).toEqual([]);
+  const first = boxes.nth(0).locator('a.video-embed__play');
+  await expect(first).toHaveAttribute('href', `https://www.youtube.com/watch?v=${id}&t=65`); // no-JS / new-tab fallback
+  await expect(first.locator('.video-embed__label')).toHaveText('테스트 영상');
+  // ctrl-click is left to the browser (new tab), page unchanged
+  await first.click({ modifiers: ['Control'], noWaitAfter: true }).catch(() => {});
+  await expect(page.locator('.article iframe')).toHaveCount(0);
+  await first.click();
+  const f = page.locator('.article .video-embed iframe');
+  await expect(f).toHaveCount(1);
+  await expect(f).toHaveAttribute('src', `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&start=65`);
+  await expect(f).toHaveAttribute('title', '테스트 영상');
+  await expect(f).toHaveAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+  await expect(boxes.nth(1).locator('iframe')).toHaveCount(0); // other embeds stay untouched
+});
+
+test('youtube embed ignores a spoofed data-video (raw html in markdown) and cleans up on navigation', async ({ page }) => {
+  await mockPost(page, [clone(essay, { contentMd: '<div class="video-embed" data-video="x&quot;><script>1</script>"><a class="video-embed__play" href="https://youtu.be/dQw4w9WgXcQ">x</a></div>' })]);
+  await page.context().route(/youtu(\.be|be\.com|be-nocookie\.com)/, (r) => r.abort()); // also the popup a plain click opens
+  await page.goto(href(essay.post.slug));
+  const a = page.locator('.article a.video-embed__play');
+  await a.click({ noWaitAfter: true }).catch(() => {});
+  await expect(page.locator('.article iframe')).toHaveCount(0);
+});

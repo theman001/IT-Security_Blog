@@ -30,13 +30,14 @@ export default {
   async load(params) {
     try {
       // dynamic: markdown/DOMPurify/Prism stay out of the main chunk
-      const [data, { renderMarkdown }, { enhanceCodeBlocks }, { hydrateLinkCards }] = await Promise.all([
+      const [data, { renderMarkdown }, { enhanceCodeBlocks }, { hydrateLinkCards }, { enableVideoEmbeds }] = await Promise.all([
         getPost(params['*']),
         import('../render/markdown.js'),
         import('../render/code-blocks.js'),
         import('../render/link-cards.js'),
+        import('../render/video-embeds.js'),
       ]);
-      return { ...data, bodyHtml: renderMarkdown(data.post.contentMd), enhanceCodeBlocks, hydrateLinkCards };
+      return { ...data, bodyHtml: renderMarkdown(data.post.contentMd), enhanceCodeBlocks, hydrateLinkCards, enableVideoEmbeds };
     } catch (err) {
       if (err instanceof ApiError && err.status === 404) return { notFound: true };
       throw err;
@@ -64,7 +65,7 @@ export default {
     }
     const article = root.querySelector('.article');
     data.enhanceCodeBlocks(article);
-    cleanups.push(data.hydrateLinkCards(article));
+    cleanups.push(data.hydrateLinkCards(article), data.enableVideoEmbeds(article));
 
     const bar = root.querySelector('.reading-progress');
     if (bar) {

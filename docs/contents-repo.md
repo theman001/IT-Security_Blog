@@ -45,6 +45,20 @@ description: 한두 문장 설명
 - 새 글이 DB에 반영된 직후 처음 보는 카드는 가져오는 시간만큼 늦게 채워지고, 이후 24시간은 캐시된다. 바로 갱신하려면 Cloudflare Purge Cache(`docs/seo.md`).
 - 구현: `src/render/markdown.js`의 `linkCard`, `src/render/link-cards.js`(채우기), 스타일: `src/styles/article.css`의 `.link-card`.
 
+## 2-2. 본문 안 유튜브 영상
+` ```youtube ` 코드 블록에 주소만 적으면 된다. 제목은 선택(접근성 이름과 플레이스홀더 문구로 쓰임).
+
+````
+```youtube
+url: https://youtu.be/dQw4w9WgXcQ?t=1m5s
+title: 영상 제목
+```
+````
+- `url`은 `youtube.com/watch?v=`, `youtu.be/`, `shorts/`, `embed/`, `live/` 주소 또는 11자 영상 ID. 시작 시간은 `t=65`, `t=1m5s`, `start=65`. 그 밖의 주소(다른 사이트, 흉내 도메인)는 영상이 아니라 일반 코드 블록으로 남는다. 첫 줄에 주소만 적어도 된다.
+- **재생 버튼을 누르기 전에는 YouTube 쪽 요청이 하나도 없다**(쿠키, IP 전달, 썸네일 없음). 누르면 `youtube-nocookie.com` iframe으로 바뀌어 바로 재생된다. Ctrl/Cmd 클릭이나 JS가 꺼진 환경에서는 그냥 youtube.com 링크(새 탭)로 열린다.
+- 본문에 직접 쓴 `<iframe>`은 보안상 제거된다. 썸네일 미리보기가 필요하면 `i.ytimg.com` 요청이 생겨 개인정보처리방침과 어긋나므로 쓰지 않았다.
+- 구현: `src/lib/youtube.js`(주소 해석), `src/render/markdown.js`의 `videoEmbed`, `src/render/video-embeds.js`(클릭 시 iframe), 스타일 `.video-embed`.
+
 ## 3. sync 스크립트(`sync_to_db.js`) 수정 지점 (적용은 사용자)
 1. `_category.md`는 글로 취급하지 않고 해당 카테고리의 `name`에만 반영한다. 섹션 설명 문구는 프론트 정적 설정(`src/content/sections.js`)에 둔다.
 2. `related`가 URL이면 `/posts/` 뒤 경로로 정규화해 `related_slug`에 저장한다. 경로면 그대로 저장한다.

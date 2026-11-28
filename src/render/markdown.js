@@ -1,6 +1,7 @@
 import { Marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { escapeHtml as e } from '../lib/escape.js';
+import { parseYouTube } from '../lib/youtube.js';
 
 const FAILED = '<p>Markdown rendering failed.</p>';
 // The html profile still passes content-injection vectors: global <style>, style= overlays,
@@ -32,7 +33,25 @@ const linkCard = ({ text, lang }) => {
   } else if (!/^\/(?!\/)/.test(url)) return false;
   return `<a class="link-card" href="${e(url)}"${host && !f.title && !f.description ? ' data-preview' : ''}>${host ? `<span class="link-card__host">${e(host)}</span>` : ''}<span class="link-card__title">${e(f.title || host || url)}</span>${f.description ? `<span class="link-card__desc">${e(f.description)}</span>` : ''}</a>\n`;
 };
-const parser = new Marked({ renderer: { code: linkCard } });
+
+// ```youtube fence (`url:` or a bare url/id on the first line; optional `title:`) -> click-to-play placeholder.
+// The iframe is created on click by src/render/video-embeds.js; an invalid url stays a normal code block.
+const videoEmbed = ({ text }) => {
+  const f = {};
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const i = line.indexOf(':');
+    if (i > 0 && /^[a-z]+$/i.test(line.slice(0, i).trim())) f[line.slice(0, i).trim().toLowerCase()] ??= line.slice(i + 1).trim();
+  }
+  const v = parseYouTube(f.url ?? lines[0]);
+  if (!v) return false;
+  const label = e(f.title || 'YouTube 영상 재생');
+  const href = `https://www.youtube.com/watch?v=${v.id}${v.start ? `&t=${v.start}` : ''}`;
+  return `<div class="video-embed" data-video="${v.id}" data-start="${v.start}"><a class="video-embed__play" href="${href}"><span class="video-embed__icon" aria-hidden="true"></span><span class="video-embed__label">${label}</span><span class="video-embed__host">youtube.com</span></a></div>\n`;
+};
+
+const fences = new Map([['link', linkCard], ['youtube', videoEmbed]]);
+const parser = new Marked({ renderer: { code: (tok) => fences.get(tok.lang?.trim())?.(tok) ?? false } });
 
 /**
  * Markdown -> sanitized HTML string. marked -> DOMPurify (no hooks, so no global state
