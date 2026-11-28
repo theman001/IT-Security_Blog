@@ -17,4 +17,4 @@
 - 도입 시 쿠키 동의(해당 지역 규정), 성능 영향(외부 스크립트), CSP, `docs/seo.md`의 Lighthouse 재측정을 함께 한다.
 
 ## 3. 기타
-- 파비콘(`index.html`은 `data:,`로 404만 막는 상태), `llms.txt`, 서버 측 글 본문 프리렌더(`docs/seo.md` 한계 항목). (문의처는 `src/content/contact.md`에 메일로 채움; 개인정보처리방침 보호책임자 이름은 현재 닉네임 "TheMan", 필요하면 실명으로 교체.)
+- 파비콘(`index.html`은 `data:,`로 404만 막는 상태), `llms.txt`, 서버 측 글 본문 프리렌더(`docs/seo.md` 한계 항목). (문의처는 `src/content/contact.md`에 메일로 채움; 개인정보처리방침 보호책임자: 김태욱.)

@@ -80,7 +80,7 @@ TheMan의 Patch Notes(IT Security Blog, 이하 "이 블로그")는 「개인정�
 
 개인이 운영하는 블로그라 별도의 담당 부서는 없으며, 운영자가 보호책임자와 열람 등 요청의 접수·처리를 맡습니다.
 
-- 보호책임자: TheMan (운영자)
+- 보호책임자: 김태욱 (TheMan, 운영자)
 - 이메일: notion.personal@gmail.com
 
 ## 12. 권익 침해 구제 방법
