@@ -1,5 +1,7 @@
 # SEO, 검색 등록, 캐시 퍼지
 
+> 전체 전략과 구현 파일 지도는 [seo-strategy.md](seo-strategy.md). 이 문서는 검색엔진 등록, 캐시 퍼지, Lighthouse 측정 절차를 다룬다.
+
 모든 HTML 경로는 엣지(Pages Functions + `HTMLRewriter`)가 `index.html` 셸의 head를 바꿔 내보낸다. 동작은 `functions/_lib/{seo,shell,edge-handlers}.js`, 라우트별 응답은 [api.md](api.md#엣지-라우트-비api).
 
 ## 1. 검색엔진 등록

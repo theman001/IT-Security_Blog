@@ -2,7 +2,7 @@
 
 Repo: `theman001/IT-Security_Blog`. Work branch: `renewal`. The user merges `renewal` -> `main` via PR.
 Detailed rules live in the `blog-platform` skill (`.claude/skills/blog-platform/SKILL.md`); read it before any work.
-Docs: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pages settings), `docs/seo.md` (Naver/Google, cache purge, Lighthouse), `docs/post-merge-checklist.md`, `docs/contents-repo.md` (Blog_Contents), `docs/backlog.md` (future work: analytics/ads, favicon, contact info; sponsor widget is done), `docs/PLAN.md`, `DESIGN.md` (tokens).
+Docs: `docs/api.md` (API + edge routes), `docs/dev.md` (local dev, Pages settings), `docs/seo-strategy.md` (SEO strategy + implementation/file map), `docs/seo.md` (Naver/Google, cache purge, Lighthouse), `docs/post-merge-checklist.md`, `docs/contents-repo.md` (Blog_Contents), `docs/backlog.md` (future work: analytics/ads, favicon, contact info; sponsor widget is done), `docs/PLAN.md`, `DESIGN.md` (tokens).
 
 ## 1. Overview and architecture
 - Frontend: Vanilla JS (ES modules), HTML5, CSS variables, Vite. NO React/Next/frameworks or framework-specific skills.
