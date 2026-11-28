@@ -1,5 +1,6 @@
-import { marked } from 'marked';
+import { Marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { escapeHtml as e } from '../lib/escape.js';
 
 const FAILED = '<p>Markdown rendering failed.</p>';
 // The html profile still passes content-injection vectors: global <style>, style= overlays,
@@ -10,13 +11,35 @@ const FORBID_TAGS = ['style', 'form', 'input', 'button', 'textarea', 'select', '
 const FORBID_ATTR = ['style', 'name', 'srcset', 'poster'];
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
+// ```link fence -> link card (url, title, description are written by hand; nothing is fetched).
+// url must be http(s) or a site path; anything else leaves the block as a normal code block.
+const linkCard = ({ text, lang }) => {
+  if (lang?.trim() !== 'link') return false;
+  const f = {};
+  for (const line of text.split('\n')) {
+    const i = line.indexOf(':');
+    if (i > 0) f[line.slice(0, i).trim().toLowerCase()] ??= line.slice(i + 1).trim();
+  }
+  const url = f.url ?? '';
+  let host = '';
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      host = new URL(url).hostname;
+    } catch {
+      return false;
+    }
+  } else if (!/^\/(?!\/)/.test(url)) return false;
+  return `<a class="link-card" href="${e(url)}">${host ? `<span class="link-card__host">${e(host)}</span>` : ''}<span class="link-card__title">${e(f.title || host || url)}</span>${f.description ? `<span class="link-card__desc">${e(f.description)}</span>` : ''}</a>\n`;
+};
+const parser = new Marked({ renderer: { code: linkCard } });
+
 /**
  * Markdown -> sanitized HTML string. marked -> DOMPurify (no hooks, so no global state
  * leaks between calls) -> a DOM pass that only ADDS safe attributes, so content can't spoof them.
  */
-export function renderMarkdown(md) {
+export function renderMarkdown(src) {
   try {
-    const clean = DOMPurify.sanitize(marked.parse(md, { gfm: true, breaks: false }), {
+    const clean = DOMPurify.sanitize(parser.parse(src, { gfm: true, breaks: false }), {
       USE_PROFILES: { html: true },
       FORBID_TAGS,
       FORBID_ATTR,

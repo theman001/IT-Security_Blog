@@ -231,3 +231,40 @@ test('article styling applies tokens (table wrapper scrolls, code scrolls withou
   const ws = await page.locator('.code-block pre').evaluate((e) => getComputedStyle(e).whiteSpace);
   expect(ws).toBe('pre');
 });
+
+test('```link fence renders a hand-written link card; external opens in a new tab; nothing is fetched', async ({ page }) => {
+  const reqs = [];
+  page.on('request', (r) => reqs.push(r.url()));
+  await mount(page, '앞 문단\n\n```link\nurl: https://example.org/a?x=1&y=2\ntitle: 외부 글 <b>제목</b>\ndescription: 한두 줄 설명 & 요약\n```\n\n뒤 문단');
+  const card = page.locator('#root a.link-card');
+  await expect(card).toHaveCount(1);
+  await expect(card).toHaveAttribute('href', 'https://example.org/a?x=1&y=2');
+  await expect(card).toHaveAttribute('target', '_blank');
+  await expect(card).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(card.locator('.link-card__host')).toHaveText('example.org');
+  await expect(card.locator('.link-card__title')).toHaveText('외부 글 <b>제목</b>'); // text, not markup
+  await expect(card.locator('.link-card__desc')).toHaveText('한두 줄 설명 & 요약');
+  await expect(page.locator('#root p')).toHaveCount(2);
+  expect(reqs.filter((u) => u.includes('example.org'))).toHaveLength(0);
+});
+
+test('link card: site path stays in the tab, title falls back to the host, bad urls stay code blocks', async ({ page }) => {
+  await mount(page, '```link\nurl: /posts/tech/a\ntitle: 내부 글\n```\n\n```link\nurl: https://example.org/z\n```\n\n```link\nurl: javascript:alert(1)\ntitle: x\n```\n\n```link\nurl: //evil.example/x\ntitle: y\n```\n\n```link\ntitle: no url\n```');
+  const cards = page.locator('#root a.link-card');
+  await expect(cards).toHaveCount(2);
+  expect(await cards.nth(0).getAttribute('target')).toBeNull();
+  await expect(cards.nth(0).locator('.link-card__host')).toHaveCount(0);
+  await expect(cards.nth(1).locator('.link-card__title')).toHaveText('example.org');
+  await expect(cards.nth(1).locator('.link-card__desc')).toHaveCount(0);
+  await expect(page.locator('#root pre')).toHaveCount(3); // the three invalid ones fall back to code blocks
+  expect(await page.locator('#root a[href^="javascript"]').count()).toBe(0);
+});
+
+test('link card styling: bordered card with tokens, whole card is the link', async ({ page }) => {
+  await mount(page, '```link\nurl: https://example.org/a\ntitle: 제목\ndescription: 설명\n```');
+  const c = page.locator('#root a.link-card');
+  await expect(c).toHaveCSS('border-top-style', 'solid');
+  await expect(c).toHaveCSS('text-decoration-line', 'none');
+  const ok = await c.evaluate((el) => { const r = el.getBoundingClientRect(); return r.height > 60 && el.querySelector('.link-card__title').getBoundingClientRect().top >= r.top; });
+  expect(ok).toBe(true);
+});
