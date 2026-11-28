@@ -215,3 +215,15 @@ test('favicon: index.html links existing public files that Functions skip', asyn
   }
   assert.ok(!html.includes('href="data:,"'));
 });
+
+test('naver-site-verification meta lives in index.html (once) and the shell rewriter does not strip it', async () => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+  const tags = html.match(/<meta name="naver-site-verification" content="[0-9a-f]{40}"/g) ?? [];
+  assert.equal(tags.length, 1);
+  assert.ok(tags[0].includes('ed69e7e76942b2dd7621551bf8d77204508537ce'));
+  // the selectors renderShell removes from the shell never match this tag
+  const shell = readFileSync(new URL('../../functions/_lib/shell.js', import.meta.url), 'utf8');
+  const removed = shell.match(/const REPLACED = \[([^\]]*)\]/)[1];
+  assert.ok(!/naver/.test(removed));
+});

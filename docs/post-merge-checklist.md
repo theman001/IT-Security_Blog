@@ -9,7 +9,7 @@
 ## 1. 배포 전 환경변수 (Cloudflare Pages -> Settings -> Environment variables)
 - [ ] Production: `DATABASE_URL`(읽기 전용 `app_reader`), `NODE_VERSION=22`
 - [ ] Production: `SITE_URL=https://<도메인>` (끝 슬래시 없이. 없으면 pages.dev와 중복 색인 위험)
-- [ ] 네이버를 쓸 때만 `NAVER_SITE_VERIFICATION` (Production, 필요하면 Preview도)
+- [x] 네이버 소유확인 메타는 `index.html`에 들어 있다(`NAVER_SITE_VERIFICATION` 환경변수는 설정하지 않는다, 중복됨)
 - [ ] 변수는 **다음 배포부터** 적용된다. 병합 전에 설정하거나, 설정 후 Deployments에서 재배포한다.
 
 ## 2. 병합 후 핵심 URL 확인

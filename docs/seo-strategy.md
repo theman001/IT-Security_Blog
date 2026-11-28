@@ -134,7 +134,7 @@
 | 항목 | 방법 | 문서 |
 |---|---|---|
 | `SITE_URL` | Cloudflare Pages Production 환경변수(필수), 예 `https://<도메인>` | [seo.md](seo.md) 5절 |
-| 네이버 서치어드바이저 | `NAVER_SITE_VERIFICATION` 환경변수 → 모든 HTML에 인증 메타 주입. 사이트맵과 RSS 제출 | [seo.md](seo.md) 1절 |
+| 네이버 서치어드바이저 | 인증 메타는 `index.html`에 직접 들어 있다(환경변수 `NAVER_SITE_VERIFICATION` 방식도 지원하지만 중복되므로 쓰지 않는다). 사이트맵과 RSS 제출 | [seo.md](seo.md) 1절 |
 | Google Search Console | 도메인 속성 + DNS TXT. sitemap 제출 | 〃 |
 | 머지 후 체크 | sitemap의 `<loc>`이 운영 도메인인지, canonical, 404 상태코드 등 | [post-merge-checklist.md](post-merge-checklist.md) |
 
