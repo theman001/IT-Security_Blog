@@ -7,7 +7,7 @@
   margin-bottom: var(--space-8);
 }
 .post--essay .post-head {
-  max-width: var(--measure-essay);
+  max-width: none; /* essays use the full page width like Home */
 }
 .post-crumb {
   display: flex;
@@ -129,7 +129,7 @@
   border-radius: var(--radius-md);
 }
 .post--essay > .related-card {
-  max-width: var(--measure-essay);
+  max-width: none;
   margin-bottom: var(--space-8);
 }
 .related-card__label {
@@ -190,7 +190,7 @@
   border-top: var(--rule);
 }
 .post--essay .post-nav {
-  max-width: var(--measure-essay);
+  max-width: none;
 }
 .post-nav a {
   display: flex;

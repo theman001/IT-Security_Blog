@@ -69,13 +69,20 @@ test('fewer than 3 headings: no TOC, single column', async ({ page }) => {
   await expect(page.locator('details.post-toc-mobile')).toHaveCount(0);
 });
 
-test('essay layout: measure, serif 18px/1.9, no TOC, progress line, pull quote', async ({ page }) => {
+test('essay layout: full width, serif 18px/1.9, no TOC, progress line, pull quote', async ({ page }) => {
   await mockPost(page, [essay]);
   await page.goto(href(essay.post.slug));
   const art = page.locator('.article.essay');
   await expect(art).toBeVisible();
-  const m = await measureOf(page, '--measure-essay');
-  expect(m.article).toBe(m.probe);
+  // full page width like Home (no narrow reading column): article, head and nav span #main's content box
+  const widths = await page.evaluate(() => {
+    const main = document.querySelector('#main');
+    const cs = getComputedStyle(main);
+    const inner = main.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return { inner, article: document.querySelector('.article.essay').getBoundingClientRect().width, head: document.querySelector('.post-head').getBoundingClientRect().width };
+  });
+  expect(widths.article).toBeCloseTo(widths.inner, 0);
+  expect(widths.head).toBeCloseTo(widths.inner, 0);
   const f = await art.evaluate((el) => ({ fs: getComputedStyle(el).fontSize, lh: getComputedStyle(el).lineHeight, ff: getComputedStyle(el).fontFamily }));
   expect(f).toMatchObject({ fs: '18px', lh: '34.2px' });
   expect(f.ff).toContain('Noto Serif KR');

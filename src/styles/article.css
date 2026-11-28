@@ -5,7 +5,7 @@
   line-height: var(--leading-body-tech);
 }
 .article.essay {
-  max-width: var(--measure-essay);
+  max-width: none; /* essays use the full page width like Home */
   font-family: var(--font-body-essay);
   font-size: var(--text-lg);
   line-height: var(--leading-body-essay);
