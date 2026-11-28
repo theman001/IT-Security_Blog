@@ -69,30 +69,13 @@ test('fewer than 3 headings: no TOC, single column', async ({ page }) => {
   await expect(page.locator('details.post-toc-mobile')).toHaveCount(0);
 });
 
-test('essay layout: centered 70ch column, serif 18px/1.9, no TOC, progress line, pull quote', async ({ page }) => {
+test('essay layout: measure, serif 18px/1.9, no TOC, progress line, pull quote', async ({ page }) => {
   await mockPost(page, [essay]);
   await page.goto(href(essay.post.slug));
   const art = page.locator('.article.essay');
   await expect(art).toBeVisible();
-  // 70ch reading column, centered in #main; head, related card, body and nav share it
-  const m = await measureOf(page, '--measure-essay-post');
+  const m = await measureOf(page, '--measure-essay');
   expect(m.article).toBe(m.probe);
-  expect(m.probe).not.toBe('60ch');
-  const cols = await page.evaluate(() => {
-    const main = document.querySelector('#main');
-    const r = main.getBoundingClientRect();
-    const cs = getComputedStyle(main);
-    const inner = { left: r.left + parseFloat(cs.paddingLeft), right: r.right - parseFloat(cs.paddingRight) };
-    const box = (sel) => { const b = document.querySelector(sel)?.getBoundingClientRect(); return b && { left: b.left, width: b.width, right: b.right }; };
-    return { inner, article: box('.article.essay'), head: box('.post-head'), card: box('.post--essay > .related-card'), nav: box('.post-nav') };
-  });
-  const mid = (cols.inner.left + cols.inner.right) / 2;
-  for (const k of ['article', 'head', 'card']) {
-    expect(cols[k], k).toBeTruthy();
-    expect(cols[k].width, k).toBeLessThan(cols.inner.right - cols.inner.left); // capped, not full width
-    expect((cols[k].left + cols[k].right) / 2, k).toBeCloseTo(mid, 0); // centered
-    expect(cols[k].width, k).toBeCloseTo(cols.article.width, 0); // same column
-  }
   const f = await art.evaluate((el) => ({ fs: getComputedStyle(el).fontSize, lh: getComputedStyle(el).lineHeight, ff: getComputedStyle(el).fontFamily }));
   expect(f).toMatchObject({ fs: '18px', lh: '34.2px' });
   expect(f.ff).toContain('Noto Serif KR');

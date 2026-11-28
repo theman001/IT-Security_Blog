@@ -5,8 +5,7 @@
   line-height: var(--leading-body-tech);
 }
 .article.essay {
-  max-width: var(--measure-essay-post);
-  margin-inline: auto;
+  max-width: var(--measure-essay);
   font-family: var(--font-body-essay);
   font-size: var(--text-lg);
   line-height: var(--leading-body-essay);
