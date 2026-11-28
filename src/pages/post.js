@@ -1,16 +1,41 @@
 import '../styles/article.css';
 import '../styles/post.css';
-import { ApiError, getPost } from '../lib/api.js';
+import { ApiError, getPost, getSectionNav } from '../lib/api.js';
 import { escapeHtml as e } from '../lib/escape.js';
 import { categoryHref, postHref } from '../lib/urls.js';
 import { postLayoutHtml, sectionOfSlug } from '../lib/post-header.js';
 import { buildToc, observeToc } from '../components/toc.js';
 import { relatedByHtml } from '../components/related-card.js';
+import { sectionNavHtml } from '../components/section-nav.js';
 import { mountNotFound, notFoundView } from './not-found.js';
+import { SECTIONS } from '../content/sections.js';
 
 const TOC_MIN = 3;
 const TOC_LABEL = '이 글의 목차';
 let cleanups = [];
+
+// Left column (>= 1280px) / collapsible list (below): the section's categories and posts. Filled after first render;
+// the empty .post-sidenav column is reserved by CSS (and by the edge prerender) so the body never shifts.
+function mountSideNav(root, slug) {
+  const side = root.querySelector('.post-sidenav');
+  if (!side) return () => {};
+  let dead = false;
+  const section = sectionOfSlug(slug);
+  getSectionNav(section)
+    .then((data) => {
+      if (dead || !side.isConnected) return;
+      const html = sectionNavHtml(data, section, slug);
+      side.innerHTML = html;
+      root.querySelector('.post-body')?.insertAdjacentHTML('beforebegin', `<details class="post-sidenav-mobile"><summary>${e(SECTIONS[section]?.title ?? section)} 글 둘러보기</summary>${html}</details>`);
+      const nav = side.querySelector('.sidenav');
+      const cur = nav?.querySelector('[aria-current="page"]');
+      if (cur) nav.scrollTop = Math.max(0, cur.offsetTop - nav.clientHeight / 2); // keep the current post in view inside the sticky list
+    })
+    .catch(() => {}); // the sidebar is optional: the page works without it
+  return () => {
+    dead = true;
+  };
+}
 
 const navHtml = ({ prev, next }, slug, essay) => {
   const word = essay ? '사유' : '글';
@@ -67,6 +92,7 @@ export default {
     const article = root.querySelector('.article');
     data.enhanceCodeBlocks(article);
     cleanups.push(data.hydrateLinkCards(article), data.enableVideoEmbeds(article), data.enableImageZoom(article));
+    cleanups.push(mountSideNav(root, data.post.slug));
 
     const bar = root.querySelector('.reading-progress');
     if (bar) {

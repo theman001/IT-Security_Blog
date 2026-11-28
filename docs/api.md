@@ -80,6 +80,15 @@ Category = {
 ```
 `<path…>`는 전체 경로와 정확히 일치해야 한다. 없으면 404. (끝의 `/posts`는 라우팅용 접미사다. 카테고리 이름이 `posts`인 경우만 모호하므로 그런 카테고리는 만들지 않는다. 접미사가 없으면 404.)
 
+## `GET /api/section-nav?section=tech|trends|essays`
+글 상세 왼쪽 사이드바용(섹션 하나의 카테고리 트리 + 글 제목 목록). 본문·요약 없이 가볍게 한 번에 준다.
+```json
+{ "categories": [Category], "posts": [{ "slug": string, "title": string }] }
+```
+- `categories`: 그 섹션 루트와 하위 전부(`path` 오름차순, 글 수는 `Category`와 동일). `posts`: 섹션의 모든 글(`created_at ASC, id ASC`). 글의 카테고리는 slug의 폴더 부분(`tech/a/b.md` → `tech/a`)이다.
+- `section`이 셋 중 하나가 아니면 400, GET 외 405(`Allow: GET`). `section`은 SQL에 바인딩된다.
+- 캐시: 기본 엣지 캐시(성공 600초). 구현: `getSectionNav`(`functions/_lib/queries.js`), `handleSectionNav`, `functions/api/section-nav.js`.
+
 ## `GET /api/link-preview?url=<절대 URL>`
 글 본문 외부 링크 카드(` ```link ` 블록에 `url:`만 쓴 경우)의 제목/설명. 엣지(Function)가 그 페이지를 가져와 메타데이터만 돌려준다(브라우저는 외부 사이트에 접속하지 않는다).
 ```json

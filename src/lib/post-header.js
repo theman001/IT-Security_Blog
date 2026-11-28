@@ -36,7 +36,7 @@ export function postLayoutHtml(post, { related, bodyHtml = '', tailHtml = '' } =
   const section = sectionOfSlug(post.slug);
   const essay = section === 'essays';
   return `<div class="post post--${essay ? 'essay' : 'tech'}">
-${essay ? '<div class="reading-progress" aria-hidden="true"></div>' : ''}
+${essay ? '<div class="reading-progress" aria-hidden="true"></div>' : '<div class="post-sidenav"></div>'}
 ${essay && related ? relatedCardHtml(related, '이 생각의 계기가 된 글') : ''}
 ${postHeaderHtml(post, { section })}
 <div class="post-body">

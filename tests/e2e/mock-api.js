@@ -37,6 +37,18 @@ export function postFixture(name) {
 export async function mockPost(page, responses) {
   const bySlug = new Map(responses.map((r) => [r.post.slug, r]));
   const calls = [];
+  // post-page sidebar (GET /api/section-nav): the deep category fixture + the served posts + a few fixed ones
+  await page.route('**/api/section-nav?*', (route) => {
+    const section = new URL(route.request().url()).searchParams.get('section');
+    const posts = [...bySlug.values()].map((r) => ({ slug: r.post.slug, title: r.post.title }));
+    for (const p of [{ slug: 'tech/security/reversing/r1', title: '리버싱 글 1' }, { slug: 'tech/security/web/w1', title: '웹 글 <1>' }, { slug: 'trends/t1', title: '동향 글 1' }]) {
+      if (!posts.some((x) => x.slug === p.slug)) posts.push(p);
+    }
+    return route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ categories: fixture('categories-deep').filter((c) => c.section === section), posts: posts.filter((p) => p.slug.startsWith(`${section}/`)) }),
+    });
+  });
   await page.route('**/api/posts/**', (route) => {
     const { pathname } = new URL(route.request().url());
     calls.push(pathname);
