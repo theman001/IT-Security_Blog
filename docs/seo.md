@@ -1,11 +1,14 @@
 # SEO, 검색 등록, 캐시 퍼지
 
+> 전체 전략과 구현 파일 지도는 [seo-strategy.md](seo-strategy.md). 이 문서는 검색엔진 등록, 캐시 퍼지, Lighthouse 측정 절차를 다룬다.
+
 모든 HTML 경로는 엣지(Pages Functions + `HTMLRewriter`)가 `index.html` 셸의 head를 바꿔 내보낸다. 동작은 `functions/_lib/{seo,shell,edge-handlers}.js`, 라우트별 응답은 [api.md](api.md#엣지-라우트-비api).
 
 ## 1. 검색엔진 등록
 > 주의: 아래 외부 서비스(네이버, Google, Cloudflare)의 메뉴·화면 이름과 경로는 일반 지식으로 적은 것이며 이 환경에서 직접 확인하지 못했다. 서비스 개편으로 달라질 수 있으니 실제 화면에서 확인한다.
 
 ### 네이버 서치어드바이저
+0. **현재 상태**: 소유확인 토큰이 `index.html`의 `<head>`에 직접 들어 있다(`<meta name="naver-site-verification" content="ed69e7e7…">`). 모든 HTML 응답(글, 404 포함)에 나가므로 환경변수는 설정하지 않는다(설정하면 같은 태그가 두 번 나간다). 토큰을 바꾸려면 `index.html`의 `content` 값을 고친다. 아래 1~2는 환경변수 방식으로 바꾸고 싶을 때의 절차이고, 그때는 `index.html`의 태그를 지운다.
 1. Cloudflare Pages -> Settings -> Environment variables에 `NAVER_SITE_VERIFICATION`을 **Production과 Preview 모두** 추가한다. 값은 아래 3단계에서 받는 토큰(`content="..."`의 값만, 따옴표·태그 제외). 다음 배포부터 적용되므로 저장 후 재배포한다.
 2. 동작 방식: 값이 비어 있지 않으면 엣지가 모든 HTML 응답(404/500 포함)의 `</head>` 앞에 `<meta name="naver-site-verification" content="<값>">`을 넣는다(값은 속성 이스케이프, 앞뒤 공백 제거). 비어 있으면 아무것도 넣지 않는다.
 3. https://searchadvisor.naver.com 로그인 -> 웹마스터 도구 -> 사이트 등록 -> 운영 URL(`SITE_URL`과 같은 주소) 입력 -> 소유확인에서 **HTML 태그**를 고르고 표시되는 `content` 값을 1단계에 넣는다.
