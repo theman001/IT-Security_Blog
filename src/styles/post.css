@@ -88,19 +88,29 @@
 .post-toc-mobile nav {
   padding: 0 var(--space-4) var(--space-3);
 }
+/* Wide screens: .post is a grid so the sidebar (left) and the TOC (right) both start at the breadcrumb/title row.
+   The columns exist whether or not their content has arrived or exists, so the body never moves. */
 @media (min-width: 1200px) {
-  .post-body--toc {
+  .post {
     display: grid;
     grid-template-columns: minmax(0, var(--measure-tech)) var(--toc-width);
-    justify-content: space-between;
     column-gap: var(--space-12);
+    justify-content: start;
     align-items: start;
+  }
+  .post--essay {
+    grid-template-columns: minmax(0, var(--measure-essay));
+  }
+  .post > * {
+    grid-column: 1;
   }
   .post-toc-mobile {
     display: none;
   }
-  .post-toc {
+  .post > .post-toc {
     display: block;
+    grid-column: 2;
+    grid-row: 1 / span 10;
     align-self: stretch; /* tall enough for the sticky nav to travel */
   }
 }
@@ -230,7 +240,7 @@
   }
 }
 
-/* Section sidebar: categories + posts of this section (src/components/section-nav.js) */
+/* Sidebar: tech / trends / essays folders with their categories and posts (src/components/sidenav.js) */
 .post-sidenav {
   display: none; /* >= 1280px only: a reserved left column; below that the collapsible copy is used */
 }
@@ -249,23 +259,26 @@
   padding: 0 var(--space-4) var(--space-3);
 }
 @media (min-width: 1280px) {
-  #main:has(.post--tech) {
+  #main:has(.post) {
     max-width: calc(var(--container) + var(--toc-width) + var(--space-8)); /* the left column sits in what used to be margin */
   }
-  .post--tech {
-    display: grid;
-    grid-template-columns: var(--toc-width) minmax(0, 1fr);
-    column-gap: var(--space-8);
-    align-items: start;
+  .post {
+    grid-template-columns: var(--toc-width) minmax(0, var(--measure-tech)) var(--toc-width);
   }
-  .post--tech > * {
+  .post--essay {
+    grid-template-columns: var(--toc-width) minmax(0, var(--measure-essay));
+  }
+  .post > * {
     grid-column: 2;
   }
-  .post--tech > .post-sidenav {
+  .post > .post-sidenav {
     display: block;
     grid-column: 1;
     grid-row: 1 / span 10;
     align-self: stretch; /* tall enough for the sticky list to travel */
+  }
+  .post > .post-toc {
+    grid-column: 3;
   }
   .post-sidenav-mobile {
     display: none;
@@ -292,18 +305,9 @@
   padding-left: var(--space-3);
   border-left: var(--border);
 }
-.sidenav__title {
-  margin: 0 0 var(--space-1);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-}
-.sidenav__title a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--space-12);
-  color: var(--color-accent);
-  text-decoration: none;
+.sidenav__sections > li > details > summary {
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
 }
 .sidenav summary {
   display: flex;

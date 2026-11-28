@@ -85,33 +85,30 @@ test('categories: no params -> list; suffix required/stripped', async () => {
   assert.equal(r.status, 400);
 });
 
-import { handleSectionNav } from '../../functions/_lib/handlers.js';
+import { handleNav } from '../../functions/_lib/handlers.js';
 
-test('section-nav: only tech|trends|essays; bound patterns; no body; categories + {slug,title} posts', async () => {
-  for (const q of ['', '?section=', '?section=other', '?section=tech%25', '?section=tech/security']) {
-    const db = fakeDb();
-    const r = await handleSectionNav(mk('/api/section-nav' + q), deps(db));
-    assert.equal(r.status, 400, q);
-    assert.equal(db.calls.length, 0, q);
-  }
-  assert.equal((await handleSectionNav(mk('/api/section-nav?section=tech', { method: 'POST' }), deps(fakeDb()))).status, 405);
+test('nav: GET only; nothing bound; no body; all categories + {slug,title} posts', async () => {
+  assert.equal((await handleNav(mk('/api/nav', { method: 'POST' }), deps(fakeDb()))).status, 405);
   const calls = [];
   const db = {
     query: async (text, params) => {
       calls.push({ text, params });
       if (/FROM categories c/.test(text)) return [{ id: 1, name: '보안', slug: 'tech/security', parent_id: null, depth: 2, post_count: 1, total_post_count: 1, sub_category_count: 0 }];
-      return [{ slug: 'tech/security/a', title: 'A <b>' }];
+      return [{ slug: 'tech/security/a', title: 'A <b>', content_md: 'never', description: 'never' }];
     },
   };
-  const r = await handleSectionNav(mk('/api/section-nav?section=tech'), deps(db));
+  const r = await handleNav(mk('/api/nav'), deps(db));
   assert.equal(r.status, 200);
   assert.match(r.headers.get('cache-control'), /s-maxage=600/);
   const out = await r.json();
-  assert.deepEqual(out.posts, [{ slug: 'tech/security/a', title: 'A <b>' }]);
+  assert.deepEqual(out.posts, [{ slug: 'tech/security/a', title: 'A <b>' }]); // only slug + title, whatever the row holds
   assert.equal(out.categories[0].path, 'tech/security');
   assert.equal(calls.length, 2);
   for (const c of calls) {
-    assert.deepEqual(c.params, ['tech']);
+    assert.deepEqual(c.params, []);
     assert.doesNotMatch(c.text, /content_md|description/); // list only: never the body
   }
+  const fail = await handleNav(mk('/api/nav'), deps({ query: async () => { throw new Error('secret'); } }));
+  assert.equal(fail.status, 500);
+  assert.doesNotMatch(await fail.text(), /secret/);
 });

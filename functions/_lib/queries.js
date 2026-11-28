@@ -114,14 +114,14 @@ export async function getCategoryPosts(db, path) {
   return { category: toCategory(cat), children: children.map(toCategory), posts: posts.map(toSummary) };
 }
 
-// Section sidebar (post pages): the section's categories + every post as {slug, title} (no body, no excerpt).
-// A post's category is the folder part of its slug. section is whitelisted by the caller; both patterns are bound.
-export async function getSectionNav(db, section) {
-  const [cats, posts] = await Promise.all([
-    db.query(`${CATEGORY_SELECT} WHERE c.slug = $1 OR left(c.slug, length($1) + 1) = $1 || '/' ORDER BY c.slug`, [section]),
-    db.query(`SELECT r.slug, r.title FROM reports r WHERE left(r.slug, length($1) + 1) = $1 || '/' ORDER BY r.created_at, r.id`, [section]),
+// Post-page sidebar: every category + every post as {slug, title} (no body, no excerpt, nothing to bind).
+// A post's category is the folder part of its slug.
+export async function getNav(db) {
+  const [categories, posts] = await Promise.all([
+    listCategories(db),
+    db.query('SELECT r.slug, r.title FROM reports r ORDER BY r.created_at, r.id', []),
   ]);
-  return { categories: cats.map(toCategory), posts: posts.map((p) => ({ slug: p.slug, title: p.title })) };
+  return { categories, posts: posts.map((p) => ({ slug: p.slug, title: p.title })) };
 }
 
 // Sitemap: slug + date only (no body), bound-free fixed query.

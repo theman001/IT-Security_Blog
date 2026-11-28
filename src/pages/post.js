@@ -1,32 +1,31 @@
 import '../styles/article.css';
 import '../styles/post.css';
-import { ApiError, getPost, getSectionNav } from '../lib/api.js';
+import { ApiError, getPost, getNav } from '../lib/api.js';
 import { escapeHtml as e } from '../lib/escape.js';
 import { categoryHref, postHref } from '../lib/urls.js';
 import { postLayoutHtml, sectionOfSlug } from '../lib/post-header.js';
 import { buildToc, observeToc } from '../components/toc.js';
 import { relatedByHtml } from '../components/related-card.js';
-import { sectionNavHtml } from '../components/section-nav.js';
+import { sidenavHtml } from '../components/sidenav.js';
 import { mountNotFound, notFoundView } from './not-found.js';
-import { SECTIONS } from '../content/sections.js';
 
 const TOC_MIN = 3;
 const TOC_LABEL = '이 글의 목차';
+const SIDENAV_LABEL = '카테고리와 글 둘러보기';
 let cleanups = [];
 
-// Left column (>= 1280px) / collapsible list (below): the section's categories and posts. Filled after first render;
+// Left column (>= 1280px) / collapsible list (below): all sections' categories and posts, the current section open. Filled after first render;
 // the empty .post-sidenav column is reserved by CSS (and by the edge prerender) so the body never shifts.
 function mountSideNav(root, slug) {
   const side = root.querySelector('.post-sidenav');
   if (!side) return () => {};
   let dead = false;
-  const section = sectionOfSlug(slug);
-  getSectionNav(section)
+  getNav()
     .then((data) => {
       if (dead || !side.isConnected) return;
-      const html = sectionNavHtml(data, section, slug);
+      const html = sidenavHtml(data, slug);
       side.innerHTML = html;
-      root.querySelector('.post-body')?.insertAdjacentHTML('beforebegin', `<details class="post-sidenav-mobile"><summary>${e(SECTIONS[section]?.title ?? section)} 글 둘러보기</summary>${html}</details>`);
+      root.querySelector('.post-body')?.insertAdjacentHTML('beforebegin', `<details class="post-sidenav-mobile"><summary>${SIDENAV_LABEL}</summary>${html}</details>`);
       const nav = side.querySelector('.sidenav');
       const cur = nav?.querySelector('[aria-current="page"]');
       if (cur) nav.scrollTop = Math.max(0, cur.offsetTop - nav.clientHeight / 2); // keep the current post in view inside the sticky list
@@ -118,11 +117,11 @@ export default {
     const toc = buildToc(article);
     if (toc.count < TOC_MIN) return;
     const body = article.parentElement;
-    body.classList.add('post-body--toc');
     // two copies: the <details> shows below 1200px, the sticky column at >= 1200px (CSS hides the other)
     article.insertAdjacentHTML('beforebegin', `<details class="post-toc-mobile"><summary>${TOC_LABEL}</summary>${toc.html}</details>`);
-    article.insertAdjacentHTML('afterend', `<aside class="post-toc">${toc.html}</aside>`);
-    for (const nav of body.querySelectorAll('nav')) cleanups.push(observeToc(article, nav));
+    // the sticky column is a child of .post (grid column spanning from the breadcrumb down), not of the body
+    body.insertAdjacentHTML('afterend', `<aside class="post-toc">${toc.html}</aside>`);
+    for (const nav of root.querySelectorAll('.post-toc-mobile nav, .post-toc nav')) cleanups.push(observeToc(article, nav));
   },
 
   unmount() {

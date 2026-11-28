@@ -1,7 +1,7 @@
 import { json, fail } from './http.js';
 import { decodeSlug } from './slug.js';
 import { decodeCursor } from './cursor.js';
-import { listPosts, getPost, listCategories, getCategoryPosts, getSectionNav } from './queries.js';
+import { listPosts, getPost, listCategories, getCategoryPosts, getNav } from './queries.js';
 
 const SECTIONS = ['tech', 'trends', 'essays'];
 const asParts = (p) => (p == null ? [] : Array.isArray(p) ? p : [p]);
@@ -48,13 +48,8 @@ export const handlePosts = (ctx, deps) =>
     return json(await listPosts(db(), { section, category, limit, cursor }));
   });
 
-// GET /api/section-nav?section=tech|trends|essays -> { categories, posts: [{slug,title}] } for the post-page sidebar
-export const handleSectionNav = (ctx, deps) =>
-  guarded(ctx, deps, async (url, _parts, db) => {
-    const section = url.searchParams.get('section');
-    if (!SECTIONS.includes(section)) return fail(400, 'bad_request', 'Invalid section');
-    return json(await getSectionNav(db(), section));
-  });
+// GET /api/nav -> { categories, posts: [{slug,title}] } for the post-page sidebar (all sections)
+export const handleNav = (ctx, deps) => guarded(ctx, deps, async (_url, _parts, db) => json(await getNav(db())));
 
 export const handleCategories = (ctx, deps) =>
   guarded(ctx, deps, async (_url, parts, db) => {

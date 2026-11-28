@@ -434,64 +434,83 @@ test('image zoom: click / Enter opens a modal dialog with the large image; Esc, 
   await expect(dlg).toBeVisible();
 });
 
-test('section sidebar (>= 1280px): categories + posts of this section in the left column, current post marked, folders collapse', async ({ page }) => {
+test('sidebar (>= 1280px): all three sections in the left column; the current section is open, the others collapsed; folders collapse', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await mockPost(page, [tech]);
   await page.goto(href(tech.post.slug));
   const side = page.locator('.post-sidenav .sidenav');
   await expect(side).toBeVisible();
-  await expect(side).toHaveAttribute('aria-label', '기술 카테고리와 글');
-  // only this section: no trends posts, no other section
-  await expect(side.locator('a[href*="/trends/"]')).toHaveCount(0);
-  await expect(side.locator('.sidenav__title a')).toHaveAttribute('href', '/tech');
-  // geometry: left of the body, same width as the TOC column, header/body start to its right
+  await expect(side).toHaveAttribute('aria-label', '카테고리와 글');
+  const top = side.locator('.sidenav__sections > li > details');
+  await expect(top).toHaveCount(3);
+  await expect(top.locator('> summary .sidenav__name')).toHaveText(['기술', '동향·사건사고', '사유']);
+  // tech open, trends/essays collapsed
+  await expect(top.nth(0)).toHaveJSProperty('open', true);
+  await expect(top.nth(1)).toHaveJSProperty('open', false);
+  await expect(top.nth(2)).toHaveJSProperty('open', false);
+  await expect(side.getByRole('link', { name: '동향 글 1' })).toBeHidden();
+  await expect(side.getByRole('link', { name: '사유 글 1' })).toBeHidden();
+  // geometry: left of the body, same width as the TOC column, starting on the breadcrumb row
   const g = await page.evaluate(() => {
     const b = (s) => document.querySelector(s).getBoundingClientRect();
-    const toc = document.querySelector('.post-toc nav')?.getBoundingClientRect().width;
-    return { side: b('.post-sidenav'), art: b('.article'), head: b('.post-head'), toc, tocVar: parseFloat(getComputedStyle(document.documentElement).fontSize) * 14, vw: innerWidth };
+    return { side: b('.post-sidenav'), art: b('.article'), head: b('.post-head'), toc: b('.post-toc'), rem: parseFloat(getComputedStyle(document.documentElement).fontSize) };
   });
   expect(g.side.right).toBeLessThanOrEqual(g.art.left);
-  expect(g.side.right).toBeLessThanOrEqual(g.head.left);
-  expect(Math.round(g.side.width)).toBe(Math.round(g.tocVar));
+  expect(Math.round(g.side.width)).toBe(Math.round(g.rem * 14));
   expect(g.side.left).toBeGreaterThanOrEqual(0);
-  // current post: marked, escaped title, its folders open, the other folders collapsed
+  expect(Math.abs(g.side.top - g.head.top)).toBeLessThanOrEqual(1); // sidebar starts at the title row
+  expect(Math.abs(g.toc.top - g.head.top)).toBeLessThanOrEqual(1); // so does the TOC (it used to start below the header)
+  expect(g.toc.left).toBeGreaterThanOrEqual(g.art.right);
+  // current post: marked, escaped title, its folders open, sibling folders collapsed
   const cur = side.locator('a[aria-current="page"]');
   await expect(cur).toHaveText(tech.post.title);
   await expect(cur).toHaveAttribute('href', href(tech.post.slug));
-  await expect(side.locator('details', { hasText: '보안' }).first()).toHaveJSProperty('open', true);
   await expect(side.locator('details', { has: page.locator('a[href$="/w1"]') }).last()).toHaveJSProperty('open', false);
   await expect(side.getByRole('link', { name: '웹 글 <1>' })).toBeHidden(); // collapsed, and the title is text
-  // toggling reveals it, no navigation
   await side.locator('summary', { hasText: '웹' }).click();
   await expect(side.getByRole('link', { name: '웹 글 <1>' })).toBeVisible();
-  await expect(side.locator('details', { has: page.locator('a[href$="/w1"]') }).last()).toHaveJSProperty('open', true);
-  await expect(page.locator('.article')).toBeVisible();
-  // 전체 보기 goes to the category page
-  await expect(side.locator('details', { hasText: '보안' }).first().locator('a.sidenav__all').first()).toHaveAttribute('href', '/categories/tech/security');
-  // counts are shown (subtree sizes)
-  await expect(side.locator('summary', { hasText: '보안' }).locator('.sidenav__count')).toHaveText(/^\d+$/);
+  await expect(page.locator('.article')).toBeVisible(); // toggling does not navigate
+  // sections collapse/expand too
+  await top.nth(1).locator('> summary').click();
+  await expect(side.getByRole('link', { name: '동향 글 1' })).toBeVisible();
+  await top.nth(0).locator('> summary').click();
+  await expect(top.nth(0)).toHaveJSProperty('open', false);
+  await expect(side.locator('a[aria-current="page"]')).toBeHidden();
+  // 전체 보기 goes to the section / category page
+  await expect(top.nth(1).locator('a.sidenav__all').first()).toHaveAttribute('href', '/trends');
+  await expect(top.nth(0).locator('details', { hasText: '보안' }).first().locator('a.sidenav__all').first()).toHaveAttribute('href', '/categories/tech/security');
+  await expect(side.locator('summary', { hasText: '보안' }).first().locator('.sidenav__count')).toHaveText(/^\d+$/);
 });
 
-test('section sidebar: a trends post lists only trends; essays get none; the body does not move when it arrives', async ({ page }) => {
+test('sidebar on a trends post opens trends; on an essay opens essays and sits in the same left column', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const trend = clone(tech, { slug: 'trends/t1', title: '동향 글 1', categoryPath: 'trends' });
-  await mockPost(page, [trend, essay]);
+  await mockPost(page, [tech, trend, essay]);
   await page.goto(href('trends/t1'));
-  await expect(page.locator('.post-sidenav .sidenav')).toBeVisible();
-  await expect(page.locator('.post-sidenav .sidenav a.sidenav__post')).toHaveCount(1);
+  const top = page.locator('.post-sidenav .sidenav__sections > li > details');
+  await expect(top).toHaveCount(3);
+  await expect(top.nth(0)).toHaveJSProperty('open', false);
+  await expect(top.nth(1)).toHaveJSProperty('open', true);
   await expect(page.locator('.post-sidenav a[aria-current="page"]')).toHaveText('동향 글 1');
+  const techArt = await page.locator('.article').evaluate((el) => el.getBoundingClientRect().left);
   await page.goto(href(essay.post.slug));
   await expect(page.locator('.article.essay')).toBeVisible();
-  await expect(page.locator('.post-sidenav')).toHaveCount(0);
-  await expect(page.locator('.sidenav')).toHaveCount(0);
+  await expect(top).toHaveCount(3);
+  await expect(top.nth(2)).toHaveJSProperty('open', true);
+  await expect(top.nth(0)).toHaveJSProperty('open', false);
+  await expect(page.locator('.post-sidenav a[aria-current="page"]')).toHaveText(essay.post.title);
+  const g = await page.evaluate(() => ({ side: document.querySelector('.post-sidenav').getBoundingClientRect(), art: document.querySelector('.article').getBoundingClientRect() }));
+  expect(g.side.right).toBeLessThanOrEqual(g.art.left);
+  expect(g.art.left).toBe(techArt); // same body x on tech and essay pages
+  await expect(page.locator('.post-sidenav .sidenav a[href^="/posts/essays"]').first()).toBeAttached();
 });
 
-test('section sidebar: the article column keeps its x position whether or not the sidebar has loaded (no layout shift)', async ({ page }) => {
+test('sidebar: the article column keeps its x position whether or not the sidebar / TOC has loaded (no layout shift)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await mockPost(page, [tech]);
   let release;
   const gate = new Promise((r) => (release = r));
-  await page.route('**/api/section-nav?*', async (route) => { await gate; await route.fallback(); });
+  await page.route('**/api/nav', async (route) => { await gate; await route.fallback(); });
   await page.goto(href(tech.post.slug));
   const left = () => page.locator('.article').evaluate((el) => el.getBoundingClientRect().left);
   const before = await left();
@@ -501,7 +520,7 @@ test('section sidebar: the article column keeps its x position whether or not th
   expect(await left()).toBe(before);
 });
 
-test('section sidebar: below 1280px it is a collapsed <details> above the body; API failure leaves the page working', async ({ page }) => {
+test('sidebar: below 1280px it is a collapsed <details> above the body; API failure leaves the page working', async ({ page }) => {
   await page.setViewportSize({ width: 1100, height: 900 });
   await mockPost(page, [tech]);
   await page.goto(href(tech.post.slug));
@@ -512,8 +531,19 @@ test('section sidebar: below 1280px it is a collapsed <details> above the body; 
   await expect(d.locator('a[aria-current="page"]')).toBeVisible();
   await expect(page.locator('.post-sidenav')).toBeHidden();
   // failure: article still renders, nothing broken
-  await page.route('**/api/section-nav?*', (r) => r.fulfill({ status: 500, contentType: 'application/json', body: '{"error":{"code":"internal","message":"x"}}' }));
+  await page.route('**/api/nav', (r) => r.fulfill({ status: 500, contentType: 'application/json', body: '{"error":{"code":"internal","message":"x"}}' }));
   await page.goto(href(tech.post.slug));
   await expect(page.locator('.article')).toBeVisible();
   await expect(page.locator('details.post-sidenav-mobile')).toHaveCount(0);
+});
+
+test('TOC (1200-1279px, no sidebar): the sticky column starts on the title row at the right of the body', async ({ page }) => {
+  await page.setViewportSize({ width: 1240, height: 900 });
+  await mockPost(page, [tech]);
+  await page.goto(href(tech.post.slug));
+  await expect(page.locator('.post-toc nav')).toBeVisible();
+  await expect(page.locator('.post-sidenav')).toBeHidden();
+  const g = await page.evaluate(() => ({ head: document.querySelector('.post-head').getBoundingClientRect(), art: document.querySelector('.article').getBoundingClientRect(), toc: document.querySelector('.post-toc').getBoundingClientRect() }));
+  expect(Math.abs(g.toc.top - g.head.top)).toBeLessThanOrEqual(1);
+  expect(g.toc.left).toBeGreaterThanOrEqual(g.art.right);
 });
